@@ -1,0 +1,67 @@
+<!-- ─── Tour Overlay & Spotlight ──────────────────────────────────────────── -->
+<ng-container *ngIf="state?.active">
+
+  <!-- Full-page dark overlay (click-through blocked) -->
+  <div class="ft-backdrop" (click)="skip()"></div>
+
+  <!-- Glowing highlight ring around the target element -->
+  <div class="ft-highlight" [ngStyle]="highlightStyle"></div>
+
+  <!-- ─── Tooltip Card ─────────────────────────────────────────────────── -->
+  <div
+    class="ft-tooltip"
+    [ngStyle]="tooltipStyle"
+    [class.ft-tooltip--arrow-left]="arrowDirection === 'left'"
+    [class.ft-tooltip--arrow-right]="arrowDirection === 'right'"
+    [class.ft-tooltip--arrow-top]="arrowDirection === 'top'"
+    [class.ft-tooltip--arrow-bottom]="arrowDirection === 'bottom'"
+  >
+    <!-- Header -->
+    <div class="ft-tooltip__header">
+      <i class="bi {{ state?.currentStep?.icon }} ft-tooltip__icon"></i>
+      <div class="ft-tooltip__meta">
+        <h3 class="ft-tooltip__title">{{ state?.currentStep?.title }}</h3>
+        <span class="ft-tooltip__step-label">Step {{ (state?.stepIndex ?? 0) + 1 }} of {{ state?.totalSteps }}</span>
+      </div>
+      <button class="ft-tooltip__close-btn" (click)="skip()" aria-label="Skip tour">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <p class="ft-tooltip__body" [innerHTML]="state?.currentStep?.body"></p>
+
+    <!-- Step dots -->
+    <div class="ft-tooltip__dots">
+      <span
+        *ngFor="let i of steps"
+        class="ft-dot"
+        [class.ft-dot--active]="i === state?.stepIndex"
+      ></span>
+    </div>
+
+    <!-- Actions -->
+    <div class="ft-tooltip__actions">
+      <button class="ft-btn ft-btn--ghost" (click)="skip()">
+        <i class="bi bi-skip-forward me-1"></i> Skip Tour
+      </button>
+      <div class="d-flex gap-2">
+        <button
+          class="ft-btn ft-btn--secondary"
+          *ngIf="!isFirstStep"
+          (click)="prev()"
+        >
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <button
+          class="ft-btn ft-btn--primary"
+          (click)="isLastStep ? done() : next()"
+        >
+          {{ isLastStep ? '🎉 Done!' : 'Next' }}
+          <i *ngIf="!isLastStep" class="bi bi-arrow-right ms-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</ng-container>

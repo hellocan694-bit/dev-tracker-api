@@ -35,7 +35,7 @@
       <div class="active-indicator"></div>
     </a>
 
-    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'activeproject'"
+    <a id="tour-step-projects" class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'activeproject'"
       (click)="navigate('activeproject')" title="Active Projects">
       <i class="bi bi-folder2-open nav-icon"></i>
       <span class="nav-label">Active Projects</span>
@@ -49,7 +49,7 @@
       <div class="active-indicator"></div>
     </a>
 
-    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'github'"
+    <a id="tour-step-github" class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'github'"
       (click)="navigate('github')" title="GitHub Integration">
       <i class="bi bi-github nav-icon"></i>
       <span class="nav-label">GitHub Integration</span>

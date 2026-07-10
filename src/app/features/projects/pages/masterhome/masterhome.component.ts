@@ -4,9 +4,11 @@ import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ProjectService } from 'src/app/core/services/project.service';
 import { TaskService } from 'src/app/core/services/task.service';
+import { FeatureTourService } from 'src/app/core/services/feature-tour.service';
 import { Project } from 'src/app/shared/interfaces/project';
 import { ProjectResponse } from 'src/app/shared/interfaces/ProjectResponse';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { FeatureTourComponent } from 'src/app/shared/components/feature-tour/feature-tour.component';
 import { gsap } from 'gsap';
 // FIX #4 — Memory Leak: import Subject and takeUntil for subscription cleanup
 import { Subject } from 'rxjs';
@@ -15,7 +17,7 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-masterhome',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgxChartsModule],
+  imports: [CommonModule, RouterModule, NgxChartsModule, FeatureTourComponent],
   templateUrl: './masterhome.component.html',
   styleUrls: ['./masterhome.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -46,7 +48,8 @@ export class MasterhomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private taskService: TaskService,
     private toaster: ToastrService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private featureTourService: FeatureTourService
   ) {}
 
   ngOnInit() {
@@ -62,6 +65,11 @@ export class MasterhomeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cdr.markForCheck();
       this.animateCounters('.counter-history', this.countHistoryProjects);
     });
+
+    // Start feature tour for first-time users after DOM has settled
+    if (this.featureTourService.isFirstTimeUser()) {
+      setTimeout(() => this.featureTourService.startTour(), 1200);
+    }
   }
 
   ngAfterViewInit() {
@@ -172,6 +180,10 @@ export class MasterhomeComponent implements OnInit, AfterViewInit, OnDestroy {
       stagger: 0.03,
       ease: 'none'
     });
+  }
+
+  startTour(): void {
+    this.featureTourService.restartTour();
   }
 
   gotoCreate() {

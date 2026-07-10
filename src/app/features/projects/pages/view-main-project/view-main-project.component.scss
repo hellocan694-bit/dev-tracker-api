@@ -386,3 +386,133 @@ input {
 }
 
 .extra-small { font-size: 0.7rem; color: #666; }
+
+// 9. Custom Modals Styling
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  z-index: 1050;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.custom-modal-content {
+  width: 100%;
+  max-width: 550px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+}
+
+.bg-dark-transparent {
+  background: rgba(8, 8, 8, 0.6) !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  
+  &:focus {
+    background: rgba(8, 8, 8, 0.8) !important;
+    border-color: $primary-blue !important;
+    box-shadow: 0 0 10px rgba($primary-blue, 0.2) !important;
+  }
+}
+
+.input-with-icon {
+  position: relative;
+  
+  i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 1rem;
+    pointer-events: none;
+  }
+  
+  input {
+    width: 100%;
+    padding: 12px 16px 12px 45px;
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    
+    &:focus {
+      outline: none;
+      border-color: $primary-blue;
+      box-shadow: 0 0 15px rgba($primary-blue, 0.25);
+      background: rgba(8, 8, 8, 0.8);
+    }
+
+    &:disabled {
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.05);
+      cursor: not-allowed;
+    }
+  }
+}
+
+select.form-select {
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  
+  &:disabled {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    cursor: not-allowed;
+  }
+}
+
+textarea.form-control {
+  border-radius: 12px;
+  font-size: 0.9rem;
+  
+  &:disabled {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    cursor: not-allowed;
+  }
+}
+
+.btn-glow-primary {
+  background: $primary-blue;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s;
+  
+  &:hover:not(:disabled) {
+    box-shadow: 0 0 20px rgba($primary-blue, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

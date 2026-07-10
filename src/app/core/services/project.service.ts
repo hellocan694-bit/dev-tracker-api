@@ -1,8 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Project } from 'src/app/shared/interfaces/project';
 import { ProjectResponse } from 'src/app/shared/interfaces/ProjectResponse';
+import { UpdateProjectPayload } from 'src/app/shared/interfaces/task';
 import { environment } from 'src/environment/environment';
 
 @Injectable({
@@ -51,6 +53,27 @@ getAllProjects(page: number = 1, limit: number = 10): Observable<ProjectResponse
   return this.http.get<any>(`${this.baseUrl}/activityproject/my-weekly-hours`);
 }
 
-
+  /**
+   * PATCH /developer/dev/projectdev/updateproject/:id
+   * Authorization: Project Owner or Platform Admin only (enforced by server).
+   * At least one field in payload is required.
+   */
+  updateProject(
+    projectId: string,
+    payload: UpdateProjectPayload
+  ): Observable<{ status: string; message: string; data: Partial<Project> }> {
+    return this.http
+      .patch<{ status: string; message: string; data: Partial<Project> }>(
+        `${this.baseUrl}/developer/dev/projectdev/updateproject/${projectId}`,
+        payload
+      )
+      .pipe(
+        catchError((err) => {
+          const message =
+            err?.error?.message || 'Failed to update project. Please try again.';
+          return throwError(() => new Error(message));
+        })
+      );
+  }
 
 }

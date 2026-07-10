@@ -3,9 +3,14 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { TaskService } from 'src/app/core/services/task.service';
+import { ProjectService } from 'src/app/core/services/project.service';
+import { TeamsService } from 'src/app/core/services/teams.service';
+import { Project } from 'src/app/shared/interfaces/project';
+import { Task } from 'src/app/shared/interfaces/task';
 import Swal from 'sweetalert2';
 import { timer, Subscription, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
+
 @Component({
   selector: 'app-view-main-project',
   templateUrl: './view-main-project.component.html',
@@ -13,15 +18,30 @@ import { map, shareReplay } from 'rxjs/operators';
 })
 export class ViewMainProjectComponent implements OnInit, OnDestroy {
   formData: FormGroup;
+  editProjectForm: FormGroup;
+  editTaskForm: FormGroup;
   tasks: any[] = []; 
   isLoading: boolean = false;
   financials: any;
   currentFilter: 'all' | 'completed' | 'progress' = 'all'; 
   taskMonitors: { [key: string]: Subscription } = {};
   
+  // Project details & Team members
+  project: Project | null = null;
+  teamMembers: any[] = [];
+
+  // Modals state
+  showEditProjectModal: boolean = false;
+  showEditTaskModal: boolean = false;
+  selectedTask: any = null;
+
   // ⚡ صلاحيات الوصول
+  currentUser: any = null;
   canManage: boolean = false;
   canSeeFinancials: boolean = false;
+  canEditProject: boolean = false;
+  isAdmin: boolean = false;
+  isOwner: boolean = false;
 
   now$: Observable<number>;
 
@@ -29,12 +49,31 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private router: ActivatedRoute,
     private taskService: TaskService,
+    private projectService: ProjectService,
+    private teamsService: TeamsService,
     private toaster: ToastrService
   ) {
     this.formData = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       estimatedHours: ['', [Validators.required, Validators.min(1)]],
       deadline: ['', [Validators.required]],
+    });
+
+    this.editProjectForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      clientName: ['', [Validators.required, Validators.minLength(2)]],
+      hourlyRate: [0, [Validators.required, Validators.min(0)]],
+      description: [''],
+      status: ['active', [Validators.required]]
+    });
+
+    this.editTaskForm = this.fb.group({
+      title: ['', [Validators.required, Validators.minLength(3)]],
+      estimatedHours: [0, [Validators.required, Validators.min(0)]],
+      deadline: ['', [Validators.required]],
+      assignedTo: [''],
+      status: ['todo', [Validators.required]],
+      progress: [0, [Validators.required, Validators.min(0), Validators.max(100)]]
     });
 
     this.now$ = timer(0, 1000).pipe(
@@ -46,55 +85,94 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // ⚡ لازم ننادي على دي أول حاجة عشان هي اللي بتحدد مين اليوزر وبتفتح الصلاحيات
     this.checkPermissionsAndLoadData();
+    this.loadTeamMembers();
   }
 
-checkPermissionsAndLoadData() {
-  const projectId = this.router.snapshot.paramMap.get('id');
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-
-  if (projectId) {
-    this.isLoading = true;
-    
-    this.taskService.getAllTasks(projectId).subscribe({
+  loadTeamMembers(): void {
+    this.teamsService.getTeamMembers().subscribe({
       next: (res: any) => {
-        this.tasks = res.tasks;
-        this.isLoading = false;
-
-        // 1. استخراج الـ Owner ID من الداتا اللي راجعة من الباك إند
-        const projectOwnerId = res.projectOwnerId; 
-        
-        // 2. هل اليوزر الحالي هو صاحب المشروع؟
-        const isOwner = (currentUser._id === projectOwnerId);
-
-        // 3. ندور في تيمات اليوزر عن التيم اللي "المدير" بتاعه هو صاحب المشروع ده
-        const userTeamMembership = currentUser.teams?.find((t: any) => t.adminId === projectOwnerId);
-
-        // --- ⚡ توزيع الصلاحيات الصارم ⚡ ---
-
-        // canManage تبقى true في حالتين بس:
-        // إما إنه المالك (Owner)
-        // أو ديفلوبر مضاف ومعاه TRUE في الـ canManageTasks
-        this.canManage = isOwner || (userTeamMembership && userTeamMembership.permissions?.canManageTasks === true);
-
-        // canSeeFinancials تبقى true في حالتين بس:
-        // إما إنه المالك (Owner)
-        // أو ديفلوبر مضاف ومعاه TRUE في الـ canSeeFinancials
-        this.canSeeFinancials = isOwner || (userTeamMembership && userTeamMembership.permissions?.canSeeFinancials === true);
-
-        // تنفيذ الطلبات بناءً على النتيجة الجديدة
-        if (this.canSeeFinancials) {
-          this.getAllFinancials();
-        }
-
-        this.loadTasksStatus(projectId);
+        this.teamMembers = res.data?.members || [];
       },
       error: (err) => {
-        this.isLoading = false;
-        this.toaster.error('Error loading project');
+        console.error('Failed to load team members:', err);
       }
     });
   }
-}
+
+  checkPermissionsAndLoadData() {
+    const projectId = this.router.snapshot.paramMap.get('id');
+    const currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('developerProfile') || '{}');
+    this.currentUser = currentUser;
+
+    if (projectId) {
+      this.isLoading = true;
+      
+      this.taskService.getAllTasks(projectId).subscribe({
+        next: (res: any) => {
+          this.tasks = res.tasks;
+          this.isLoading = false;
+
+          // 1. استخراج الـ Owner ID من الداتا اللي راجعة من الباك إند
+          const projectOwnerId = res.projectOwnerId; 
+          
+          // 2. هل اليوزر الحالي هو صاحب المشروع؟
+          this.isOwner = (currentUser._id === projectOwnerId || currentUser.id === projectOwnerId);
+          this.isAdmin = currentUser.role === 'admin';
+
+          // 3. ندور في تيمات اليوزر عن التيم اللي "المدير" بتاعه هو صاحب المشروع ده
+          const userTeamMembership = currentUser.teams?.find((t: any) => t.adminId === projectOwnerId);
+
+          // --- ⚡ توزيع الصلاحيات الصارم ⚡ ---
+          this.canEditProject = this.isOwner || this.isAdmin;
+
+          // canManage تبقى true في حالتين بس:
+          // إما إنه المالك (Owner)
+          // أو ديفلوبر مضاف ومعاه TRUE في الـ canManageTasks
+          this.canManage = this.isOwner || this.isAdmin || (userTeamMembership && userTeamMembership.permissions?.canManageTasks === true);
+
+          // canSeeFinancials تبقى true في حالتين بس:
+          // إما إنه المالك (Owner)
+          // أو ديفلوبر مضاف ومعاه TRUE في الـ canSeeFinancials
+          this.canSeeFinancials = this.isOwner || this.isAdmin || (userTeamMembership && userTeamMembership.permissions?.canSeeFinancials === true);
+
+          // تنفيذ الطلبات بناءً على النتيجة الجديدة
+          if (this.canSeeFinancials) {
+            this.getAllFinancials();
+          }
+
+          this.loadTasksStatus(projectId);
+          this.loadProjectDetails(projectId, currentUser);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.toaster.error('Error loading project');
+        }
+      });
+    }
+  }
+
+  loadProjectDetails(projectId: string, currentUser: any) {
+    this.projectService.getAllProjects(1, 100).subscribe({
+      next: (res: any) => {
+        const list = res.Projects || [];
+        const found = list.find((p: any) => p._id === projectId);
+        if (found) {
+          this.project = found;
+        } else {
+          // Check completed/archived projects as fallback
+          this.projectService.getCompletedProjects(1).subscribe({
+            next: (resComp: any) => {
+              const listComp = resComp.Projects || [];
+              const foundComp = listComp.find((p: any) => p._id === projectId);
+              if (foundComp) {
+                this.project = foundComp;
+              }
+            }
+          });
+        }
+      }
+    });
+  }
 
   loadTasksStatus(projectId: string) {
     this.tasks.forEach(task => {
@@ -263,6 +341,116 @@ checkPermissionsAndLoadData() {
     if (diff < 0) return 'Overdue';
     const hours = Math.floor(diff / 3600000);
     return hours < 24 ? `In ${hours}h` : `In ${Math.floor(hours / 24)}d`;
+  }
+
+  // Project editing methods
+  openEditProjectModal() {
+    if (!this.canEditProject || !this.project) return;
+    this.editProjectForm.setValue({
+      name: this.project.name || '',
+      clientName: this.project.clientName || '',
+      hourlyRate: this.project.hourlyRate || 0,
+      description: this.project.description || '',
+      status: this.project.status || 'active'
+    });
+    this.showEditProjectModal = true;
+  }
+
+  closeEditProjectModal() {
+    this.showEditProjectModal = false;
+  }
+
+  submitEditProject() {
+    if (this.editProjectForm.invalid || !this.project) return;
+    this.isLoading = true;
+    this.projectService.updateProject(this.project._id, this.editProjectForm.value).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        this.showEditProjectModal = false;
+        this.showToast('success', 'Project details updated');
+        this.checkPermissionsAndLoadData();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.toaster.error(err.message || 'Failed to update project');
+      }
+    });
+  }
+
+  // Task editing methods
+  openEditTaskModal(task: any) {
+    this.selectedTask = task;
+    
+    // Set form values
+    let formattedDeadline = '';
+    if (task.deadline) {
+      formattedDeadline = new Date(task.deadline).toISOString().split('T')[0];
+    }
+    
+    // Get assigned developer ID
+    let assignedDevId = '';
+    if (task.assignedTo) {
+      assignedDevId = typeof task.assignedTo === 'object' ? task.assignedTo._id : task.assignedTo;
+    }
+
+    this.editTaskForm.setValue({
+      title: task.title || '',
+      estimatedHours: task.estimatedHours || 0,
+      deadline: formattedDeadline,
+      assignedTo: assignedDevId || '',
+      status: task.status || 'todo',
+      progress: task.progress || 0
+    });
+
+    // Reset controls state
+    this.editTaskForm.enable();
+
+    // Role/Permission-based control disabling
+    const currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('developerProfile') || '{}');
+    const isOwnerOrAdmin = this.isOwner || this.isAdmin;
+    const canManageTasks = this.canManage;
+    const isAssigned = (assignedDevId === currentUser._id || assignedDevId === currentUser.id);
+
+    if (!isOwnerOrAdmin && !canManageTasks) {
+      if (isAssigned) {
+        // Restricted access: only status and progress allowed
+        this.editTaskForm.get('title')?.disable();
+        this.editTaskForm.get('estimatedHours')?.disable();
+        this.editTaskForm.get('deadline')?.disable();
+        this.editTaskForm.get('assignedTo')?.disable();
+      } else {
+        // No access/read-only
+        this.editTaskForm.disable();
+      }
+    }
+
+    this.showEditTaskModal = true;
+  }
+
+  closeEditTaskModal() {
+    this.showEditTaskModal = false;
+    this.selectedTask = null;
+  }
+
+  submitEditTask() {
+    const projectId = this.router.snapshot.paramMap.get('id');
+    if (!projectId || !this.selectedTask) return;
+
+    this.isLoading = true;
+    const payload = this.editTaskForm.value;
+
+    this.taskService.updateTask(projectId, this.selectedTask._id, payload).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        this.showEditTaskModal = false;
+        this.showToast('success', 'Task successfully updated');
+        this.checkPermissionsAndLoadData();
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.toaster.error(err.error?.message || 'Failed to update task');
+      }
+    });
   }
 
   private showToast(icon: any, title: string) {

@@ -63,6 +63,28 @@
 
       <div class="col-xl-9 col-lg-8">
         
+        <!-- Project Title Header & Edit Project Actions -->
+        <div class="glass-panel p-4 mb-4 border-primary-glow d-flex justify-content-between align-items-center flex-wrap gap-3" *ngIf="project">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-primary text-uppercase">{{ project.status }}</span>
+              <span class="badge bg-secondary" *ngIf="project.isArchived">Archived</span>
+            </div>
+            <h3 class="text-white fw-bold m-0">{{ project.name }}</h3>
+            <p class="text-white-50 m-0 small mt-1" *ngIf="project.clientName">Client: <strong>{{ project.clientName }}</strong></p>
+            <p class="text-muted m-0 extra-small mt-2" *ngIf="project.description">{{ project.description }}</p>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="text-end">
+              <span class="d-block fw-bold text-primary h5 mb-0">${{ project.hourlyRate || 0 }}/h</span>
+              <span class="extra-small text-muted text-uppercase">Hourly Rate</span>
+            </div>
+            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" *ngIf="canEditProject" (click)="openEditProjectModal()">
+              <i class="bi bi-pencil-square me-1"></i> Edit Project
+            </button>
+          </div>
+        </div>
+
         <div class="glass-panel p-3 mb-5 border-primary-glow" *ngIf="canManage">
           <form [formGroup]="formData" (ngSubmit)="creatTask()" class="row g-2 align-items-center">
             <div class="col-md-5">
@@ -125,6 +147,7 @@
                   </div>
                 </div>
 
+                <!-- Timeline -->
                 <div class="mb-3" *ngIf="task.status !== 'done'">
                   <div class="d-flex justify-content-between extra-small mb-1">
                     <span class="text-white-50">Timeline</span>
@@ -137,25 +160,48 @@
                   </div>
                 </div>
 
+                <!-- Completion Progress -->
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between extra-small mb-1">
+                    <span class="text-white-50">Task Progress</span>
+                    <span class="text-success fw-bold">{{ task.progress || 0 }}%</span>
+                  </div>
+                  <div class="progress custom-progress">
+                    <div class="progress-bar bg-success" [style.width.%]="task.progress || 0"></div>
+                  </div>
+                </div>
+
                 <p class="text-muted extra-small mt-2" *ngIf="task.status === 'done'">
                   <i class="bi bi-calendar-check me-1"></i> Finished on Time
                 </p>
               </div>
 
               <div class="task-footer">
-                <div class="d-flex gap-2" *ngIf="canManage">
-                  <button type="button" *ngIf="task.status !== 'done'" 
+                <div class="d-flex gap-2">
+                  <!-- Play / Pause (canManage only) -->
+                  <button type="button" *ngIf="canManage && task.status !== 'done'" 
                           (click)="toggleTaskActivity(task)" 
                           class="btn-activity"
                           [ngClass]="task.statusActivity?.isWorking ? 'btn-pause' : 'btn-play'">
                     <i class="bi" [ngClass]="task.statusActivity?.isWorking ? 'bi-pause-fill' : 'bi-play-fill'"></i>
                   </button>
-                  <button type="button" *ngIf="task.status !== 'done'" (click)="completetask(task._id)" class="btn-action-sm">
+                  
+                  <!-- Complete (canManage only) -->
+                  <button type="button" *ngIf="canManage && task.status !== 'done'" (click)="completetask(task._id)" class="btn-action-sm" title="Complete Mission">
                     <i class="bi bi-check2-all"></i>
+                  </button>
+
+                  <!-- Edit Task (Owner/Admin/canManage OR Assigned Developer) -->
+                  <button type="button" 
+                          *ngIf="canManage || (currentUser && (task.assignedTo === currentUser._id || task.assignedTo?._id === currentUser._id))" 
+                          (click)="openEditTaskModal(task)" 
+                          class="btn-action-sm" 
+                          title="Edit Task">
+                    <i class="bi bi-pencil-fill"></i>
                   </button>
                 </div>
                 
-                <div *ngIf="!canManage && task.status !== 'done'" class="text-muted extra-small italic">Read Only</div>
+                <div *ngIf="!canManage && (currentUser && task.assignedTo !== currentUser._id && task.assignedTo?._id !== currentUser._id) && task.status !== 'done'" class="text-muted extra-small italic">Read Only</div>
                 <div *ngIf="task.status === 'done'" class="text-success small fw-bold">Done</div>
                 
                 <div class="avatar-sm">{{ task.title[0] | uppercase }}</div>
@@ -164,6 +210,144 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Edit Project Modal -->
+  <div class="custom-modal-backdrop" *ngIf="showEditProjectModal" (click)="closeEditProjectModal()">
+    <div class="custom-modal-content glass-panel border-primary-glow p-4" (click)="$event.stopPropagation()">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="text-white fw-bold m-0"><i class="bi bi-folder-fill text-primary me-2"></i>Edit Project</h4>
+        <button type="button" class="btn-close btn-close-white" (click)="closeEditProjectModal()"></button>
+      </div>
+
+      <form [formGroup]="editProjectForm" (ngSubmit)="submitEditProject()">
+        <div class="mb-3">
+          <label class="form-label text-white-50 small">Project Name</label>
+          <div class="input-with-icon">
+            <i class="bi bi-folder"></i>
+            <input type="text" formControlName="name" placeholder="Project Name" />
+          </div>
+          <div class="text-danger extra-small mt-1" *ngIf="editProjectForm.get('name')?.touched && editProjectForm.get('name')?.invalid">
+            Name must be at least 3 characters.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white-50 small">Client Name</label>
+          <div class="input-with-icon">
+            <i class="bi bi-person"></i>
+            <input type="text" formControlName="clientName" placeholder="Client Name" />
+          </div>
+          <div class="text-danger extra-small mt-1" *ngIf="editProjectForm.get('clientName')?.touched && editProjectForm.get('clientName')?.invalid">
+            Client Name must be at least 2 characters.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white-50 small">Hourly Rate ($)</label>
+          <div class="input-with-icon">
+            <i class="bi bi-cash"></i>
+            <input type="number" formControlName="hourlyRate" placeholder="Hourly Rate" />
+          </div>
+          <div class="text-danger extra-small mt-1" *ngIf="editProjectForm.get('hourlyRate')?.touched && editProjectForm.get('hourlyRate')?.invalid">
+            Hourly Rate must be a valid number >= 0.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white-50 small">Description</label>
+          <textarea formControlName="description" class="form-control bg-dark-transparent text-white border-secondary" rows="3" placeholder="Project Details..."></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-white-50 small">Status</label>
+          <select formControlName="status" class="form-select bg-dark-transparent text-white border-secondary">
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+
+        <div class="d-flex gap-3 justify-content-end">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="closeEditProjectModal()">Cancel</button>
+          <button type="submit" class="btn-glow-primary px-4 py-2" [disabled]="editProjectForm.invalid || isLoading">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Task Modal -->
+  <div class="custom-modal-backdrop" *ngIf="showEditTaskModal" (click)="closeEditTaskModal()">
+    <div class="custom-modal-content glass-panel border-primary-glow p-4" (click)="$event.stopPropagation()">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="text-white fw-bold m-0"><i class="bi bi-card-checklist text-primary me-2"></i>Edit Task</h4>
+        <button type="button" class="btn-close btn-close-white" (click)="closeEditTaskModal()"></button>
+      </div>
+
+      <form [formGroup]="editTaskForm" (ngSubmit)="submitEditTask()">
+        <div class="mb-3">
+          <label class="form-label text-white-50 small">Task Title</label>
+          <div class="input-with-icon">
+            <i class="bi bi-type"></i>
+            <input type="text" formControlName="title" placeholder="Task Title" />
+          </div>
+          <div class="text-danger extra-small mt-1" *ngIf="editTaskForm.get('title')?.touched && editTaskForm.get('title')?.invalid">
+            Title must be at least 3 characters.
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label text-white-50 small">Estimated Hours</label>
+            <div class="input-with-icon">
+              <i class="bi bi-hourglass"></i>
+              <input type="number" formControlName="estimatedHours" placeholder="Hours" />
+            </div>
+            <div class="text-danger extra-small mt-1" *ngIf="editTaskForm.get('estimatedHours')?.touched && editTaskForm.get('estimatedHours')?.invalid">
+              Estimated Hours must be >= 0.
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-white-50 small">Deadline</label>
+            <input type="date" formControlName="deadline" class="form-control bg-dark-transparent text-white border-secondary" />
+            <div class="text-danger extra-small mt-1" *ngIf="editTaskForm.get('deadline')?.touched && editTaskForm.get('deadline')?.invalid">
+              Deadline is required.
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white-50 small">Assign To</label>
+          <select formControlName="assignedTo" class="form-select bg-dark-transparent text-white border-secondary">
+            <option value="">Unassigned</option>
+            <option *ngFor="let member of teamMembers" [value]="member.id">{{ member.name }} ({{ member.email }})</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white-50 small">Status</label>
+          <select formControlName="status" class="form-select bg-dark-transparent text-white border-secondary">
+            <option value="todo">To Do</option>
+            <option value="in-progress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <div class="d-flex justify-content-between mb-1">
+            <label class="form-label text-white-50 small m-0">Progress Percentage</label>
+            <span class="text-success small fw-bold">{{ editTaskForm.get('progress')?.value }}%</span>
+          </div>
+          <input type="range" class="form-range" min="0" max="100" step="5" formControlName="progress" />
+        </div>
+
+        <div class="d-flex gap-3 justify-content-end">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="closeEditTaskModal()">Cancel</button>
+          <button type="submit" class="btn-glow-primary px-4 py-2" [disabled]="editTaskForm.invalid || isLoading">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

@@ -23,6 +23,13 @@ export class TaskService {
     return this.http.get(`${this.baseUrl}/project/dev/tasks/getalltasks/${projectId}`)
   }
 
+  updateTask(projectId: string, taskId: string, data: Partial<Task>): Observable<TaskResponse> {
+    return this.http.patch<TaskResponse>(
+      `${this.baseUrl}/dev/tasks/updatetask/${projectId}/${taskId}`,
+      data
+    );
+  }
+
   completeTask(projectId:string  , taskId:string){
     return this.http.patch(`${this.baseUrl}/project/dev/${projectId}/tasks/${taskId}/complete`, {})
   } 

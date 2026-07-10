@@ -9,9 +9,14 @@
            <span class="badge-custom"><i class="bi bi-shield-lock"></i> Secured</span>
         </div>
       </div>
-      <button class="btn-primary-action shadow-blue" (click)="gotoCreate()">
-        <i class="bi bi-plus-lg"></i> New Project
-      </button>
+      <div class="d-flex gap-2 align-items-center">
+        <button class="btn-tour-help" (click)="startTour()" title="Take a feature tour">
+          <i class="bi bi-compass me-1"></i> Tour
+        </button>
+        <button class="btn-primary-action shadow-blue" (click)="gotoCreate()">
+          <i class="bi bi-plus-lg"></i> New Project
+        </button>
+      </div>
     </header>
 
     <section class="stats-grid">
@@ -90,7 +95,7 @@
           </div>
         </div>
       </div>
-<div class="chart-wrapper">
+<div id="tour-step-tracker" class="chart-wrapper">
   <div class="chart-header">
     <span class="chart-title">Weekly Productivity</span>
     <span class="chart-value">{{weeklyHours}}h <small>this week</small></span>
@@ -126,3 +131,6 @@
     </div>
   </div>
 </div>
+
+<!-- Feature Tour Component -->
+<app-feature-tour></app-feature-tour>

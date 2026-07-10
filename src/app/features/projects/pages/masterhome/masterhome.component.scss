@@ -930,3 +930,28 @@ $text-muted: #4b5563;
   margin-right: 0 !important;
   margin-left: 0 !important;
 }
+
+// ─── Feature Tour Help Button ─────────────────────────────────────────────────
+.btn-tour-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: rgba(0, 240, 255, 0.8);
+  padding: 9px 16px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(0, 240, 255, 0.08);
+    border-color: rgba(0, 240, 255, 0.6);
+    color: #00f0ff;
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.2);
+    transform: translateY(-1px);
+  }
+}
