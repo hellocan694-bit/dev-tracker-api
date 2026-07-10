@@ -1,0 +1,73 @@
+<nav class="glass-nav">
+  <div class="nav-container">
+    
+    <!-- Left: Brand / Toggle -->
+    <div class="brand-section">
+      <!-- Menu Trigger (Only visible when logged in) -->
+      <button class="menu-trigger" (click)="toggleMenu()" *ngIf="isLoggedIn" aria-label="Toggle Menu">
+        <i class="fa-solid fa-bars-staggered"></i>
+      </button>
+
+      <a class="brand" routerLink="/">
+        <div class="logo-icon">
+          <i class="fa-solid fa-rocket"></i>
+        </div>
+        <span class="brand-name">Dev<span class="highlight">Track</span></span>
+      </a>
+    </div>
+
+    <!-- Center: Links -->
+    <div class="nav-links-center d-none d-md-flex" *ngIf="!isLoggedIn">
+      <a routerLink="/" class="center-link active">Home</a>
+      <a routerLink="/features" class="center-link">Features</a>
+      <a routerLink="/templates" class="center-link">Templates</a>
+      <a routerLink="/pricing" class="center-link">Pricing</a>
+      <a routerLink="/community" class="center-link">Community</a>
+    </div>
+
+    <!-- Right: Actions -->
+    <div class="nav-actions">
+      <!-- Unauthenticated -->
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/auth/login" class="nav-link login-link">
+          <span class="action-text">Login</span>
+        </a>
+        <a tabindex="0" routerLink="/auth/register" class="register-pill">
+          <span>Get Started</span>
+        </a>
+      </ng-container>
+
+      <!-- Authenticated -->
+      <ng-container *ngIf="isLoggedIn">
+
+        <!-- Not Pro: Upgrade CTA -->
+        <a *ngIf="!isPro && !isPremium" (click)="gotopremium()" class="nav-link premium-link">
+          <i class="fa-solid fa-crown"></i> 
+          <span class="action-text">Pro</span>
+        </a>
+
+        <!-- Pro Trial: Active badge -->
+        <a *ngIf="isPro && !isPremium" (click)="gotopremium()" class="nav-link premium-link premium-link--active"
+          [title]="daysRemaining !== null ? daysRemaining + ' days remaining' : 'Unlimited'">
+          <i class="fa-solid fa-crown"></i>
+          <span class="action-text">Pro</span>
+          <span class="pro-badge-dot"></span>
+        </a>
+
+        <!-- Premium (paid): Distinguished badge -->
+        <a *ngIf="isPremium" class="nav-link premium-link premium-link--premium"
+          [title]="daysRemaining !== null ? daysRemaining + ' days remaining' : 'Unlimited Premium'">
+          <i class="fa-solid fa-gem"></i>
+          <span class="action-text">Premium</span>
+          <span class="pro-badge-dot pro-badge-dot--premium"></span>
+        </a>
+
+        <button (click)="logout()" class="logout-pill">
+          <i class="fa-solid fa-power-off"></i>
+          <span>Logout</span>
+        </button>
+      </ng-container>
+    </div>
+
+  </div>
+</nav>

@@ -1,0 +1,132 @@
+<div class="login-container container-fluid p-0 vh-100 overflow-hidden">
+  <!-- Decorative Background Glows -->
+  <div class="circle top-left"></div>
+  <div class="circle bottom-right"></div>
+
+  <div class="row g-0 h-100 w-100">
+    <!-- Left Side: Visual Column -->
+    <div class="col-md-6 col-lg-7 d-none d-md-block h-100 position-relative visual-column overflow-hidden">
+      <!-- Background Image visual -->
+      <div class="visual-image-bg"></div>
+
+      <!-- Grid pattern & glowing mesh overlay -->
+      <div class="visual-grid"></div>
+      <div class="visual-glow"></div>
+
+      <!-- Content Container -->
+      <div class="illustration-container d-flex align-items-center justify-content-center h-100 p-4 p-lg-5">
+        <aside class="login-aside glass-card w-100">
+          <div class="aside-card text-center text-lg-start">
+            <div class="card-header mb-4">
+              <div class="card-info">
+                <span
+                  class="badge rounded-pill bg-primary bg-opacity-20 text-primary px-3 py-1.5 mb-3 border border-primary border-opacity-30">WORKSPACE</span>
+                <h3 class="text-white fw-bold mb-2">Boost Your Productivity</h3>
+                <span class="text-secondary small font-monospace d-block">Development Growth Blog</span>
+              </div>
+            </div>
+            <p class="card-description mb-4">
+              Track progress, manage projects, and achieve your goals faster with our comprehensive developer analytics
+              workspace.
+            </p>
+
+            <!-- Feature Icons -->
+            <div class="card-features mb-4 d-flex justify-content-center justify-content-lg-start gap-4">
+              <i class="fa-solid fa-code fa-fade" title="Clean Code tracking"></i>
+              <i class="fa-solid fa-chart-line fa-beat-fade" title="Performance Charts"></i>
+              <i class="fa-solid fa-gear" title="Settings"></i>
+              <i class="fa-solid fa-calendar-check" title="Daily Tasks"></i>
+            </div>
+
+            <button class="aside-action-btn w-100" (click)="gotoLearnAboutUs()">
+              Learn More about Dev Tracker <i class="fa-solid fa-arrow-right ms-2 transition-icon"></i>
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Right Side: Form Column -->
+    <div
+      class="col-12 col-md-6 col-lg-5 h-100 d-flex align-items-center justify-content-center position-relative form-column px-4 px-sm-5 py-4 overflow-y-auto">
+      <div class="login-form-wrapper w-100">
+
+        <!-- Header -->
+        <header class="login-header mb-4 text-center text-md-start">
+          <div class="brand">
+            <h1 class="site-name">Dev Tracker</h1>
+            <p class="welcome-text">Welcome Back, Developer</p>
+          </div>
+        </header>
+
+        <!-- Form Panel -->
+        <main class="login-content">
+          <h2 class="form-title mb-4">Login to your account</h2>
+
+          <form [formGroup]="formData!" (ngSubmit)="login()">
+
+            <!-- Email -->
+            <div class="input-group-custom mb-3">
+              <label class="form-label-custom">Email Address</label>
+              <input type="email" placeholder="e.g. dev@example.com" formControlName="email" [class.is-invalid]="
+                  formData.get('email')?.touched &&
+                  formData.get('email')?.invalid
+                " />
+            </div>
+
+            <!-- Password -->
+            <div class="input-group-custom password-wrapper mb-3">
+              <label class="form-label-custom">Password</label>
+              <div class="password-input-container">
+                <input type="password" placeholder="••••••••" formControlName="password" #passwordInput />
+                <span class="eye-icon" (click)="
+                    passwordInput.type =
+                      passwordInput.type === 'password' ? 'text' : 'password'
+                  ">
+                  <i class="fa-regular" [ngClass]="
+                      passwordInput.type === 'password' ? 'fa-eye-slash' : 'fa-eye'
+                    "></i>
+                </span>
+              </div>
+            </div>
+
+            <!-- Forgot Password -->
+            <div class="forgot-password text-end mb-4">
+              <a routerLink="/forgot-password" (click)="gotoForgetPassword()">Forgot Password?</a>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-login mb-4" [disabled]="formData.invalid || isLoading">
+              <span *ngIf="isLoading" class="loader"></span>
+              <span *ngIf="!isLoading">Log In</span>
+              <span *ngIf="isLoading">Logging in...</span>
+            </button>
+
+            <!-- Quick Access / Social Logins -->
+            <div class="quick-access-box mb-4">
+              <span class="divider-text">OR QUICK ACCESS</span>
+
+              <div class="social-orbs-container">
+                <div class="orb g-orb" title="Login with Google">
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                  <div id="google-btn" class="hidden-google-trigger"></div>
+                  <div class="orb-glow"></div>
+                </div>
+
+                <button type="button" class="orb gh-orb" (click)="loginWithGithub()" title="Login with GitHub">
+                  <i class="fa-brands fa-github"></i>
+                  <div class="orb-glow"></div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Sign Up Link -->
+            <div class="signup-link text-center">
+              Don't have an account? <a routerLink="/auth/register" class="signup-btn">Sign Up</a>
+            </div>
+          </form>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>

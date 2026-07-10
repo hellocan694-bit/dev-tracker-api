@@ -1,0 +1,124 @@
+// إعدادات الألوان والـ Glass
+$primary-blue: #38bdf8;
+$glass-bg: rgba(255, 255, 255, 0.05);
+$glass-border: rgba(255, 255, 255, 0.1);
+
+.settings-page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: #030712; // لون غامق ناعم مش أسود صريح
+}
+
+// الباك جراوند الملونة (Gradient Blur)
+.bg-gradient-blur {
+  position: fixed;
+  top: -10%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(56, 189, 248, 0) 70%);
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -100%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0) 70%);
+    filter: blur(80px);
+  }
+}
+
+.content-area {
+  position: relative;
+  z-index: 1;
+}
+
+// كروت الزجاج
+.glass-card {
+  background: $glass-bg;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid $glass-border;
+  border-radius: 28px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+// الأفاتار مع الجلو (Glow)
+.avatar-container {
+  position: relative;
+  display: inline-block;
+  
+  .avatar-glow {
+    width: 100px; height: 100px;
+    background: linear-gradient(135deg, $primary-blue, #8b5cf6);
+    border-radius: 35px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; font-weight: 800; color: white;
+    box-shadow: 0 15px 30px rgba(56, 189, 248, 0.3);
+  }
+
+  .btn-edit-avatar {
+    position: absolute; bottom: -5px; right: -5px;
+    background: #fff; border: none; width: 32px; height: 32px;
+    border-radius: 12px; color: #000; font-size: 0.9rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+}
+
+// الـ Inputs المودرن
+.custom-input-group {
+  label {
+    display: block; font-size: 0.75rem; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+    font-weight: 600;
+  }
+  
+  input {
+    width: 100%; background: rgba(0, 0, 0, 0.2);
+    border: 1px solid $glass-border;
+    border-radius: 16px; padding: 14px 18px; color: #fff;
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none; border-color: $primary-blue;
+      background: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+    }
+    
+    &.locked { background: transparent; color: #64748b; cursor: not-allowed; }
+  }
+}
+
+.input-with-icon {
+  position: relative;
+  i { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); }
+}
+
+// الأزرار
+.btn-glass-primary {
+  background: $primary-blue; color: #000; border: none;
+  padding: 12px 30px; border-radius: 16px; font-weight: 700;
+  transition: all 0.3s ease;
+  &:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2); }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  color: white;
+}
+.btn-glass-secondary {
+  background: rgba(255, 255, 255, 0.05); color: #fff;
+  border: 1px solid $glass-border; padding: 12px 30px; border-radius: 16px;
+  &:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+}
+
+.stats-box { background: rgba(0, 0, 0, 0.2); border: 1px solid $glass-border; }

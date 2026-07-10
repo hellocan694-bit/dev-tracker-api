@@ -1,0 +1,353 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+// ── Design Tokens ─────────────────────────────────────────────────────────────
+$bg:             #050505;
+$surface:        rgba(255, 255, 255, 0.02);
+$surface2:       rgba(255, 255, 255, 0.04);
+$border:         rgba(255, 255, 255, 0.06);
+$accent:         #0d6efd;
+$accent-glow:    rgba(13, 110, 253, 0.25);
+$purple:         #8b5cf6;
+$text:           #f8fafc;
+$muted:          #94a3b8;
+$danger:         #ef4444;
+$green:          #10b981;
+$warning:        #f59e0b;
+$radius:         20px;
+
+// ── Background Blobs ──────────────────────────────────────────────────────────
+.fb-floating-bg {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(140px);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  will-change: transform;
+
+  &.blob-1 {
+    width: 600px; height: 600px;
+    background: $accent;
+    top: -150px; right: -150px;
+  }
+  &.blob-2 {
+    width: 500px; height: 500px;
+    background: $purple;
+    bottom: -100px; left: -100px;
+  }
+}
+
+// ── Page Wrapper ──────────────────────────────────────────────────────────────
+.fb-list-page {
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  background-color: $bg;
+  color: $text;
+  padding: 110px 2rem 3rem 2rem;
+  box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+  z-index: 0;
+
+  @media (max-width: 768px) {
+    padding: 100px 1.25rem 2rem 1.25rem;
+  }
+}
+
+// ── Header Styling ────────────────────────────────────────────────────────────
+.fb-header {
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 1.5rem;
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+// ── Filter Bar ────────────────────────────────────────────────────────────────
+.fb-filters {
+  position: relative;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  &__label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+}
+
+// Chip tags selectors
+.chip-tag {
+  padding: 0.4rem 0.85rem;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: $muted;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  &--active {
+    background: rgba($accent, 0.1) !important;
+    border-color: $accent !important;
+    color: #93c5fd !important;
+    font-weight: 600;
+    box-shadow: 0 0 12px rgba($accent, 0.15);
+  }
+
+  &--star {
+    font-family: monospace;
+  }
+}
+
+.btn-clear-filters {
+  background: transparent;
+  border: none;
+  color: $danger;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  transition: all 0.2s;
+
+  &:hover {
+    color: lighten($danger, 10%);
+    text-shadow: 0 0 10px rgba($danger, 0.3);
+  }
+}
+
+// ── Feedback Cards ────────────────────────────────────────────────────────────
+.fb-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: $radius;
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 10;
+
+  &__subject {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.2px;
+  }
+
+  &__message {
+    line-height: 1.5;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 6rem;
+  }
+
+  &__stars {
+    color: #fbbf24;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.35);
+  }
+
+  &__note {
+    background: rgba(13, 110, 253, 0.03);
+    border: 1px solid rgba(13, 110, 253, 0.12);
+    
+    .admin-note-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #93c5fd;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  }
+
+  // Action buttons
+  .btn-icon-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+
+    &.btn-edit {
+      background: rgba(255, 255, 255, 0.04);
+      color: $muted;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      &:hover {
+        background: rgba($accent, 0.15);
+        color: #93c5fd;
+        border-color: rgba($accent, 0.3);
+      }
+    }
+
+    &.btn-delete {
+      background: rgba($danger, 0.06);
+      color: #fca5a5;
+      border: 1px solid rgba($danger, 0.15);
+      &:hover {
+        background: $danger;
+        color: white;
+        border-color: $danger;
+        box-shadow: 0 0 15px rgba($danger, 0.4);
+      }
+    }
+  }
+}
+
+// ── Badges ────────────────────────────────────────────────────────────────────
+.badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+
+  &--type {
+    &--bug {
+      background: rgba($danger, 0.1);
+      color: #fca5a5;
+      border-color: rgba($danger, 0.2);
+    }
+    &--feature_request {
+      background: rgba($purple, 0.1);
+      color: #ddd6fe;
+      border-color: rgba($purple, 0.2);
+    }
+    &--general {
+      background: rgba($accent, 0.1);
+      color: #93c5fd;
+      border-color: rgba($accent, 0.2);
+    }
+    &--improvement {
+      background: rgba($green, 0.1);
+      color: #a7f3d0;
+      border-color: rgba($green, 0.2);
+    }
+  }
+
+  &--status {
+    &--pending {
+      background: rgba($warning, 0.08);
+      color: #fde047;
+      border-color: rgba($warning, 0.15);
+    }
+    &--under_review {
+      background: rgba(147, 197, 253, 0.1);
+      color: #60a5fa;
+      border-color: rgba(147, 197, 253, 0.18);
+    }
+    &--resolved {
+      background: rgba($green, 0.1);
+      color: #34d399;
+      border-color: rgba($green, 0.2);
+    }
+    &--closed {
+      background: rgba(255, 255, 255, 0.05);
+      color: $muted;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
+// ── Empty state Redesign ──────────────────────────────────────────────────────
+.fb-empty {
+  position: relative;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  max-width: 500px;
+  margin: 4rem auto;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
+
+  .fb-empty__icon {
+    font-size: 3rem;
+  }
+}
+
+// ── Error State ───────────────────────────────────────────────────────────────
+.fb-error {
+  position: relative;
+  z-index: 10;
+  background: rgba($danger, 0.03);
+  border: 1px solid rgba($danger, 0.15);
+  max-width: 450px;
+  margin: 4rem auto;
+
+  .error-icon {
+    font-size: 2.5rem;
+  }
+}
+
+// ── Button Custom Styles ──────────────────────────────────────────────────────
+.btn-submit-premium {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: $accent;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 20px rgba(13, 110, 253, 0.2);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(13, 110, 253, 0.4);
+    opacity: 0.95;
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: $muted;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    color: white;
+    background: rgba(255, 255, 255, 0.02);
+  }
+}

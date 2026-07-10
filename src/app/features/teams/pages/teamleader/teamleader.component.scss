@@ -1,0 +1,363 @@
+$primary: #3b82f6;
+$accent: #a855f7;
+$bg-dark: #030303;
+$glass: rgba(255, 255, 255, 0.03);
+$glass-border: rgba(255, 255, 255, 0.08);
+$text-muted: #94a3b8;
+
+.team-leader-wrapper {
+  background-color: $bg-dark;
+  min-height: 100vh;
+  padding: clamp(40px, 8vw, 80px) 0;
+  color: white;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+
+  .header-section {
+    margin-bottom: 40px;
+    padding: 0 15px;
+    h1 {
+      font-size: clamp(2.2rem, 7vw, 3.5rem);
+      font-weight: 850;
+      letter-spacing: -1px;
+      span { color: $primary; }
+    }
+  }
+
+  .invite-panel, .members-panel {
+    background: $glass;
+    backdrop-filter: blur(20px);
+    border: 1px solid $glass-border;
+    border-radius: 28px;
+    padding: clamp(20px, 5vw, 35px);
+    height: 100%;
+  }
+
+  .form-control-cyber {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid $glass-border;
+    padding: 16px;
+    border-radius: 14px;
+    color: white;
+    margin-bottom: 20px;
+    transition: 0.3s;
+    &:focus { border-color: $primary; outline: none; box-shadow: 0 0 15px rgba($primary, 0.2); }
+  }
+
+  .btn-glow {
+    width: 100%;
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-weight: 800;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    &:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(255,255,255,0.15);
+    }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  .member-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    margin-bottom: 12px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateX(5px);
+      
+      .member-actions-wrapper {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(-50%) scale(1);
+      }
+      
+      .member-status {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+    }
+
+    .member-info {
+      flex: 1;
+      min-width: 0; // لمنع كسر التصميم عند النصوص الطويلة
+      .name { display: block; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .mail { display: block; color: $text-muted; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    }
+  }
+
+  .member-actions-wrapper {
+    position: absolute;
+    right: clamp(15px, 5vw, 25px); // موقع ديناميكي
+    top: 50%;
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+
+    &:hover .action-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-10px) scale(1);
+    }
+  }
+
+  .dots-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .action-menu {
+    position: absolute;
+    bottom: 120%;
+    right: 0;
+    width: 170px;
+    background: #0a0a0a;
+    backdrop-filter: blur(15px);
+    border: 1px solid $glass-border;
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px) scale(0.9);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    .menu-item {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: #eee;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      transition: 0.2s;
+      &:hover { background: rgba(255,255,255,0.05); padding-left: 15px; }
+      &.delete:hover { color: #ff4d4d; background: rgba(255, 77, 77, 0.1); }
+    }
+  }
+  
+
+  .member-status {
+    flex-shrink: 0;
+    transition: 0.3s ease;
+    .status-tag {
+      background: rgba($primary, 0.1);
+      color: $primary;
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+.permissions-wrapper {
+  position: relative;
+  
+  // Hover effect
+  &:hover .permissions-popover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1); // غيرنا الاتجاه لـ Y عشان الموبايل
+  }
+
+  .permissions-popover {
+    position: absolute;
+    /* --- الإعدادات الافتراضية للموبايل (تفتح تحت الزرار) --- */
+    top: 100%; 
+    right: 0;
+    margin-top: 10px;
+    /* -------------------------------------------------- */
+    
+    width: 240px;
+    background: rgba(10, 10, 10, 0.98); // تقلت الخلفية شوية للموبايل
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px) scale(0.95); // أنيميشن من تحت لفوق
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000; // تأكد إنها فوق أي حاجة
+
+    /* --- تعديل للشاشات الكبيرة (تفتح على الجنب زي ما كنت عايز) --- */
+    @media (min-width: 992px) {
+      top: -20px;
+      right: 105%;
+      margin-top: 0;
+      transform: translateX(10px) scale(0.95);
+      
+      &:hover {
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    .popover-header {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: #3b82f6;
+      letter-spacing: 2px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      padding-left: 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 8px;
+    }
+
+    .perm-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .perm-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      border-radius: 10px;
+      transition: 0.2s;
+      
+      &:hover { background: rgba(255, 255, 255, 0.05); }
+
+      .perm-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        i { color: #64748b; font-size: 0.85rem; }
+        span { font-size: 0.8rem; color: #e2e8f0; white-space: nowrap; }
+      }
+    }
+  }
+}
+
+/* الـ Switch زي ما هو بس صغرناه سنة للموبايل */
+.cyber-switch {
+  flex-shrink: 0; // عشان ميتعصرش في الموبايل
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 16px;
+
+  input { opacity: 0; width: 0; height: 0; }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .4s;
+    border-radius: 20px;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 10px;
+      width: 10px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #64748b;
+      transition: .4s;
+      border-radius: 50%;
+    }
+  }
+
+  input:checked + .slider {
+    background-color: rgba(59, 130, 246, 0.2);
+    &:before {
+      background-color: #3b82f6;
+      transform: translateX(16px);
+      box-shadow: 0 0 8px #3b82f6;
+    }
+  }
+}  // ميديا كويري احترافية للموبايل
+  @media (max-width: 768px) {
+    padding: 30px 0;
+    .invite-panel, .members-panel { border-radius: 20px; }
+    
+    .member-item {
+      padding: 12px 15px;
+      &:hover { transform: none; } // إلغاء الإزاحة في التاتش
+    }
+
+    .member-status { display: none; } // إخفاء التاج لتوسيع مساحة الأكشنز
+    
+    .member-actions-wrapper {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) scale(1);
+    }
+  }
+}
+
+// استايل اللودر
+.skeleton-loader {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  border-radius: 20px;
+
+  .member-avatar-skeleton {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .member-info { flex: 1; margin-left: 15px; }
+
+  .skeleton-line {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer-load 1.5s infinite linear;
+    height: 12px;
+    border-radius: 4px;
+    &.short { width: 40%; margin-bottom: 8px; }
+    &.long { width: 75%; }
+  }
+}
+
+@keyframes shimmer-load {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+::ng-deep .glass-alert-popup {
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* تخلي الـ Loading Spinner لونه أزرق شيك */
+::ng-deep .swal2-loader {
+  border-color: #3b82f6 transparent #3b82f6 transparent !important;
+}

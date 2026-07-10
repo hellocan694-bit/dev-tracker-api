@@ -1,0 +1,42 @@
+<div class="auth-wrapper d-flex align-items-center justify-content-center">
+  <div class="circle-top"></div>
+  <div class="circle-bottom"></div>
+
+  <div class="auth-container p-4">
+    <h1 class="text-white fw-bold mb-3 display-5">Verify Email</h1>
+    <p class="text-secondary mb-5">Please enter the OTP code sent to your email.</p>
+
+    <form [formGroup]="formData" (ngSubmit)="createAccount()">
+      
+      <div class="mb-4">
+        <input 
+          type="text" 
+          formControlName="otp"
+          class="form-control auth-input text-center letter-spacing-lg" 
+          [ngClass]="{'is-invalid': formData.get('otp')?.invalid && formData.get('otp')?.touched}"
+          placeholder="Enter OTP Code"
+          maxlength="6">
+        
+        <div class="invalid-feedback text-center" *ngIf="formData.get('otp')?.invalid && formData.get('otp')?.touched">
+          <small>OTP is required to verify your account.</small>
+        </div>
+      </div>
+
+      <div class="d-grid gap-3 mt-5">
+        <button 
+          type="submit" 
+          [disabled]="formData.invalid || isLoading"
+          class="btn btn-light action-btn fw-bold">
+          <span *ngIf="!isLoading">Verify & Create Account</span>
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm"></span>
+        </button>
+      </div>
+
+      <div class="text-center mt-5">
+        <p class="auth-footer-text">
+          Didn't receive a code? <a href="javascript:void(0)" class="text-primary text-decoration-none">Resend Code</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

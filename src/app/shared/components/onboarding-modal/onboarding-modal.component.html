@@ -1,0 +1,221 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     ARIA 3-Agent Onboarding Modal
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<ng-container *ngIf="isVisible && message">
+
+  <!-- ░░ OVERLAY ░░ -->
+  <div
+    #modalOverlay
+    class="aria-overlay"
+    (click)="close()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- ░░ MODAL PANEL ░░ -->
+  <div
+    #modalPanel
+    class="aria-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="aria-subject"
+  >
+
+    <!-- ─── HEADER ──────────────────────────────────────────────────────── -->
+    <header class="aria-header">
+      <div class="aria-header__left">
+        <span class="aria-logo">
+          <span class="aria-logo__ring"></span>
+          <span class="aria-logo__core">AI</span>
+        </span>
+        <span class="aria-agent-name">ARIA · System Online</span>
+      </div>
+
+      <div class="aria-header__center">
+        <h1 id="aria-subject" #subjectText class="aria-subject">
+          {{ message.subject }}
+        </h1>
+      </div>
+
+      <div class="aria-header__right">
+        <span class="aria-badge aria-badge--auth">
+          <span class="aria-badge__dot"></span>
+          System Authenticated
+        </span>
+        <button
+          class="aria-close-btn"
+          (click)="close()"
+          aria-label="Close ARIA modal"
+          id="aria-close-btn"
+        >✕</button>
+      </div>
+    </header>
+
+    <!-- ─── BODY (2-column) ─────────────────────────────────────────────── -->
+    <div class="aria-body">
+
+      <!-- ░░ LEFT COLUMN ░░ -->
+      <div class="aria-col aria-col--left">
+
+        <!-- Greeting -->
+        <div class="aria-greeting">
+          <div class="aria-greeting__label">
+            <span class="label-dot"></span> DIRECT TRANSMISSION
+          </div>
+          <p #greetingText class="aria-greeting__text"></p>
+        </div>
+
+        <!-- Project Snapshot Card -->
+        <div #snapshotCard class="aria-card aria-card--snapshot">
+          <div class="aria-card__header">
+            <span class="aria-card__icon">📡</span>
+            <span class="aria-card__title">Project Snapshot</span>
+          </div>
+
+          <div class="snapshot-grid">
+            <div class="snapshot-stat">
+              <span class="snapshot-stat__value">{{ message.projectSnapshot.totalTasks }}</span>
+              <span class="snapshot-stat__label">Total Tasks</span>
+            </div>
+            <div class="snapshot-stat">
+              <span class="snapshot-stat__value accent-lime">{{ message.projectSnapshot.activeTasks }}</span>
+              <span class="snapshot-stat__label">In Progress</span>
+            </div>
+            <div class="snapshot-stat">
+              <span class="snapshot-stat__value accent-blue">{{ message.projectSnapshot.completedTasks }}</span>
+              <span class="snapshot-stat__label">Completed</span>
+            </div>
+            <div class="snapshot-stat">
+              <span class="snapshot-stat__value accent-purple">{{ message.projectSnapshot.teamSize }}</span>
+              <span class="snapshot-stat__label">Dev Team</span>
+            </div>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="snapshot-progress">
+            <div class="snapshot-progress__header">
+              <span>Completion</span>
+              <span class="accent-lime">{{ message.projectSnapshot.completionPercentage }}%</span>
+            </div>
+            <div class="snapshot-progress__track">
+              <div
+                class="snapshot-progress__fill"
+                [style.width]="progressWidth()"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Tech Stack chips -->
+          <div class="snapshot-stack" *ngIf="message.projectSnapshot.techStack?.length">
+            <span
+              class="stack-chip"
+              *ngFor="let tech of message.projectSnapshot.techStack"
+            >{{ tech }}</span>
+          </div>
+        </div><!-- /snapshot card -->
+
+      </div><!-- /left column -->
+
+      <!-- ░░ RIGHT COLUMN ░░ -->
+      <div class="aria-col aria-col--right">
+
+        <!-- Priority Files Card -->
+        <div #priorityCard class="aria-card aria-card--priority">
+          <div class="aria-card__header">
+            <span class="aria-card__icon">🗂️</span>
+            <span class="aria-card__title">Priority Files</span>
+          </div>
+
+          <ul class="priority-list">
+            <li
+              class="priority-item"
+              *ngFor="let file of message.priorityFiles"
+            >
+              <div class="priority-item__top">
+                <code class="priority-item__path">{{ file.path }}</code>
+                <span class="risk-badge {{ riskClass(file.riskLevel) }}">
+                  {{ file.riskLevel ?? 'low' }}
+                </span>
+              </div>
+              <p class="priority-item__reason">{{ file.reason }}</p>
+            </li>
+          </ul>
+        </div><!-- /priority card -->
+
+        <!-- Bottleneck Alerts Card -->
+        <div #alertsCard class="aria-card aria-card--alerts">
+          <div class="aria-card__header">
+            <span class="aria-card__icon">⚡</span>
+            <span class="aria-card__title">Bottleneck Alerts</span>
+          </div>
+
+          <ul class="alert-list">
+            <li
+              class="alert-item alert-item--{{ alert.severity }}"
+              *ngFor="let alert of message.bottleneckAlerts"
+            >
+              <span class="alert-item__icon">{{ alertIcon(alert.severity) }}</span>
+              <div class="alert-item__body">
+                <strong class="alert-item__title">{{ alert.title }}</strong>
+                <p class="alert-item__desc">{{ alert.description }}</p>
+              </div>
+            </li>
+          </ul>
+        </div><!-- /alerts card -->
+
+      </div><!-- /right column -->
+
+    </div><!-- /body -->
+
+    <!-- ─── MISSION CARD (full-width) ──────────────────────────────────── -->
+    <div #missionCard class="aria-mission">
+      <div class="aria-mission__glow"></div>
+
+      <div class="aria-mission__header">
+        <span class="aria-mission__icon">🚀</span>
+        <h2 class="aria-mission__title">First Mission</h2>
+        <span class="aria-mission__priority priority--{{ message.firstMission.priority }}">
+          {{ message.firstMission.priority | uppercase }}
+        </span>
+      </div>
+
+      <p class="aria-mission__task-title">{{ message.firstMission.title }}</p>
+      <p class="aria-mission__desc">{{ message.firstMission.description }}</p>
+
+      <div class="aria-mission__meta">
+        <span class="meta-chip">
+          <span class="meta-chip__icon">⏱</span>
+          {{ message.firstMission.estimatedHours }}h estimated
+        </span>
+        <span class="meta-chip">
+          <span class="meta-chip__icon">📅</span>
+          {{ message.firstMission.deadline | date:'mediumDate' }}
+        </span>
+      </div>
+
+      <div class="aria-mission__files" *ngIf="message.firstMission.relatedFiles?.length">
+        <span class="files-label">Related modules:</span>
+        <code
+          class="file-tag"
+          *ngFor="let f of message.firstMission.relatedFiles"
+        >{{ f }}</code>
+      </div>
+    </div><!-- /mission -->
+
+    <!-- ─── FOOTER ──────────────────────────────────────────────────────── -->
+    <footer class="aria-footer">
+      <p #closingText class="aria-footer__signal">
+        {{ message.closingSignal }}
+      </p>
+      <button
+        class="aria-cta-btn"
+        id="aria-start-coding-btn"
+        (click)="close()"
+      >
+        <span class="aria-cta-btn__glow"></span>
+        <span class="aria-cta-btn__text">⚡ Start Coding</span>
+      </button>
+    </footer>
+
+  </div><!-- /panel -->
+
+</ng-container>

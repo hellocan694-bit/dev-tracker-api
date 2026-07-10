@@ -1,0 +1,53 @@
+/* AOS is loaded via angular.json styles array — no duplicate import needed */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- الحل النهائي لإخفاء السكرول بار (Global) --- */
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+
+  /* إخفاء السكرول بار في Firefox */
+  scrollbar-width: none !important;
+  /* إخفاء السكرول بار في IE/Edge */
+  -ms-overflow-style: none !important;
+}
+
+
+/* إخفاء السكرول بار في Chrome, Safari, and Brave */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* --- إعدادات AOS الخاصة بك --- */
+[data-aos].aos-init {
+  visibility: visible !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* تأمين: لو الـ AOS محملش، اظهر كل حاجة */
+[data-aos] {
+  pointer-events: auto !important;
+}
+
+/* حل مشكلة الاختفاء في Angular */
+.aos-init[data-aos] {
+  visibility: visible !important;
+  opacity: 1;
+}
+
+/* لو المكتبة لسه معلقة، العناصر تظهر فوراً */
+html:not(.aos-enabled) [data-aos] {
+  opacity: 1 !important;
+  transform: none !important;
+}

@@ -1,0 +1,64 @@
+<div class="admin-stats-page">
+
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <div class="stats-header">
+    <h1>🛡️ Feedback Dashboard</h1>
+    <p>Platform-wide analytics — Admin view</p>
+    <button class="btn-ghost" (click)="loadAllStats()">↺ Refresh</button>
+  </div>
+
+  <div class="stats-loader" *ngIf="isLoading">
+    <div class="spinner"></div>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- ── Total Count Hero ─────────────────────────────────────── -->
+    <div class="hero-count">
+      <span class="hero-count__number">{{ totalCount ?? '—' }}</span>
+      <span class="hero-count__label">Total Feedbacks</span>
+    </div>
+
+    <!-- ── Status Breakdown ─────────────────────────────────────── -->
+    <section class="stats-section">
+      <h2 class="stats-section__title">By Status</h2>
+      <div class="stats-grid stats-grid--4">
+        <div class="stat-card" *ngFor="let s of statuses" [style.border-color]="getStatusColor(s)">
+          <div class="stat-card__value" [style.color]="getStatusColor(s)">
+            {{ statusCounts[s] ?? '…' }}
+          </div>
+          <div class="stat-card__label">{{ statusLabels[s] }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Type Breakdown ───────────────────────────────────────── -->
+    <section class="stats-section">
+      <h2 class="stats-section__title">By Type</h2>
+      <div class="stats-grid stats-grid--4">
+        <div class="stat-card" *ngFor="let t of types">
+          <div class="stat-card__value">{{ typeCounts[t] ?? '…' }}</div>
+          <div class="stat-card__label">{{ typeLabels[t] }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Rating Distribution ──────────────────────────────────── -->
+    <section class="stats-section">
+      <h2 class="stats-section__title">Rating Distribution</h2>
+      <div class="rating-bars">
+        <div class="rating-bar-row" *ngFor="let r of ratings">
+          <span class="rating-bar-row__label">{{ r }} ★</span>
+          <div class="rating-bar-row__track">
+            <div class="rating-bar-row__fill"
+              [style.width.%]="getRatingBar(r)"
+              [style.background]="'hsl(' + (r * 20 + 20) + ', 80%, 55%)'">
+            </div>
+          </div>
+          <span class="rating-bar-row__count">{{ ratingCounts[r] ?? '…' }}</span>
+        </div>
+      </div>
+    </section>
+
+  </ng-container>
+</div>

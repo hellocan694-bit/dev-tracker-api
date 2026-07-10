@@ -1,0 +1,295 @@
+<div class="gh-dash">
+  <!-- Background blobs -->
+  <div class="gh-dash__blob blob-1"></div>
+  <div class="gh-dash__blob blob-2"></div>
+
+  <!-- ══ Header ════════════════════════════════════════════════════════════ -->
+  <header
+    class="gh-dash__header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div class="gh-dash__header-left d-flex align-items-center gap-3">
+      <!-- GitHub Octocat icon -->
+      <div class="gh-dash__gh-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57
+            0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695
+            -.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99
+            .105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225
+            -.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405
+            c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225
+            0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3
+            0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+        </svg>
+      </div>
+      <div class="d-flex flex-column gap-1">
+        <h1 class="gh-dash__title m-0">GitHub Repositories</h1>
+
+        <div class="gh-status-strip d-flex flex-wrap align-items-center gap-2" *ngIf="trialStatus?.githubLogin">
+
+          <!-- Connected chip -->
+          <span class="gh-status-chip gh-status-chip--connected">
+            <span class="gh-status-chip__dot"></span>
+            <span class="gh-status-chip__label">
+              Connected as <strong class="gh-status-chip__handle">@{{ trialStatus!.githubLogin }}</strong>
+            </span>
+          </span>
+
+          <!-- Trial / days-remaining pill -->
+          <span class="gh-trial-pill"
+            [class.gh-trial-pill--critical]="trialStatus!.daysRemaining !== null && trialStatus!.daysRemaining <= 5"
+            [class.gh-trial-pill--pro]="trialStatus!.isPro">
+            <span *ngIf="trialStatus!.isPro" class="live-dot-pulse me-1"></span>
+            <!-- Paid premium: unlimited -->
+            <span class="gh-trial-pill__text" *ngIf="trialStatus!.isPremium && trialStatus!.daysRemaining === null">
+              Premium ∞
+            </span>
+            <!-- Paid premium: has an end date -->
+            <span class="gh-trial-pill__text" *ngIf="trialStatus!.isPremium && trialStatus!.daysRemaining !== null">
+              {{ trialStatus!.daysRemaining }} days left
+            </span>
+            <!-- Trial user -->
+            <span class="gh-trial-pill__text" *ngIf="!trialStatus!.isPremium">
+              {{ trialStatus!.daysRemaining }} days left
+            </span>
+          </span>
+
+        </div>
+
+        <p class="gh-dash__sub m-0 text-muted small" *ngIf="!trialStatus?.githubLinked && !isLoadingTrial">
+          Link your GitHub to activate your 30-day Pro trial
+        </p>
+      </div>
+    </div>
+
+    <!-- Sync & Create Projects action (top right) -->
+    <div class="gh-dash__header-right d-flex align-items-center gap-2" *ngIf="repos.length && !proAccessError">
+      <button class="btn-save" [class.saving]="isSaving" [class.success]="saveSuccess"
+        [disabled]="isSaving || selectedRepos.size === 0" id="gh-save-repos-btn" (click)="saveSelection()">
+        <!-- Default state -->
+        <span *ngIf="!isSaving && !saveSuccess" class="btn-save__content">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" class="me-1">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+          Sync &amp; Create Projects
+          <span class="btn-save__count ms-1" *ngIf="selectedRepos.size > 0">{{ selectedRepos.size }}</span>
+        </span>
+        <!-- Loading state -->
+        <span *ngIf="isSaving" class="btn-save__content">
+          <span class="btn-spinner me-1"></span>
+          Creating projects…
+        </span>
+        <!-- Success state -->
+        <span *ngIf="saveSuccess && !isSaving" class="btn-save__content">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" class="me-1">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Synced!
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ══ Connect GitHub Strip ══════════════════════════════════════════════ -->
+  <div class="gh-dash__connect" *ngIf="!isLoadingTrial && !trialStatus?.githubLinked">
+    <div class="gh-dash__connect-inner">
+      <h2>Connect GitHub &amp; Start Your Free Trial</h2>
+      <p class="mb-4">Get 30 days of Pro access — track repos, view commits, and monitor your team's activity.</p>
+      <button class="btn-connect" id="gh-connect-btn" (click)="connectGitHub()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"
+          class="me-2">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57
+            0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695
+            -.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99
+            .105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225
+            -.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405
+            c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225
+            0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3
+            0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+        </svg>
+        Connect with GitHub
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ Pro Access Error (trial expired / not linked) ════════════════════ -->
+  <div class="gh-dash__error-block" *ngIf="proAccessError">
+    <div class="error-icon mb-3">{{ proAccessError.error === 'trial_expired' ? '⏰' : '🔗' }}</div>
+    <h3 class="mb-2">{{ proAccessError.error === 'trial_expired' ? 'Your Pro Trial Has Expired' : 'GitHub Not Linked
+      Yet' }}</h3>
+    <p class="mb-4">{{ proAccessError.message }}</p>
+    <button class="btn-upgrade px-4 py-2" (click)="goToPricing()" *ngIf="proAccessError.error === 'trial_expired'">
+      Upgrade to Pro →
+    </button>
+    <button class="btn-connect-sm px-4 py-2" (click)="connectGitHub()"
+      *ngIf="proAccessError.error === 'github_not_linked'">
+      Connect GitHub
+    </button>
+  </div>
+
+  <!-- ══ General error ════════════════════════════════════════════════════ -->
+  <div class="gh-dash__msg-error mb-4" *ngIf="errorMessage && !proAccessError">
+    {{ errorMessage }}
+  </div>
+
+  <!-- ══ Sync result banner ═══════════════════════════════════════════════ -->
+  <div class="gh-dash__sync-banner" *ngIf="syncResult && !isSaving">
+    <span class="sync-banner__icon">🚀</span>
+    <div class="sync-banner__body">
+      <strong>Sync complete!</strong>
+      <span *ngIf="syncResult.newProjectsCreated > 0">
+        {{ syncResult.newProjectsCreated }} new project{{ syncResult.newProjectsCreated !== 1 ? 's' : '' }} created.
+      </span>
+      <span *ngIf="syncResult.newProjectsCreated === 0">
+        {{ syncResult.totalLinked }} repo{{ syncResult.totalLinked !== 1 ? 's' : '' }} linked — no new projects needed.
+      </span>
+    </div>
+    <span class="sync-banner__redirect text-success fw-semibold">Redirecting to projects…</span>
+  </div>
+
+  <!-- ══ Main grid (repos + activity) ═════════════════════════════════════ -->
+  <div class="gh-dash__main" *ngIf="trialStatus?.githubLinked && !proAccessError">
+
+    <!-- ── Repositories ───────────────────────────────────────────────── -->
+    <section class="gh-dash__repos">
+      <div class="section-head d-flex justify-content-between align-items-center mb-3">
+        <h2 class="section-title">Your Repositories</h2>
+        <span class="section-count badge bg-secondary bg-opacity-20 text-muted" *ngIf="repos.length">{{ repos.length }}
+          repos</span>
+      </div>
+
+      <!-- Skeleton loaders -->
+      <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4" *ngIf="isLoadingRepos">
+        <div class="col" *ngFor="let sk of skeletonItems">
+          <div class="repo-card repo-card--skeleton h-100 d-flex flex-column">
+            <div class="sk-line sk-title mb-2"></div>
+            <div class="sk-line sk-lang mb-2"></div>
+            <div class="sk-line sk-desc mb-2"></div>
+            <div class="sk-line sk-desc short mb-3"></div>
+            <div class="sk-footer mt-auto">
+              <div class="sk-dot"></div>
+              <div class="sk-line sk-badge"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Repo cards -->
+      <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4" #repoGrid
+        *ngIf="!isLoadingRepos && repos.length">
+        <div class="col" *ngFor="let repo of repos">
+          <div class="repo-card h-100 d-flex flex-column" [class.repo-card--selected]="isSelected(repo.repoId)"
+            (click)="toggleRepo(repo)" [id]="'repo-card-' + repo.repoId" role="button"
+            [attr.aria-pressed]="isSelected(repo.repoId)">
+            <!-- Selection checkmark -->
+            <div class="repo-card__check" [class.visible]="isSelected(repo.repoId)">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+
+            <!-- Card body -->
+            <div class="repo-card__top mb-2">
+              <div class="repo-card__icon me-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.8" width="15" height="15">
+                  <path
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-8 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+                </svg>
+              </div>
+              <div class="repo-card__name-wrap flex-grow-1 min-w-0">
+                <p class="repo-card__name text-truncate mb-0" [title]="repo.name">{{ repo.name }}</p>
+                <div class="mt-1">
+                  <span class="repo-card__private-badge" *ngIf="repo.private">private</span>
+                  <span class="repo-card__public-badge" *ngIf="!repo.private">public</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="repo-card__desc mb-3 small text-muted flex-grow-1">{{ repo.description || 'No description
+              provided' }}</p>
+
+            <div
+              class="repo-card__footer mt-auto pt-2 border-top border-opacity-10 border-white d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center gap-2">
+                <div class="repo-card__lang" *ngIf="repo.language">
+                  <span class="lang-dot" [style.background]="langColor(repo.language)"></span>
+                  <span class="small">{{ repo.language }}</span>
+                </div>
+                <div class="repo-card__stars small" *ngIf="repo.stars > 0">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"
+                    class="me-0.5">
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                  {{ repo.stars }}
+                </div>
+              </div>
+
+              <!-- Toggle switch and time -->
+              <div class="d-flex align-items-center gap-2">
+                <div class="repo-card__updated text-muted small">{{ relativeTime(repo.updatedAt) }}</div>
+                <div class="repo-toggle" (click)="$event.stopPropagation(); toggleRepo(repo)">
+                  <div class="repo-toggle__track" [class.on]="isSelected(repo.repoId)">
+                    <div class="repo-toggle__thumb"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty repos state -->
+      <div class="gh-dash__empty py-5" *ngIf="!isLoadingRepos && !repos.length && !proAccessError">
+        <div class="gh-dash__empty-icon mb-3">📂</div>
+        <p class="text-muted">No repositories found. Make sure your GitHub account has public or private repos.</p>
+      </div>
+    </section>
+
+    <!-- ── Activity Feed ──────────────────────────────────────────────── -->
+    <aside class="gh-dash__activity">
+      <div class="section-head d-flex justify-content-between align-items-center mb-3">
+        <h2 class="section-title">Developer Activity</h2>
+        <span class="live-dot" title="Live via webhooks">
+          <span class="live-dot__inner"></span>
+        </span>
+      </div>
+
+      <!-- Skeleton -->
+      <div class="activity-list d-flex flex-column gap-2" *ngIf="isLoadingActivity">
+        <div class="activity-item activity-item--skeleton p-3 d-flex align-items-center gap-3"
+          *ngFor="let sk of [].constructor(5)">
+          <div class="sk-circle"></div>
+          <div class="sk-lines flex-grow-1">
+            <div class="sk-line mb-1"></div>
+            <div class="sk-line short"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity entries -->
+      <div class="activity-list d-flex flex-column gap-2" *ngIf="!isLoadingActivity && activity.length">
+        <div class="activity-item p-3 d-flex align-items-start gap-3" *ngFor="let a of activity">
+          <div class="activity-item__icon">{{ activityIcon(a.type) }}</div>
+          <div class="activity-item__body flex-grow-1 min-w-0">
+            <p class="activity-item__msg text-truncate mb-1 fw-medium" [title]="a.message">{{ a.message }}</p>
+            <span class="activity-item__meta text-muted small text-truncate d-block">
+              {{ a.repoFullName }} · {{ relativeTime(a.createdAt) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty activity state -->
+      <div class="activity-empty py-4 text-center" *ngIf="!isLoadingActivity && !activity.length">
+        <div class="activity-empty__icon mb-2">🔔</div>
+        <p class="text-muted small mb-0">No activity yet. Webhook events from your selected repositories will appear
+          here.</p>
+      </div>
+    </aside>
+  </div><!-- /.gh-dash__main -->
+</div>

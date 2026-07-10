@@ -1,0 +1,398 @@
+.glass-nav {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 1400px;
+  height: 70px;
+  background: transparent; // Keeps the outer root transparent to allow floating effect
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .nav-container {
+    width: 100%;
+    height: 100%;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(8, 8, 10, 0.6); // Premium dark glass
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .brand-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .menu-trigger {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: none; /* Hidden on desktop */
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background: rgba(13, 110, 253, 0.15);
+      border-color: rgba(13, 110, 253, 0.35);
+      color: #0d6efd;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(13, 110, 253, 0.2);
+    }
+
+    &:active {
+      transform: translateY(1px) scale(0.95);
+    }
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      
+      .logo-icon i {
+        transform: rotate(-15deg) scale(1.1);
+        filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.6));
+      }
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.25s ease;
+      
+      i {
+        font-size: 1.4rem;
+        background: linear-gradient(135deg, #a855f7, #f97316);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        transition: transform 0.25s ease;
+      }
+    }
+
+    .brand-name {
+      color: #f8fafc;
+      font-weight: 850;
+      font-style: italic;
+      font-size: 1.3rem;
+      letter-spacing: -0.5px;
+
+      .highlight {
+        color: #fff;
+        font-weight: 850;
+      }
+    }
+  }
+
+  .nav-links-center {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 50px;
+    padding: 5px 10px;
+    gap: 4px;
+
+    .center-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 50px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      &.active {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+    }
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .nav-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 10px;
+
+      i {
+        font-size: 1rem;
+      }
+
+      &:hover {
+        color: #f8fafc;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      &.active {
+        color: #0d6efd;
+        background: rgba(13, 110, 253, 0.1);
+      }
+
+      &.premium-link {
+        color: #fbbf24;
+        background: rgba(251, 191, 36, 0.05);
+        border: 1px solid rgba(251, 191, 36, 0.12);
+        position: relative;
+
+        i {
+          animation: crown-float 2s ease-in-out infinite;
+        }
+
+        &:hover {
+          background: rgba(251, 191, 36, 0.12);
+          border-color: rgba(251, 191, 36, 0.3);
+          color: #fcd34d;
+          box-shadow: 0 0 15px rgba(251, 191, 36, 0.15);
+        }
+
+        // Active Pro state styling (cyan/blue theme)
+        &--active {
+          color: #38bdf8;
+          background: rgba(56, 189, 248, 0.06);
+          border-color: rgba(56, 189, 248, 0.2);
+
+          i {
+            color: #38bdf8;
+            filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.4));
+          }
+
+          &:hover {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: #7dd3fc;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+          }
+        }
+
+        // Paid Premium state styling (purple/gem theme)
+        &--premium {
+          color: #c084fc;
+          background: rgba(192, 132, 252, 0.07);
+          border-color: rgba(192, 132, 252, 0.25);
+          cursor: default;
+
+          i {
+            color: #c084fc;
+            filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.5));
+          }
+
+          &:hover {
+            background: rgba(192, 132, 252, 0.12);
+            border-color: rgba(192, 132, 252, 0.4);
+            color: #d8b4fe;
+            box-shadow: 0 0 15px rgba(192, 132, 252, 0.25);
+          }
+        }
+
+        // Status indicator dot
+        .pro-badge-dot {
+          position: absolute;
+          top: 3px;
+          right: 3px;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #38bdf8;
+          box-shadow: 0 0 8px #38bdf8;
+
+          &--premium {
+            background: #c084fc;
+            box-shadow: 0 0 8px #c084fc;
+          }
+        }
+      }
+
+      &.login-link {
+        font-weight: 500;
+        i { display: none; }
+      }
+    }
+
+    .register-pill {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 7px 18px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+
+      i {
+        font-size: 0.95rem;
+        color: #f97316;
+        transition: transform 0.25s;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.35);
+
+        i {
+          transform: scale(1.1);
+          color: #f59e0b;
+        }
+      }
+    }
+
+    .logout-pill {
+      background: rgba(239, 68, 68, 0.05);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      padding: 8px 18px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        background: #ef4444;
+        color: white;
+        border-color: #ef4444;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+      }
+
+      &:active {
+        transform: translateY(1px);
+      }
+    }
+  }
+}
+
+@keyframes crown-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px) rotate(5deg); }
+}
+
+// Responsive adjustments
+@media (max-width: 991px) {
+  .glass-nav {
+    top: 10px;
+    width: calc(100% - 20px);
+    height: 60px;
+
+    .nav-container {
+      padding: 0 14px;
+      border-radius: 16px;
+    }
+
+    .brand-section {
+      gap: 8px;
+    }
+
+    .menu-trigger {
+      display: flex; /* Shown on mobile/tablet */
+    }
+
+    .brand {
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+      }
+
+      .brand-name {
+        display: none;
+      }
+    }
+
+    .nav-actions {
+      gap: 6px;
+
+      .action-text {
+        display: none;
+      }
+
+      .nav-link {
+        padding: 6px;
+        border-radius: 8px;
+      }
+
+      .register-pill {
+        padding: 8px 12px;
+
+        span {
+          display: none;
+        }
+
+        i {
+          margin: 0;
+          font-size: 1rem;
+        }
+      }
+
+      .logout-pill {
+        padding: 8px 12px;
+        border-radius: 8px;
+
+        span {
+          display: none;
+        }
+
+        i {
+          margin: 0;
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+}

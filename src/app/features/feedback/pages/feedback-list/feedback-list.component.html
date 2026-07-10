@@ -1,0 +1,208 @@
+<div class="fb-list-page">
+  <!-- Background glassmorphism blobs -->
+  <div class="fb-floating-bg blob-1"></div>
+  <div class="fb-floating-bg blob-2"></div>
+
+  <!-- ══ Header ═════════════════════════════════════════════════════════════ -->
+  <header class="fb-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+    <div class="fb-header__title d-flex align-items-center gap-3">
+      <h1 class="m-0" *ngIf="viewMode === 'my'">My Feedbacks</h1>
+      <h1 class="m-0" *ngIf="viewMode === 'wall'">Developer Wall</h1>
+      <span class="badge rounded-pill bg-white bg-opacity-5 text-muted px-3 py-2" *ngIf="!isLoading">
+        {{ (isPublicView ? publicFeedbacks : feedbacks).length }} items
+      </span>
+    </div>
+
+    <!-- "New Feedback" button -->
+    <button
+      class="btn-submit-premium px-4 py-2"
+      id="fb-new-btn"
+      routerLink="/feedback/new"
+      *ngIf="viewMode === 'my'"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+           stroke-linejoin="round" class="me-1">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      New Feedback
+    </button>
+  </header>
+
+  <!-- ══ Filter Bar (My Feedbacks view only) ═══════════════════════════════ -->
+  <div class="fb-filters p-3 rounded-4 mb-4" *ngIf="viewMode === 'my'">
+    <div class="d-flex flex-wrap align-items-center gap-4">
+      
+      <!-- Status Filter -->
+      <div class="fb-filters__group d-flex align-items-center gap-2">
+        <span class="fb-filters__label">Status</span>
+        <div class="d-flex flex-wrap gap-1.5">
+          <button
+            *ngFor="let s of statuses"
+            class="chip-tag"
+            [class.chip-tag--active]="activeStatus === s"
+            [id]="'filter-status-' + s"
+            (click)="applyFilter('status', s)"
+          >{{ statusLabels[s] }}</button>
+        </div>
+      </div>
+
+      <!-- Type Filter -->
+      <div class="fb-filters__group d-flex align-items-center gap-2">
+        <span class="fb-filters__label">Type</span>
+        <div class="d-flex flex-wrap gap-1.5">
+          <button
+            *ngFor="let t of types"
+            class="chip-tag"
+            [class.chip-tag--active]="activeType === t"
+            [id]="'filter-type-' + t"
+            (click)="applyFilter('type', t)"
+          >{{ typeLabels[t] }}</button>
+        </div>
+      </div>
+
+      <!-- Rating Filter -->
+      <div class="fb-filters__group d-flex align-items-center gap-2">
+        <span class="fb-filters__label">Rating</span>
+        <div class="d-flex flex-wrap gap-1.5">
+          <button
+            *ngFor="let r of ratings"
+            class="chip-tag chip-tag--star"
+            [class.chip-tag--active]="activeRating === r"
+            [id]="'filter-rating-' + r"
+            (click)="applyFilter('rating', r)"
+          >{{ r }}★</button>
+        </div>
+      </div>
+
+      <!-- Clear Filters -->
+      <button class="btn-clear-filters ms-auto" id="filter-clear-btn" (click)="clearFilters()"
+              *ngIf="activeStatus || activeType || activeRating">
+        ✕ Clear Filters
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ══ Loading State ══════════════════════════════════════════════════════ -->
+  <div class="fb-loader py-5 text-center" *ngIf="isLoading">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="text-muted mt-3">Loading feedbacks…</p>
+  </div>
+
+  <!-- ══ Error State ════════════════════════════════════════════════════════ -->
+  <div class="fb-error text-center py-5 rounded-4" *ngIf="!isLoading && error">
+    <div class="error-icon mb-3">⚡</div>
+    <p class="text-danger mb-3">{{ error }}</p>
+    <button class="btn-ghost px-4 py-2" (click)="loadFeedbacks()">↺ Retry</button>
+  </div>
+
+  <!-- ══ Empty State ════════════════════════════════════════════════════════ -->
+  <div class="fb-empty py-5 text-center rounded-4" *ngIf="!isLoading && !error && feedbacks.length === 0 && publicFeedbacks.length === 0">
+    <div class="fb-empty__icon mb-3">📭</div>
+    <h3 class="text-white mb-2 fw-bold">No feedbacks found</h3>
+    <p class="text-muted mb-4">You haven't submitted any feedback requests yet.</p>
+    <button class="btn-submit-premium px-4 py-2.5" routerLink="/feedback/new" *ngIf="viewMode === 'my'">
+      Submit your first feedback
+    </button>
+  </div>
+
+  <!-- ══ Owner/Admin Cards Grid ════════════════════════════════════════════ -->
+  <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-lg-3" #fbGrid *ngIf="!isLoading && !isPublicView && feedbacks.length > 0">
+    <div class="col" *ngFor="let fb of feedbacks">
+      <div
+        class="fb-card h-100 d-flex flex-column"
+        [class.fb-card--resolved]="fb.status === 'resolved'"
+        [id]="'fb-card-' + fb._id"
+        (mouseenter)="onCardEnter($event)"
+        (mouseleave)="onCardLeave($event)"
+      >
+        <!-- Card header: type + status + stars -->
+        <div class="fb-card__top d-flex align-items-center justify-content-between mb-3">
+          <div class="d-flex flex-wrap gap-1">
+            <span class="badge badge--type badge--{{ fb.type }}">{{ typeLabels[fb.type] }}</span>
+            <span class="badge badge--status badge--{{ fb.status }}">{{ statusLabels[fb.status] }}</span>
+          </div>
+          <span class="fb-card__stars">{{ getRatingStars(fb.rating) }}</span>
+        </div>
+
+        <!-- Subject -->
+        <h3 class="fb-card__subject mb-2">{{ fb.subject }}</h3>
+
+        <!-- Message -->
+        <p class="fb-card__message text-muted small flex-grow-1">{{ fb.message }}</p>
+
+        <!-- Admin Note -->
+        <div class="fb-card__note mt-3 p-2.5 rounded-3" *ngIf="fb.adminNote">
+          <strong class="admin-note-label">Admin Note</strong>
+          <p class="m-0 small text-white-50 mt-1">{{ fb.adminNote }}</p>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="fb-card__footer mt-3 pt-2 border-top border-opacity-5 border-white d-flex align-items-center justify-content-between">
+          <div class="fb-card__meta small text-muted">
+            <span>{{ fb.createdAt | date:'mediumDate' }}</span>
+            <span class="resolved-at ms-2 text-success" *ngIf="fb.resolvedAt">
+              · Resolved
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div class="fb-card__actions d-flex gap-1" *ngIf="canManageFeedback(fb)">
+            <button
+              class="btn-icon-action btn-edit"
+              title="Edit Feedback"
+              [id]="'fb-edit-' + fb._id"
+              (click)="navigateToEdit(fb._id)"
+              (mouseenter)="onIconEnter($event)"
+              (mouseleave)="onIconLeave($event)"
+            >
+              <i class="bi bi-pencil-square"></i>
+            </button>
+            <button
+              class="btn-icon-action btn-delete"
+              title="Delete Feedback"
+              [id]="'fb-delete-' + fb._id"
+              (click)="deleteFeedback(fb._id)"
+              (mouseenter)="onIconEnter($event)"
+              (mouseleave)="onIconLeave($event)"
+            >
+              <i class="bi bi-trash3"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Public Wall Cards Grid ════════════════════════════════════════════ -->
+  <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-lg-3" #fbGrid *ngIf="!isLoading && isPublicView && publicFeedbacks.length > 0">
+    <div class="col" *ngFor="let fb of publicFeedbacks; let i = index">
+      <div
+        class="fb-card h-100 d-flex flex-column fb-card--public"
+        [id]="'fb-card-pub-' + i"
+        (mouseenter)="onCardEnter($event)"
+        (mouseleave)="onCardLeave($event)"
+      >
+        <div class="fb-card__top d-flex align-items-center justify-content-between mb-3">
+          <span class="badge badge--type badge--{{ fb.type }}">{{ typeLabels[fb.type] }}</span>
+          <span class="fb-card__stars">{{ getRatingStars(fb.rating) }}</span>
+        </div>
+        
+        <h3 class="fb-card__subject mb-2">{{ fb.subject }}</h3>
+        <p class="fb-card__message text-muted small flex-grow-1">{{ fb.message }}</p>
+        
+        <div class="fb-card__footer mt-3 pt-2 border-top border-opacity-5 border-white d-flex align-items-center">
+          <div class="fb-card__meta small text-muted">
+            <span>{{ fb.createdAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="fb-public-cap text-center text-muted small mt-4" *ngIf="isPublicView && publicFeedbacks.length === 4">
+    Showing 4 most recent public feedbacks.
+  </p>
+</div>

@@ -1,0 +1,123 @@
+<aside class="sidebar-master d-flex flex-column p-3" [class.show]="(sidebarService.isOpen$ | async)">
+
+  <!-- Close Button (mobile only) -->
+  <button class="sidebar-close-btn d-lg-none" (click)="sidebarService.close()" aria-label="Close sidebar">
+    <i class="bi bi-x-lg"></i>
+  </button>
+
+  <!-- Logo Section -->
+  <div class="logo-area mb-4 text-center d-flex align-items-center justify-content-center justify-content-lg-center">
+    <div class="logo-hexagon">D</div>
+    <span class="brand-text ms-3 d-none d-lg-none-sidebar">Dev<span class="highlight">Track</span></span>
+  </div>
+
+  <!-- Navigation Links -->
+  <div class="nav-links d-flex flex-column gap-3 align-items-center align-items-lg-center w-100 flex-grow-1">
+
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'dashboard'"
+      (click)="navigate('dashboard')" title="Dashboard">
+      <i class="bi bi-grid-1x2-fill nav-icon"></i>
+      <span class="nav-label">Dashboard</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'teams'"
+      (click)="navigate('teams')" title="Teams">
+      <i class="bi bi-people-fill nav-icon"></i>
+      <span class="nav-label">Teams</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'invitations'"
+      (click)="navigate('invitations')" title="Invitations">
+      <i class="bi bi-person-plus-fill nav-icon"></i>
+      <span class="nav-label">Invitations</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'activeproject'"
+      (click)="navigate('activeproject')" title="Active Projects">
+      <i class="bi bi-folder2-open nav-icon"></i>
+      <span class="nav-label">Active Projects</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'completed'"
+      (click)="navigate('completed')" title="Completed Projects">
+      <i class="bi bi-clock-history nav-icon"></i>
+      <span class="nav-label">Completed Projects</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'github'"
+      (click)="navigate('github')" title="GitHub Integration">
+      <i class="bi bi-github nav-icon"></i>
+      <span class="nav-label">GitHub Integration</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'feedbacks'"
+      (click)="navigate('feedbacks')" title="My Feedbacks">
+      <i class="bi bi-chat-left-text nav-icon"></i>
+      <span class="nav-label">My Feedbacks</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <a *ngIf="isAdmin" class="nav-item-wrapper d-flex align-items-center w-100"
+      [class.active]="activeRoute === 'feedback-admin'" (click)="navigate('feedback-admin')" title="Feedback Stats">
+      <i class="bi bi-bar-chart nav-icon"></i>
+      <span class="nav-label">Feedback Stats</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <!-- ARIA Live Trigger -->
+    <a class="nav-item-wrapper aria-test-btn d-flex align-items-center w-100 mt-auto" [class.loading]="isAriaLoading"
+      (click)="triggerAriaDemo()" title="Trigger ARIA Onboarding">
+      <span class="aria-test-icon">
+        <span *ngIf="!isAriaLoading">AI</span>
+        <div *ngIf="isAriaLoading" class="spinner-border spinner-border-sm text-info" role="status"></div>
+      </span>
+      <span class="nav-label">ARIA Onboarding</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <!-- Settings -->
+    <a class="nav-item-wrapper d-flex align-items-center w-100 mb-2"
+      [class.active]="activeRoute === 'developersettings'" (click)="navigate('developersettings')" title="Settings">
+      <i class="bi bi-gear nav-icon"></i>
+      <span class="nav-label">Settings</span>
+      <div class="active-indicator"></div>
+    </a>
+  </div>
+
+  <!-- Pro/Premium Member Status Widget -->
+  <div class="pro-widget w-100 mb-3" *ngIf="isPro || isPremium">
+    <div class="pro-widget__inner" [class.pro-widget__inner--premium]="isPremium">
+      <div class="pro-widget__glow"></div>
+      <div class="pro-widget__crown">
+        <i class="bi" [ngClass]="isPremium ? 'bi-gem' : 'bi-crown-fill'"></i>
+      </div>
+      <div class="pro-widget__info">
+        <span class="pro-widget__label">{{ isPremium ? 'Premium' : 'Pro Trial' }}</span>
+        <span class="pro-widget__days" *ngIf="daysRemaining !== null">
+          {{ daysRemaining }}d left
+        </span>
+        <span class="pro-widget__days pro-widget__days--unlimited" *ngIf="daysRemaining === null">
+          Unlimited ∞
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Area -->
+  <div
+    class="profile-mini text-center border-top border-white border-opacity-10 pt-3 w-100 d-flex align-items-center justify-content-center justify-content-lg-center gap-2">
+    <img src="https://ui-avatars.com/api/?name=Ali&background=0d6efd&color=fff" class="rounded-circle shadow-sm"
+      width="34">
+    <span class="profile-name d-lg-none text-white small fw-semibold">Ali Abueldahab</span>
+  </div>
+</aside>
+
+<!-- Click-away overlay for mobile navigation drawer -->
+<div class="sidebar-overlay" *ngIf="(sidebarService.isOpen$ | async)" (click)="sidebarService.close()">
+</div>

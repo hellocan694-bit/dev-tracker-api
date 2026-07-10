@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+// ── Design Tokens ─────────────────────────────────────────────────────────────
+$bg:      #0a0e14;
+$surface: rgba(255,255,255,0.03);
+$border:  rgba(255,255,255,0.05);
+$accent:  #6366f1;
+$text:    #e2e8f0;
+$muted:   #64748b;
+$radius:  14px;
+
+// ── Page Shell (Agent 1: min-height, no whitespace) ───────────────────────────
+.admin-stats-page {
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  background: transparent;   // layout handles the background
+  color: $text;
+  padding: 2rem;
+  max-width: 1140px;
+  margin: 0 auto;
+  box-sizing: border-box;
+
+  @media (max-width: 640px) { padding: 1rem; }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.stats-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, $text, $accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  p { color: $muted; font-size: 0.875rem; margin: 0; flex: 1; }
+}
+
+// ── Hero Count ────────────────────────────────────────────────────────────────
+.hero-count {
+  background: $surface;
+  border: 1px solid rgba($accent, 0.2);
+  border-radius: $radius;
+  padding: 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 0 60px rgba($accent, 0.06), inset 0 1px 0 rgba(255,255,255,0.05);
+
+  &__number {
+    font-size: 4.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, $text, $accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+  &__label {
+    font-size: 0.8rem;
+    color: $muted;
+    margin-top: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+}
+
+// ── Stats Section ─────────────────────────────────────────────────────────────
+.stats-section {
+  margin-bottom: 2.5rem;
+
+  &__title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 1rem;
+  }
+}
+
+// ── Stats Grid ────────────────────────────────────────────────────────────────
+.stats-grid {
+  display: grid;
+  gap: 1rem;
+  &--4 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+  @media (max-width: 640px) {
+    &--4 { grid-template-columns: repeat(2, 1fr); }
+  }
+}
+
+// ── Stat Card (Agent 3: Glassmorphism spec) ───────────────────────────────────
+.stat-card {
+  background: $surface;
+  border: 1px solid $border;
+  border-left-width: 3px;
+  border-radius: $radius;
+  padding: 1.25rem 1.5rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+  }
+
+  &__value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: $text;
+    margin-bottom: 0.4rem;
+  }
+  &__label { font-size: 0.78rem; color: $muted; font-weight: 600; }
+}
+
+// ── Rating Bars ───────────────────────────────────────────────────────────────
+.rating-bars {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $radius;
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rating-bar-row {
+  display: grid;
+  grid-template-columns: 3rem 1fr 3.5rem;
+  align-items: center;
+  gap: 1rem;
+
+  &__label { font-size: 0.85rem; font-weight: 700; color: #f59e0b; text-align: right; }
+
+  &__track {
+    height: 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 4px;
+  }
+
+  &__count { font-size: 0.78rem; color: $muted; font-weight: 600; }
+}
+
+// ── Loader ────────────────────────────────────────────────────────────────────
+.stats-loader {
+  display: flex;
+  justify-content: center;
+  padding: 5rem;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255,255,255,0.06);
+  border-top-color: $accent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+.btn-ghost {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: $muted;
+  border: 1px solid $border;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: $accent;
+    color: $text;
+    background: rgba($accent, 0.05);
+  }
+}

@@ -1,0 +1,229 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+// ── Tokens ──────────────────────────────────────────────────────────────────
+$bg:     #0a0e14;
+$accent: #6366f1;
+$green:  #10b981;
+$text:   #e2e8f0;
+$muted:  #64748b;
+$border: rgba(255,255,255,0.07);
+
+// ── Page wrapper ─────────────────────────────────────────────────────────────
+.gh-success {
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+// ── Background blobs ─────────────────────────────────────────────────────────
+.gh-success__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  opacity: 0.18;
+
+  &.blob-1 {
+    width: 500px; height: 500px;
+    background: $accent;
+    top: -150px; right: -150px;
+  }
+  &.blob-2 {
+    width: 400px; height: 400px;
+    background: #10b981;
+    bottom: -120px; left: -120px;
+  }
+}
+
+// ── Particle ring ─────────────────────────────────────────────────────────────
+.particle-ring {
+  position: absolute;
+  width: 0; height: 0;
+  top: 50%; left: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $accent, $green);
+  transform-origin: center center;
+  top: -5px; left: -5px;
+}
+
+// ── Card ─────────────────────────────────────────────────────────────────────
+.gh-success__card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+  max-width: 480px;
+  width: 100%;
+  padding: 2.5rem 2rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid $border;
+  border-radius: 24px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+// ── Checkmark SVG ─────────────────────────────────────────────────────────────
+.gh-success__check-wrap {
+  position: relative;
+  width: 100px; height: 100px;
+}
+
+.gh-success__check-svg {
+  width: 100%; height: 100%;
+  overflow: visible;
+}
+
+.check-bg {
+  fill: rgba(16,185,129,0.12);
+  stroke: rgba(16,185,129,0.2);
+  stroke-width: 1;
+}
+
+.check-stroke {
+  stroke: $green;
+  stroke-dasharray: 320;
+  stroke-dashoffset: 320;
+  transform: rotate(-90deg);
+  transform-origin: 60px 60px;
+}
+
+.check-tick {
+  stroke: $green;
+  filter: drop-shadow(0 0 6px rgba(16,185,129,0.7));
+}
+
+// ── Pro Badge ─────────────────────────────────────────────────────────────────
+.gh-success__pro-badge {
+  padding: 0.3rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(99,102,241,0.4);
+  background: rgba(99,102,241,0.1);
+  color: #a5b4fc;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+// ── Headline ─────────────────────────────────────────────────────────────────
+.gh-success__title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: $text;
+  margin: 0;
+
+  span {
+    background: linear-gradient(135deg, $accent, $green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+// ── Sub line ────────────────────────────────────────────────────────────────
+.gh-success__sub {
+  color: $muted;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.gh-success__handle {
+  color: $accent;
+}
+
+// ── Date chip ─────────────────────────────────────────────────────────────────
+.gh-success__date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 10px;
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.2);
+  color: #34d399;
+  font-size: 0.8rem;
+  font-weight: 500;
+
+  strong { color: #6ee7b7; }
+  svg { flex-shrink: 0; }
+}
+
+// ── Features list ────────────────────────────────────────────────────────────
+.gh-success__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: left;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.85rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid $border;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: $muted;
+    transition: background 0.2s;
+
+    &:hover { background: rgba(255,255,255,0.04); color: $text; }
+  }
+}
+
+.feat-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+// ── CTA Button ───────────────────────────────────────────────────────────────
+.gh-success__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, $accent 0%, #818cf8 100%);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 8px 24px rgba(99,102,241,0.35);
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(99,102,241,0.45);
+  }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .gh-success__card { padding: 2rem 1.25rem; }
+  .gh-success__title { font-size: 2rem; }
+}

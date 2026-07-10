@@ -1,0 +1,71 @@
+<section class="testimonials-section">
+  <div class="section-header text-center mb-5">
+    <p class="section-eyebrow">LOVED BY DEVELOPERS</p>
+    <h2 class="section-title">
+      Trusted by <span class="gradient-text">elite engineers</span> worldwide.
+    </h2>
+    <p class="section-subtitle">Don't take our word for it — hear from the developers who ship faster with DevTrack.</p>
+  </div>
+
+  <!-- Scrolling columns wrapper -->
+  <div class="columns-wrapper">
+
+    <!-- Column 1 -->
+    <div class="scroll-column-outer d-none d-lg-block">
+      <div class="scroll-column" #column>
+        <div class="testimonial-card glass-card" *ngFor="let t of col1Items">
+          <div class="card-header-row">
+            <div class="avatar">{{ t.avatar }}</div>
+            <div class="author-info">
+              <span class="author-name">{{ t.name }}</span>
+              <span class="author-role">{{ t.role }} · {{ t.company }}</span>
+            </div>
+          </div>
+          <p class="card-content">{{ t.content }}</p>
+          <div class="star-row">
+            <i class="fa-solid fa-star" *ngFor="let s of getStars(t.rating)"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 2 (always visible) -->
+    <div class="scroll-column-outer">
+      <div class="scroll-column" #column>
+        <div class="testimonial-card glass-card" *ngFor="let t of col2Items">
+          <div class="card-header-row">
+            <div class="avatar">{{ t.avatar }}</div>
+            <div class="author-info">
+              <span class="author-name">{{ t.name }}</span>
+              <span class="author-role">{{ t.role }} · {{ t.company }}</span>
+            </div>
+          </div>
+          <p class="card-content">{{ t.content }}</p>
+          <div class="star-row">
+            <i class="fa-solid fa-star" *ngFor="let s of getStars(t.rating)"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3 (hidden on mobile, visible md+) -->
+    <div class="scroll-column-outer d-none d-md-block">
+      <div class="scroll-column" #column>
+        <div class="testimonial-card glass-card" *ngFor="let t of col3Items">
+          <div class="card-header-row">
+            <div class="avatar">{{ t.avatar }}</div>
+            <div class="author-info">
+              <span class="author-name">{{ t.name }}</span>
+              <span class="author-role">{{ t.role }} · {{ t.company }}</span>
+            </div>
+          </div>
+          <p class="card-content">{{ t.content }}</p>
+          <div class="star-row">
+            <i class="fa-solid fa-star" *ngFor="let s of getStars(t.rating)"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

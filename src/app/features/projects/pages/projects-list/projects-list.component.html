@@ -1,0 +1,140 @@
+<div class="dashboard-wrapper">
+  <main class="main-content flex-grow-1 p-3 p-md-4 p-lg-5">
+
+
+
+    <div class="row g-3 mb-5">
+      <div class="col-6 col-md-3" *ngFor="let stat of [
+            { l: 'Hours', v: '120h', icon: 'bi-clock' },
+            { l: 'Active', v: isLoading ? '...' : countProjects, icon: 'bi-kanban' },
+            { l: 'Done', v: countHistoryProjects, icon: 'bi-check-all' },
+            { l: 'Rate', v: '$15/h', icon: 'bi-graph-up' }
+          ]">
+        <div class="stat-mini-card p-3 rounded-4 h-100 d-flex align-items-center gap-3">
+          <div class="stat-icon-sm"><i class="bi {{stat.icon}}"></i></div>
+          <div>
+            <small class="d-block text-secondary tiny-text">{{ stat.l | uppercase }}</small>
+            <span class="fw-bold text-white">{{ stat.v }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12 col-xl-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="section-title text-white m-0">Active Operations</h4>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-1 border-0 shadow-blue" routerLink="/home/createproject">
+              <i class="bi bi-plus-lg"></i> Add Project
+            </button>
+            <span class="badge rounded-pill bg-white bg-opacity-5 text-secondary px-3 py-2">Live Updates</span>
+          </div>
+        </div>
+
+        <div class="projects-list-container">
+          <!-- Loading state -->
+          <div *ngIf="isLoading" class="text-center py-5 glass-panel rounded-5 mb-3">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-secondary mt-2">Loading projects...</p>
+          </div>
+
+          <!-- Loaded state -->
+          <ng-container *ngIf="!isLoading">
+            <div class="project-elegant-row p-3 mb-3 d-flex align-items-center justify-content-between"
+              *ngFor="let p of projects; trackBy: trackByProjectId" [routerLink]="['/home/viewproject', p._id]">
+
+              <div class="d-flex align-items-center gap-3">
+                <div class="project-icon-box">
+                  <i class="bi bi-terminal"></i>
+                </div>
+                <div>
+                  <h6 class="m-0 fw-bold text-white">{{ p.name }}</h6>
+                  <p class="m-0 text-muted small text-truncate" style="max-width: 200px;">
+                    <i class="bi bi-person-circle tiny-text me-1"></i>
+                    {{ p.owner?.name || p.clientName || 'Personal Project' }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="d-none d-md-flex flex-column align-items-center px-3">
+                <span class="text-secondary tiny-text mb-1">HEALTH</span>
+                <div class="mini-status-indicator pulse-green"></div>
+              </div>
+
+              <div class="d-flex align-items-center gap-4">
+                <div class="text-end d-none d-sm-block">
+                  <span class="d-block fw-bold text-primary">${{ p.hourlyRate || 0 }}/h</span>
+                  <span class="tiny-text text-muted">CURRENT RATE</span>
+                </div>
+                <div class="row-actions">
+                  <button class="btn-circle-action"><i class="bi bi-chevron-right"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-center py-5 glass-panel rounded-5" *ngIf="projects.length === 0">
+              <i class="bi bi-inbox text-muted fs-1"></i>
+              <p class="text-secondary mt-2">No active projects in your pipeline.</p>
+            </div>
+          </ng-container>
+
+          <!-- Pagination -->
+          <div class="pagination-container mt-4" *ngIf="totalPages > 1">
+            <button class="btn-pagination wide-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+              <i class="bi bi-chevron-left me-1"></i> Previous
+            </button>
+            
+            <button *ngFor="let page of pages" 
+                    class="btn-pagination" 
+                    [class.active]="page === currentPage" 
+                    (click)="onPageChange(page)">
+              {{ page }}
+            </button>
+            
+            <button class="btn-pagination wide-btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+              Next <i class="bi bi-chevron-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-4">
+        <div class="pulse-card p-4 rounded-5 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 text-white fw-bold tiny-text">PERFORMANCE PULSE</h5>
+            <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary small">+12%</span>
+          </div>
+          <div class="chart-container-mini d-flex align-items-end justify-content-between mb-3">
+            <div class="bar" style="height: 40%"></div>
+            <div class="bar" style="height: 70%"></div>
+            <div class="bar active" style="height: 55%"></div>
+            <div class="bar" style="height: 90%"></div>
+            <div class="bar" style="height: 65%"></div>
+            <div class="bar" style="height: 80%"></div>
+          </div>
+          <div class="d-flex justify-content-between text-muted tiny-text">
+            <span>MON</span><span>WED</span><span>FRI</span><span>SUN</span>
+          </div>
+        </div>
+
+        <div class="activity-panel p-4 rounded-5">
+          <h5 class="section-title mb-4 text-white tiny-text">RECENT LOGS</h5>
+          <div class="timeline ps-2">
+            <div class="timeline-item position-relative ps-4 pb-4" *ngFor="let x of [1, 2, 3]">
+              <div class="timeline-dot"></div>
+              <p class="time-stamp mb-1">2h ago</p>
+              <h6 class="mb-1 fw-bold text-white small">Update pushed to production</h6>
+              <p class="text-muted tiny-text m-0">Auto-tracked 4.5 hours successfully.</p>
+            </div>
+          </div>
+          <div class="upgrade-card-new mt-2 p-4 rounded-4">
+            <h6 class="fw-bold text-white mb-2">Pro Analytics</h6>
+            <p class="tiny-text text-white-50">Unlock deeper insights into your workflow.</p>
+            <button class="btn btn-primary btn-sm w-100 rounded-pill fw-bold">Upgrade</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

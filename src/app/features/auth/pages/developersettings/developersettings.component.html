@@ -1,0 +1,103 @@
+<div class="settings-page-wrapper" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); background-size: cover; background-position: center; min-height: 100vh;">
+  
+  <div class="container py-5 content-area">
+    <div class="row justify-content-center">
+      <div class="col-xl-11">
+        
+        <header class="d-flex justify-content-between align-items-end mb-5 px-2">
+          <div class="title-group">
+            <h1 class="text-white fw-bold display-5 mb-1">Developer Settings</h1>
+            <p class="text-info opacity-75 mb-0"><i class="bi bi-shield-lock me-2"></i>Secure environment for profile management</p>
+          </div>
+          <div class="actions d-none d-md-flex gap-3">
+            <button type="button" class="btn btn-outline-light px-4">Discard</button>
+            <button type="button" (click)="updateUserName()" [disabled]="formData.invalid" class="btn btn-primary px-4 shadow-lg">Save Changes</button>
+          </div>
+        </header>
+
+        <div class="row g-4">
+          <div class="col-lg-4">
+            <div class="glass-card text-center p-5 h-100 shadow-2xl">
+              <div class="avatar-container mb-4">
+                <div class="avatar-glow shadow-primary">{{ formData.get('name')?.value?.charAt(0) || 'D' }}</div>
+                <button class="btn-edit-avatar"><i class="bi bi-camera"></i></button>
+              </div>
+              <h4 class="text-white mb-1 fw-bold">{{ formData.get('name')?.value || 'Developer' }}</h4>
+              <p class="text-info small mb-4 uppercase tracking-wider">Senior Systems Architect</p>
+              
+              <div class="bio-section text-start mb-4">
+                <label class="text-light opacity-50 small d-block mb-2">Professional Bio</label>
+                <p class="text-white small lh-base">
+                  Passionate about building scalable web applications and exploring the depths of modern AI integrations. Always pushing the boundaries of what's possible in the digital realm.
+                </p>
+              </div>
+
+              <div class="stats-box p-3 rounded-4 mt-auto" style="background: rgba(255,255,255,0.05)">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-light opacity-50 small">Node Uptime</span>
+                  <span class="text-success small fw-bold">99.9%</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-light opacity-50 small">Trust Score</span>
+                  <span class="text-info small fw-bold">98/100</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-8">
+            <div class="glass-card p-4 p-md-5 mb-4">
+              <h5 class="text-white mb-4 fw-bold"><i class="bi bi-person-badge me-2 text-info"></i>Identity Access</h5>
+              
+              <form [formGroup]="formData" (ngSubmit)="updateUserName()" class="row g-4">
+                <div class="col-md-6">
+                  <div class="custom-input-group">
+                    <label>Legal Display Name</label>
+                    <input type="text" formControlName="name" placeholder="Full name" [class.is-invalid]="formData.get('name')?.touched && formData.get('name')?.invalid">
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="custom-input-group">
+                    <label>System Permission Role</label>
+                    <div class="input-with-icon">
+                      <input type="text" value="Level 4 Administrator" readonly class="locked text-info fw-bold">
+                      <i class="bi bi-shield-check text-info"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="custom-input-group">
+                    <label>Primary Secure Email</label>
+                    <input type="email" [value]="developermail" readonly class="locked opacity-75 border-info-subtle">
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="glass-card p-4 p-md-5">
+              <h5 class="text-white mb-4 fw-bold"><i class="bi bi-fingerprint me-2 text-info"></i>Security Protocols</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="p-3 rounded-3 border border-secondary border-opacity-25 bg-black bg-opacity-25">
+                    <p class="text-white small mb-1">Two-Factor Authentication</p>
+                    <p class="text-light opacity-50 x-small mb-0">Enhanced protection enabled via Google Auth.</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="p-3 rounded-3 border border-secondary border-opacity-25 bg-black bg-opacity-25">
+                    <p class="text-white small mb-1">Last Secure Login</p>
+                    <p class="text-light opacity-50 x-small mb-0">12 minutes ago from Cairo, Egypt (IP: 192.168.1.1)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<div class="auth-wrapper">
+  <div class="circle top-left"></div>
+  <div class="circle bottom-right"></div>
+
+  <div class="login-wrapper">
+    <header class="login-header">
+      <div class="brand">
+        <h1 class="site-name">Dev Tracker</h1>
+        <p class="welcome-text">Start your developer journey</p>
+      </div>
+      <button class="btn-logout-ghost" routerLink="/auth/login">Log In</button>
+    </header>
+
+    <div class="main-content-layout">
+      <main class="login-content">
+        <h2 class="form-title">Create Account</h2>
+
+        <form [formGroup]="formData" (ngSubmit)="developerRegister()">
+          
+          <div class="input-group">
+            <label>Full Name</label>
+            <input 
+              type="text" 
+              formControlName="name"
+              placeholder="e.g. John Doe"
+              [class.is-invalid]="formData.get('name')?.invalid && formData.get('name')?.touched">
+          </div>
+
+          <div class="input-group">
+            <label>Email Address</label>
+            <input 
+              type="email" 
+              formControlName="email"
+              placeholder="e.g. dev@example.com"
+              [class.is-invalid]="formData.get('email')?.invalid && formData.get('email')?.touched">
+          </div>
+
+          <div class="input-group password-wrapper">
+            <label>Password</label>
+            <input 
+              #passwordInput
+              type="password" 
+              formControlName="password"
+              placeholder="••••••••"
+              [class.is-invalid]="formData.get('password')?.invalid && formData.get('password')?.touched">
+            <span class="eye-icon" (click)="passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password'">
+              <i class="fa-regular" [ngClass]="passwordInput.type === 'password' ? 'fa-eye-slash' : 'fa-eye'"></i>
+            </span>
+          </div>
+
+          <button type="submit" class="btn btn-login" [disabled]="formData.invalid || isLoading">
+            <span *ngIf="isLoading" class="loader"></span>
+            <span *ngIf="!isLoading">Sign Up</span>
+            <span *ngIf="isLoading">Creating account...</span>
+          </button>
+
+          <div class="signup-link">
+            Already have an account? <a routerLink="/auth/login">Log In</a>
+          </div>
+        </form>
+      </main>
+
+      <aside class="login-aside">
+        <div class="aside-card">
+          <div class="card-header">
+            <div class="icon-circle">
+              <i class="fa-solid fa-rocket fa-bounce"></i>
+            </div>
+            <div class="card-info">
+              <h3>Join the Community</h3>
+              <span>Level up your coding game</span>
+            </div>
+          </div>
+          <p class="card-description">
+            Access real-time analytics, collaborate on projects, and keep your development focus sharp.
+          </p>
+          <div class="card-features">
+            <i class="fa-solid fa-layer-group"></i>
+            <i class="fa-solid fa-code-merge"></i>
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <p class="small-text text-muted">Join 10k+ developers today.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>

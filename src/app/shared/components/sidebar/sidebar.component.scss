@@ -1,0 +1,512 @@
+// ── Design Tokens ─────────────────────────────────────────────────────────────
+$bg-black: #050505;
+$sidebar-bg: rgba(8, 8, 10, 0.65);
+$accent-blue: #0d6efd;
+$accent-glow: rgba(13, 110, 253, 0.35);
+$gold-premium: #fbbf24;
+$gold-glow: rgba(251, 191, 36, 0.25);
+$premium-purple: #a78bfa;
+$premium-glow: rgba(167, 139, 250, 0.25);
+$text-light: #f8fafc;
+$text-muted: #64748b;
+$border-white: rgba(255, 255, 255, 0.05);
+
+// ── Layout Wrapper Protection ──────────────────────────────────────────────────
+// Margins match the sidebar width on desktop to prevent clipping of page content
+::ng-deep .main-wrapper {
+  margin-left: 85px;
+  min-height: 100vh;
+  background-color: $bg-black;
+  transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @media (max-width: 991px) {
+    margin-left: 0 !important;
+  }
+}
+
+// ── Sidebar Master Container ──────────────────────────────────────────────────
+.sidebar-master {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 85px;
+  height: 100vh;
+  background: $sidebar-bg;
+  border-right: 1px solid $border-white;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 1010;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 10px 0 32px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  // Hide scrollbar but still allow scroll
+  &::-webkit-scrollbar {
+    width: 0;
+  }
+
+  scrollbar-width: none;
+
+  // ── Close Button (mobile only, hidden on desktop) ──
+  .sidebar-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: $text-muted;
+    font-size: 0.85rem;
+    display: none; // hidden on desktop
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: $text-light;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  // Logo Area
+  .logo-area {
+    .logo-hexagon {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      background: $accent-blue;
+      color: white;
+      font-weight: 900;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      box-shadow: 0 0 16px rgba($accent-blue, 0.4);
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: rotate(10deg) scale(1.05);
+      }
+    }
+
+    .brand-text {
+      color: $text-light;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+      font-style: italic;
+      display: none; // Hidden on desktop (85px icon-only)
+
+      .highlight {
+        color: $accent-blue;
+      }
+    }
+  }
+
+  // Nav Links List
+  .nav-links {
+    width: 100%;
+  }
+
+  // Navigation Items Styling
+  .nav-item-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    color: $text-muted;
+
+    .nav-icon {
+      font-size: 1.35rem;
+      transition: all 0.25s ease;
+      z-index: 5;
+    }
+
+    // Labels hidden on desktop (icon-only sidebar)
+    .nav-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: color 0.25s;
+      display: none; // Hidden on desktop
+      white-space: nowrap;
+    }
+
+    // Indicator Line (Desktop)
+    .active-indicator {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 22px;
+      background: $accent-blue;
+      border-radius: 4px 0 0 4px;
+      box-shadow: 0 0 12px $accent-blue;
+    }
+
+    // Hover effect
+    &:hover:not(.active) {
+      color: lighten($text-muted, 20%);
+      background: rgba(255, 255, 255, 0.02);
+
+      .nav-icon {
+        color: $text-light;
+        transform: scale(1.05);
+      }
+    }
+
+    // Active state
+    &.active {
+      color: $text-light !important;
+      background: rgba($accent-blue, 0.08);
+      border: 1px solid rgba($accent-blue, 0.15);
+
+      .nav-icon {
+        color: white !important;
+        filter: drop-shadow(0 0 6px rgba($accent-blue, 0.5));
+      }
+
+      .active-indicator {
+        display: block;
+      }
+    }
+  }
+
+  // ── ARIA Onboarding Trigger ──
+  .aria-test-btn {
+    .aria-test-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 50%;
+      background: rgba(13, 110, 253, 0.08);
+      color: #93c5fd;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(13, 110, 253, 0.18);
+      box-shadow: 0 0 10px rgba(13, 110, 253, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 5;
+    }
+
+    &:hover .aria-test-icon {
+      background: rgba(13, 110, 253, 0.16);
+      color: white;
+      border-color: rgba(13, 110, 253, 0.4);
+      box-shadow: 0 0 16px rgba(13, 110, 253, 0.35);
+      transform: scale(1.08);
+    }
+
+    &.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+  }
+
+  // ── Pro / Premium Member Status Widget ──
+  .pro-widget {
+    padding: 0 8px;
+    animation: slideUpFade 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+
+    &__inner {
+      position: relative;
+      background: rgba($gold-premium, 0.03);
+      border: 1px solid rgba($gold-premium, 0.1);
+      border-radius: 14px;
+      padding: 0.65rem 0.35rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+
+      // Premium (paid) variant
+      &--premium {
+        background: rgba($premium-purple, 0.04);
+        border-color: rgba($premium-purple, 0.15);
+
+        .pro-widget__glow {
+          background: radial-gradient(circle, rgba($premium-purple, 0.1) 0%, transparent 70%);
+        }
+
+        .pro-widget__crown {
+          color: $premium-purple;
+          text-shadow: 0 0 10px $premium-glow;
+        }
+
+        .pro-widget__days {
+          color: $premium-purple;
+        }
+      }
+    }
+
+    &__glow {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba($gold-premium, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      animation: ambientPulse 4s ease-in-out infinite;
+    }
+
+    &__crown {
+      font-size: 1.15rem;
+      color: $gold-premium;
+      text-shadow: 0 0 8px $gold-glow;
+      z-index: 1;
+      line-height: 1;
+    }
+
+    &__info {
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+    }
+
+    &__label {
+      font-size: 0.58rem;
+      font-weight: 800;
+      color: $text-light;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      line-height: 1.2;
+    }
+
+    &__days {
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: $gold-premium;
+      white-space: nowrap;
+      line-height: 1.2;
+
+      &--unlimited {
+        color: #a7f3d0;
+        text-shadow: 0 0 8px rgba(167, 243, 208, 0.2);
+      }
+    }
+  }
+
+  // Profile Area
+  .profile-mini {
+    img {
+      border: 2px solid $border-white;
+      transition: all 0.25s ease;
+    }
+
+    &:hover img {
+      border-color: $accent-blue;
+      box-shadow: 0 0 10px rgba($accent-blue, 0.3);
+    }
+
+    .profile-name {
+      display: none; // Hidden on desktop
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // ── RESPONSIVE: Mobile / Tablet Drawer Layout (< 992px) ────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════════
+  @media (max-width: 991px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 270px;
+    height: 100vh;
+    transform: translateX(-100%);
+    z-index: 2000;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(10, 10, 12, 0.94);
+    box-shadow: 20px 0 60px rgba(0, 0, 0, 0.6);
+
+    &.show {
+      transform: translateX(0);
+    }
+
+    // Show close button
+    .sidebar-close-btn {
+      display: flex;
+    }
+
+    // Show brand text in drawer
+    .logo-area {
+      justify-content: flex-start !important;
+      padding-left: 0.75rem;
+
+      .brand-text {
+        display: inline; // Show brand text on mobile
+      }
+    }
+
+    .nav-links {
+      align-items: flex-start !important;
+    }
+
+    .nav-item-wrapper {
+      justify-content: flex-start;
+      gap: 1rem;
+      padding: 0 1rem;
+      height: 48px;
+
+      .nav-icon {
+        font-size: 1.25rem;
+        min-width: 22px;
+        text-align: center;
+      }
+
+      // Show labels in the mobile drawer
+      .nav-label {
+        display: inline;
+      }
+
+      .active-indicator {
+        left: 0;
+        right: auto;
+        border-radius: 0 4px 4px 0;
+      }
+    }
+
+    .aria-test-btn {
+      margin-top: 1rem !important;
+    }
+
+    // Expand the pro widget for the wider mobile drawer
+    .pro-widget {
+      padding: 0 0.5rem;
+
+      &__inner {
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+      }
+
+      &__crown {
+        font-size: 1.3rem;
+      }
+
+      &__info {
+        align-items: flex-start;
+      }
+
+      &__label {
+        font-size: 0.7rem;
+        letter-spacing: 0.8px;
+      }
+
+      &__days {
+        font-size: 0.72rem;
+      }
+    }
+
+    .profile-mini {
+      justify-content: flex-start !important;
+      padding-left: 0.75rem;
+
+      .profile-name {
+        display: inline; // Show profile name on mobile
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // ── RESPONSIVE: Small phones (< 480px) ─────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════════
+  @media (max-width: 479px) {
+    width: 100vw; // Full-width drawer on very small screens
+
+    .nav-item-wrapper {
+      height: 52px;
+      padding: 0 1.25rem;
+      gap: 1.15rem;
+    }
+
+    .pro-widget {
+      padding: 0 0.75rem;
+
+      &__inner {
+        padding: 0.85rem 1.15rem;
+      }
+    }
+  }
+}
+
+// ── Mobile Overlay ────────────────────────────────────────────────────────────
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1999;
+  animation: fadeIn 0.25s ease forwards;
+}
+
+// ── Animations ────────────────────────────────────────────────────────────────
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ambientPulse {
+
+  0%,
+  100% {
+    transform: scale(0.9) translate(-25%, -25%);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: scale(1.1) translate(-25%, -25%);
+    opacity: 1;
+  }
+}

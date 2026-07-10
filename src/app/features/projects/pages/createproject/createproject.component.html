@@ -1,0 +1,81 @@
+<div class="page-wrapper">
+  <div class="create-project-container">
+    
+    <div class="back-link" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i>
+      <span>Back to Dashboard</span>
+    </div>
+
+    <div class="create-card">
+      <div class="create-header">
+        <div class="header-icon">
+          <i class="bi bi-rocket-takeoff-fill"></i>
+        </div>
+        <div>
+          <h2>Create New Project</h2>
+          <p>Launch your workspace and start tracking progress.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="formData" (ngSubmit)="createOneProject()" class="create-form">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Project Name</label>
+            <div class="input-wrapper">
+              <i class="bi bi-briefcase"></i>
+              <input 
+                type="text" 
+                formControlName="name" 
+                placeholder="e.g. E-commerce Redesign"
+                [style.border-color]="formData.controls['name'].invalid && formData.controls['name'].touched ? '#ef4444' : ''">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Client Name</label>
+            <div class="input-wrapper">
+              <i class="bi bi-person"></i>
+              <input 
+                type="text" 
+                formControlName="clientName" 
+                placeholder="e.g. Acme Corp"
+                [style.border-color]="formData.controls['clientName'].invalid && formData.controls['clientName'].touched ? '#ef4444' : ''">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Hourly Rate</label>
+            <div class="input-wrapper">
+              <span class="currency-symbol">$</span>
+              <input 
+                type="number" 
+                formControlName="hourlyRate" 
+                placeholder="0.00"
+                [style.border-color]="formData.controls['hourlyRate'].invalid && formData.controls['hourlyRate'].touched ? '#ef4444' : ''">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Project Brief</label>
+          <textarea 
+            formControlName="description" 
+            rows="4" 
+            placeholder="Briefly describe the key objectives and scope..."
+            [style.border-color]="formData.controls['description'].invalid && formData.controls['description'].touched ? '#ef4444' : ''">
+          </textarea>
+        </div>
+
+        <div class="form-footer">
+          <button type="button" class="btn-secondary" (click)="formData.reset()">Discard</button>
+          <button type="submit" class="btn-primary" [disabled]="formData.invalid">
+            Create Project <i class="bi bi-arrow-right-short"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

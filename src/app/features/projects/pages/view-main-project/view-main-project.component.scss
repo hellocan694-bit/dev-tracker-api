@@ -1,0 +1,388 @@
+// 1. Variables & Base Setup
+$bg-dark: #080808;
+$panel-bg: rgba(18, 18, 18, 0.7);
+$primary-blue: #3b82f6;
+$success-green: #10b981;
+$glass-border: rgba(255, 255, 255, 0.08);
+
+.page-wrapper {
+  padding-top: 130px; // مسافة عشان الناف بار
+  background: $bg-dark;
+  min-height: 100vh;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-delete-all {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.btn-delete-all:hover {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-delete-all:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+// توهج أزرق للكارت الشغال
+.border-running-glow {
+  border: 1px solid rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.btn-activity {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+  
+  &.btn-play { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+  &.btn-pause { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+  &:hover { transform: scale(1.1); }
+}
+
+.bg-running {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #3b82f6 !important;
+}
+
+.pulse-icon {
+  animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.time-over-shake {
+  animation: shake 0.5s infinite;
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+// تعديل شكل الـ SweetAlert Toast ليبدو زجاجي
+.swal2-popup.swal2-toast {
+  padding: 1rem !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  
+  .swal2-title {
+    margin: 0 0 5px 0 !important;
+    font-size: 1rem !important;
+  }
+  
+  .swal2-timer-progress-bar {
+    background: currentColor !important; // ياخد لون الأيقونة تلقائياً
+  }
+
+  // تأثير النبض للأيقونة في حالة الخطأ
+  .swal2-icon.swal2-error {
+    border-color: #ef4444;
+    .swal2-x-mark {
+      animation: pulse-red 1s infinite;
+    }
+  }
+}
+
+@keyframes pulse-red {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+// 2. Containers & Panels
+.glass-panel {
+  background: $panel-bg;
+  backdrop-filter: blur(20px);
+  border: 1px solid $glass-border;
+  border-radius: 24px;
+}
+
+.border-primary-glow {
+  border: 1px solid rgba($primary-blue, 0.3);
+  box-shadow: 0 0 30px rgba($primary-blue, 0.05);
+}
+
+// 3. Main Action Button (The "Glow" Style)
+.btn-glow-primary {
+  background: linear-gradient(135deg, $primary-blue, #1d4ed8);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba($primary-blue, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba($primary-blue, 0.6);
+    filter: brightness(1.1);
+  }
+
+  &:disabled {
+    background: #222;
+    opacity: 0.5;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+// 4. Filter Chips (Clear & Interactive)
+.filter-chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $glass-border;
+  color: #a0a0a0;
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  span {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 8px;
+    margin-left: 10px;
+    font-size: 0.75rem;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    border-color: rgba($primary-blue, 0.4);
+  }
+
+  &.active {
+    background: rgba($primary-blue, 0.15);
+    color: $primary-blue;
+    border-color: $primary-blue;
+    box-shadow: 0 0 15px rgba($primary-blue, 0.15);
+    
+    span {
+      background: $primary-blue;
+      color: white;
+    }
+  }
+}
+
+// Financial Card Enhancements
+.border-financial-glow {
+  border: 1px solid rgba($primary-blue, 0.2);
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.8), rgba(30, 30, 30, 0.4));
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.bg-success-transparent { background: rgba($success-green, 0.1); }
+.bg-warning-transparent { background: rgba(#f59e0b, 0.1); }
+.bg-primary-transparent { background: rgba($primary-blue, 0.1); }
+
+// Avatar Small Fix
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+  background: rgba($primary-blue, 0.2);
+  border: 1px solid rgba($primary-blue, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: $primary-blue;
+}
+// 5. Input Styling (Sharp & Visible)
+.input-with-icon {
+  position: relative;
+  i { 
+    position: absolute; left: 18px; top: 50%; transform: translateY(-50%); 
+    color: $primary-blue; font-size: 1.1rem;
+  }
+  input { padding-left: 48px !important; }
+}
+
+input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $glass-border;
+  border-radius: 16px;
+  padding: 14px;
+  color: #fff;
+  width: 100%;
+  font-size: 0.95rem;
+  transition: all 0.3s;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-blue;
+    background: rgba($primary-blue, 0.05);
+    box-shadow: 0 0 15px rgba($primary-blue, 0.1);
+  }
+
+  &::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.6;
+    cursor: pointer;
+  }
+}
+
+// 6. Task Cards (Professional Look)
+.task-card-pro {
+  background: $panel-bg;
+  border: 1px solid $glass-border;
+  border-radius: 22px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &:hover { 
+    border-color: rgba($primary-blue, 0.4); 
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  }
+  
+  .tag-dev { 
+    font-size: 0.65rem; 
+    background: rgba($primary-blue, 0.1); 
+    color: $primary-blue; 
+    padding: 4px 10px; 
+    border-radius: 6px; 
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .task-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+// 7. Small Action Buttons
+.btn-action-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid $glass-border;
+  background: rgba(255, 255, 255, 0.02);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $primary-blue;
+    border-color: $primary-blue;
+    transform: scale(1.1) rotate(-5deg);
+    box-shadow: 0 5px 15px rgba($primary-blue, 0.3);
+  }
+}
+
+.btn-complete-task {
+  background: rgba($success-green, 0.1);
+  color: $success-green;
+  border: 1px solid rgba($success-green, 0.2);
+  padding: 6px 16px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.3s;
+
+  &:hover {
+    background: $success-green;
+    color: white;
+  }
+}
+
+// 8. Stats & Progress
+.stats-sidebar { top: 130px; }
+
+.custom-progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: visible; // عشان لو حبيت تضيف Glow
+
+  .progress-bar {
+    border-radius: 10px;
+    transition: width 1s linear; // ⚡ makes 1s interval look continuously smooth
+    position: relative;
+    
+    // تأثير توهج خفيف للبار
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      box-shadow: 0 0 10px currentColor;
+      border-radius: 10px;
+      opacity: 0.4;
+    }
+  }
+}
+.progress-circle-box {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 5px solid rgba($primary-blue, 0.1);
+  border-top-color: $primary-blue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  animation: spin 2s linear infinite; // اختياري لو عايز حركة
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+ 
+}
+
+.extra-small { font-size: 0.7rem; color: #666; }

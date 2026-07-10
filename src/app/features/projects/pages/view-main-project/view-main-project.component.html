@@ -1,0 +1,169 @@
+<div class="page-wrapper">
+  <div class="container-fluid px-md-5">
+    <div class="row g-4">
+      
+      <div class="col-xl-3 col-lg-4">
+        <div class="stats-sidebar sticky-top">
+          <div class="glass-panel p-4 mb-4">
+            <h6 class="text-primary fw-bold small mb-4 text-uppercase">Project Progress</h6>
+            <div class="progress-circle-box mb-4" [style.border-top-color]="completionRate > 0 ? '#3b82f6' : 'rgba(255,255,255,0.1)'">
+              <div class="progress-info text-center">
+                <h2 class="m-0 text-white">{{ completionRate }}%</h2>
+                <p class="m-0 text-muted small">Completed</p>
+              </div>
+            </div>
+            <div class="stats-details">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-white-50 small">Completed Tasks</span>
+                <span class="text-success small fw-bold">{{ completedTasksCount }}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-white-50 small">Total Missions</span>
+                <span class="text-white small fw-bold">{{ tasks.length }}</span>
+              </div>
+            </div>
+            <div class="progress mt-3" style="height:6px;background:rgba(255,255,255,0.05)">
+              <div class="progress-bar bg-primary" [style.width]="completionRate + '%'"></div>
+            </div>
+          </div>
+
+          <div class="glass-panel p-4 mb-4 border-financial-glow" *ngIf="canSeeFinancials">
+            <h6 class="text-info fw-bold small mb-4 text-uppercase">Financial Summary</h6>
+            <div class="d-flex align-items-center mb-3">
+              <div class="stat-icon bg-success-transparent me-3">
+                <i class="bi bi-wallet2 text-success"></i>
+              </div>
+              <div>
+                <p class="text-white-50 m-0 extra-small">Earned</p>
+                <h5 class="text-white m-0 fw-bold">${{ financials?.earned }}</h5>
+              </div>
+            </div>
+            <div class="d-flex align-items-center mb-3">
+              <div class="stat-icon bg-warning-transparent me-3">
+                <i class="bi bi-hourglass-split text-warning"></i>
+              </div>
+              <div>
+                <p class="text-white-50 m-0 extra-small">Remaining</p>
+                <h5 class="text-white m-0 fw-bold">${{ financials?.remaining }}</h5>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel p-4" *ngIf="now$ | async as nowTime">
+            <h6 class="text-primary fw-bold small mb-4 text-uppercase">Upcoming Deadlines</h6>
+            <div *ngFor="let task of upcomingDeadlines" class="deadline-item mb-3 border-bottom pb-2">
+              <p class="m-0 text-white small fw-bold">{{ task.title }}</p>
+              <span class="extra-small fw-bold">
+                <i class="bi bi-clock-history me-1"></i> {{ getRemainingTime(task.deadline, nowTime) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-9 col-lg-8">
+        
+        <div class="glass-panel p-3 mb-5 border-primary-glow" *ngIf="canManage">
+          <form [formGroup]="formData" (ngSubmit)="creatTask()" class="row g-2 align-items-center">
+            <div class="col-md-5">
+              <div class="input-with-icon">
+                <i class="bi bi-plus-circle"></i>
+                <input type="text" formControlName="title" placeholder="Add a new mission..." />
+              </div>
+            </div>
+            <div class="col-md-2">
+              <input type="number" formControlName="estimatedHours" placeholder="Hours" />
+            </div>
+            <div class="col-md-3">
+              <input type="date" formControlName="deadline" />
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn-glow-primary w-100" [disabled]="formData.invalid || isLoading">Launch</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+          <div class="d-flex gap-3">
+            <button class="filter-chip" [class.active]="currentFilter === 'all'" (click)="currentFilter = 'all'">All</button>
+            <button class="filter-chip" [class.active]="currentFilter === 'progress'" (click)="currentFilter = 'progress'">Active</button>
+            <button class="filter-chip" [class.active]="currentFilter === 'completed'" (click)="currentFilter = 'completed'">Done</button>
+          </div>
+          <button *ngIf="canManage" (click)="deleteAllProjectTasks()" class="btn-delete-all"><i class="bi bi-trash3 me-2"></i>Clear</button>
+        </div>
+
+        <div class="row g-3" *ngIf="now$ | async as nowTime">
+          <div class="col-md-6 col-xl-4" *ngFor="let task of filteredTasks">
+            <div class="task-card-pro" 
+                 [class.border-success-glow]="task.status === 'done'"
+                 [class.border-running-glow]="task.statusActivity?.isWorking"
+                 [class.time-over-shake]="calculateTimeProgress(task) >= 100 && task.status !== 'done'">
+              
+              <div class="task-body">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="tag-dev" [class.text-success]="task.status === 'done'" [class.bg-running]="task.statusActivity?.isWorking">
+                    <i class="bi bi-record-fill pulse-icon me-1" *ngIf="task.statusActivity?.isWorking"></i>
+                    {{ task.status === 'done' ? 'Completed' : (task.statusActivity?.isWorking ? 'In Session' : 'To Do') }}
+                  </span>
+                  <span class="text-muted small fw-bold">{{ task.statusActivity?.duration }}</span>
+                </div>
+                
+                <h6 class="text-white fw-bold mb-3" [class.text-decoration-line-through]="task.status === 'done'">{{ task.title }}</h6>
+
+                <div class="mb-3" *ngIf="task.status !== 'done'">
+                  <div class="d-flex justify-content-between extra-small mb-1">
+                    <span class="text-white-50">Hours Progress</span>
+                    <span [class.text-danger]="calculateTimeProgress(task) > 90">
+                      {{ calculateTimeProgress(task) | number:'1.0-0' }}%
+                    </span>
+                  </div>
+                  <div class="progress custom-progress">
+                    <div class="progress-bar" 
+                         [ngClass]="calculateTimeProgress(task) > 90 ? 'bg-danger' : 'bg-primary'"
+                         [style.width.%]="calculateTimeProgress(task)">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3" *ngIf="task.status !== 'done'">
+                  <div class="d-flex justify-content-between extra-small mb-1">
+                    <span class="text-white-50">Timeline</span>
+                    <span class="text-info">{{ getRemainingTime(task.deadline, nowTime) }}</span>
+                  </div>
+                  <div class="progress custom-progress">
+                    <div class="progress-bar bg-info" 
+                         [style.width.%]="calculateDeadlineProgress(task, nowTime)">
+                    </div>
+                  </div>
+                </div>
+
+                <p class="text-muted extra-small mt-2" *ngIf="task.status === 'done'">
+                  <i class="bi bi-calendar-check me-1"></i> Finished on Time
+                </p>
+              </div>
+
+              <div class="task-footer">
+                <div class="d-flex gap-2" *ngIf="canManage">
+                  <button type="button" *ngIf="task.status !== 'done'" 
+                          (click)="toggleTaskActivity(task)" 
+                          class="btn-activity"
+                          [ngClass]="task.statusActivity?.isWorking ? 'btn-pause' : 'btn-play'">
+                    <i class="bi" [ngClass]="task.statusActivity?.isWorking ? 'bi-pause-fill' : 'bi-play-fill'"></i>
+                  </button>
+                  <button type="button" *ngIf="task.status !== 'done'" (click)="completetask(task._id)" class="btn-action-sm">
+                    <i class="bi bi-check2-all"></i>
+                  </button>
+                </div>
+                
+                <div *ngIf="!canManage && task.status !== 'done'" class="text-muted extra-small italic">Read Only</div>
+                <div *ngIf="task.status === 'done'" class="text-success small fw-bold">Done</div>
+                
+                <div class="avatar-sm">{{ task.title[0] | uppercase }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

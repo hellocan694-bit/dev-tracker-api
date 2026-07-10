@@ -1,0 +1,83 @@
+<div class="dashboard-container">
+  <header class="main-header">
+    <div class="welcome-text">
+      <h1>History Dashboard <span class="wave">👋</span></h1>
+      <p>
+        Your workspace is ready. You have
+        <strong>{{ countHistoryProjects }}</strong> completed projects.
+      </p>
+    </div>
+
+    <div class="status-badges">
+      <span class="badge-item"><i class="bi bi-cpu"></i> System: Online</span>
+      <span class="badge-item"><i class="bi bi-shield-check"></i> Secured</span>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="icon-box blue-glow">
+        <i class="bi bi-check2-all"></i>
+      </div>
+      <div class="stat-info">
+        <span class="value">{{ countHistoryProjects }}</span>
+        <span class="label">COMPLETED</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="icon-box"><i class="bi bi-clock-history"></i></div>
+      <div class="stat-info">
+        <span class="value">All Time</span>
+        <span class="label">ARCHIVE MODE</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="operations-section">
+    <div class="section-header">
+      <h2>Project Archive</h2>
+      <div class="header-actions">
+        <button class="btn-clear" (click)="confirmClear()">
+          <i class="bi bi-trash3"></i> Clear History
+        </button>
+      </div>
+    </div>
+
+    <div class="projects-list">
+      <div *ngIf="  countHistoryProjects === 0" class="text-center py-5 text-muted">
+        <i class="bi bi-folder-x display-4"></i>
+        <p class="mt-2">No projects found in your history.</p>
+      </div>
+
+      <div class="project-item" *ngFor="let project of projects">
+        <div class="project-main">
+          <div class="status-dot"></div>
+          <div class="project-details">
+            <h3>{{ project.name }}</h3>
+            <p>
+              {{
+                project.description ||
+                  "No additional details available for this record."
+              }}
+            </p>
+          </div>
+        </div>
+
+        <div class="project-meta">
+          <span class="date">Finished</span>
+
+          <button (click)="deleteProjectFomHistory(project._id)"
+            class="btn-delete-item"
+          
+            title="Delete Project"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
+
+          <i class="bi bi-chevron-right arrow-icon"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

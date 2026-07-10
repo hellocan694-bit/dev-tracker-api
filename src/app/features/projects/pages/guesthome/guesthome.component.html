@@ -1,0 +1,202 @@
+<div class="landing-page-container">
+
+  <!-- WebGL Shader: persistent background layer (z-index: -1) -->
+  <app-webgl-shader></app-webgl-shader>
+
+  <!-- Subtle darkening overlay + glow orbs on top of WebGL -->
+  <div class="abstract-bg">
+    <div class="glow-orb primary"></div>
+    <div class="glow-orb secondary"></div>
+  </div>
+
+  <!-- ═══════════════ HERO SECTION ═══════════════ -->
+  <section class="hero-section">
+
+    <!-- ── Hero Text Block ── -->
+    <div class="hero-content">
+
+      <!-- Gradient badge -->
+      <div class="hero-badge spring-badge">
+        <span class="badge-new">New</span>
+        <span class="badge-text">
+          Now Live: DevTrack v2.0
+          <i class="fa-solid fa-arrow-right ms-2"></i>
+        </span>
+      </div>
+
+      <!-- Main headline -->
+      <h1 class="hero-title">
+        Master Your Workflow with<br>
+        <span class="gradient-text">DevTrack Intelligence.</span>
+      </h1>
+
+      <!-- Sub-heading -->
+      <p class="hero-subtitle">
+        An all-in-one productivity platform designed for developers to track progress,<br class="d-none d-md-block">
+        manage projects, and gain deep insights into their coding journey.
+      </p>
+
+      <!-- Status indicator -->
+      <div class="hero-status">
+        <span class="status-dot-pulse"></span>
+        <span class="status-label">Available for New Projects</span>
+      </div>
+
+      <!-- Liquid CTA button -->
+      <div class="hero-cta-group">
+        <app-liquid-button label="Start Tracking for Free" (clicked)="gotoRegister()"></app-liquid-button>
+      </div>
+
+    </div>
+
+    <!-- ── Dashboard Mockup (preserved + floating 3-D) ── -->
+    <div class="hero-dashboard-mockup floating-element">
+      <div class="mockup-frame glass-panel">
+
+        <div class="mac-dots">
+          <span></span><span></span><span></span>
+        </div>
+
+        <div class="mockup-body">
+          <div class="mockup-sidebar">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line active"></div>
+            <div class="line"></div>
+          </div>
+
+          <div class="mockup-main">
+            <div class="mockup-header">
+              <div class="search-bar"></div>
+              <div class="profile-circle"></div>
+            </div>
+
+            <div class="mockup-stats-row">
+              <div class="stat-box"><div class="chart-mini"></div></div>
+              <div class="stat-box"><div class="chart-mini"></div></div>
+              <div class="stat-box"><div class="chart-mini"></div></div>
+            </div>
+
+            <div class="mockup-big-chart">
+              <div class="bar h-60"></div>
+              <div class="bar h-40"></div>
+              <div class="bar h-80"></div>
+              <div class="bar h-30"></div>
+              <div class="bar h-100"></div>
+              <div class="bar h-70"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- BRAND LOGOS -->
+  <section class="trusted-by gsap-reveal">
+    <p>TRUSTED BY INNOVATIVE TEAMS WORLDWIDE</p>
+    <div class="logo-strip">
+      <i class="fa-brands fa-aws"></i>
+      <i class="fa-brands fa-docker"></i>
+      <i class="fa-brands fa-github"></i>
+      <i class="fa-brands fa-microsoft"></i>
+      <i class="fa-brands fa-figma"></i>
+    </div>
+  </section>
+
+  <!-- FEATURES GRID -->
+  <section class="features-section" id="demo-section">
+    <div class="section-header gsap-reveal">
+      <h2 class="section-title">The anatomy of <span class="gradient-text">high performance</span>.</h2>
+      <p class="section-subtitle">Everything you need to orchestrate a world-class engineering team without the overhead of micro-management.</p>
+    </div>
+
+    <div class="features-grid">
+      <!-- Feature Card 1 -->
+      <div class="feature-card glass-panel neon-border">
+        <div class="card-icon blue-glow">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <h3>Real-time Analytics</h3>
+        <p>Your entire Git history parsed and visualized. Identify bottlenecks, code churn, and deep work sessions instantly.</p>
+      </div>
+
+      <!-- Feature Card 2 -->
+      <div class="feature-card glass-panel neon-border">
+        <div class="card-icon purple-glow">
+          <i class="fa-solid fa-users-viewfinder"></i>
+        </div>
+        <h3>Seamless Collaboration</h3>
+        <p>Automated daily standups generated from actual commits and pull requests. Keep everyone aligned automatically.</p>
+      </div>
+
+      <!-- Feature Card 3 -->
+      <div class="feature-card glass-panel neon-border">
+        <div class="card-icon blue-glow">
+           <i class="fa-solid fa-brain"></i>
+        </div>
+        <h3>AI Tech Lead</h3>
+        <p>Receive proactive suggestions on code quality and patterns of burnout. Your personal AI assistant for healthier workflows.</p>
+      </div>
+      
+      <!-- Feature Card 4 -->
+      <div class="feature-card glass-panel neon-border">
+        <div class="card-icon purple-glow">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h3>Enterprise Security</h3>
+        <p>Bank-grade encryption, SOC2 compliance, and precise role-based access controls to protect your intellectual property.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <app-testimonials></app-testimonials>
+
+  <!-- CTA STRIP -->
+  <section class="cta-strip gsap-reveal">
+    <div class="cta-box glass-panel neon-border shadow-glow">
+      <h2>Ready to level up your team?</h2>
+      <p>Join elite engineers today. Start your free trial with no credit card required.</p>
+      <button class="btn btn-primary btn-large" style="margin-top: 1rem;" (click)="gotoRegister()">
+        Create Free Account <i class="fa-solid fa-rocket" style="margin-left: 0.5rem;"></i>
+      </button>
+    </div>
+  </section>
+
+  <!-- MINIMAL CLEAN FOOTER -->
+  <footer class="minimal-footer gsap-reveal">
+    <div class="footer-content">
+      <div class="brand-col">
+        <div class="brand">
+          <div class="logo-icon"><i class="fa-solid fa-code-merge"></i></div>
+          <span class="brand-name">DevTracker</span>
+        </div>
+        <p>Empowering the next generation of builders.</p>
+      </div>
+      <div class="links-col">
+        <div class="link-group">
+          <strong>Product</strong>
+          <a href="#">Features</a>
+          <a href="#">Pricing</a>
+          <a href="#">Integrations</a>
+        </div>
+        <div class="link-group">
+          <strong>Legal</strong>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 DevTracker Inc. All rights reserved.</p>
+      <div class="socials">
+        <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#"><i class="fa-brands fa-github"></i></a>
+        <a href="#"><i class="fa-brands fa-discord"></i></a>
+      </div>
+    </div>
+  </footer>
+
+</div>

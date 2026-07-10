@@ -1,0 +1,136 @@
+<div class="pricing-page-container">
+  
+  <!-- Abstract Space Background Elements -->
+  <div class="glow-blob blob-1"></div>
+  <div class="glow-blob blob-2"></div>
+
+  <div class="pricing-wrapper">
+    <div class="pricing-header">
+      <h2 class="pricing-title">
+        Simple, transparent <span class="accent-text">pricing</span>
+      </h2>
+      <p class="pricing-subtitle">
+        Choose the plan that's right for your development journey.
+      </p>
+    </div>
+
+    <!-- Currency Toggle -->
+    <div class="currency-toggle-wrapper">
+      <div class="currency-toggle-box">
+        <button 
+          (click)="toggleCurrency('USD')"
+          [class.active]="currency === 'USD'"
+          class="currency-btn">
+          USD ($)
+        </button>
+        <button 
+          (click)="toggleCurrency('EGP')"
+          [class.active]="currency === 'EGP'"
+          class="currency-btn">
+          EGP (ج.م)
+        </button>
+      </div>
+    </div>
+
+    <!-- Pricing Cards Container -->
+    <div class="pricing-cards-grid">
+      
+      <!-- Free Plan Card (Subtle Dark) -->
+      <div class="pricing-card free-card">
+        <div class="card-gradient-overlay"></div>
+        
+        <div class="card-content">
+          <div class="card-main">
+            <h3 class="card-tier-title">Free</h3>
+            <p class="card-tier-desc">Perfect for getting started with Dev Tracker.</p>
+            <div class="price-container">
+              <span class="price-amount">$0</span>
+              <span class="price-period">/mo</span>
+            </div>
+            <ul class="features-list">
+              <li class="feature-item">
+                <i class="bi bi-check-circle-fill check-icon"></i>
+                <span class="feature-text">Up to 3 projects</span>
+              </li>
+              <li class="feature-item">
+                <i class="bi bi-check-circle-fill check-icon"></i>
+                <span class="feature-text">Basic analytics</span>
+              </li>
+            </ul>
+          </div>
+          <button (click)="subscribe('free')" class="btn-subscribe btn-free">
+            Get Started
+          </button>
+        </div>
+      </div>
+
+      <!-- Pro Plans -->
+      <ng-container *ngFor="let plan of plans">
+        <div *ngIf="plan.tier !== 'free'" class="pricing-card pro-card" [class.popular]="plan.tier === 'pro'">
+          
+          <!-- Premium Gold/Blue Gradient Top Border -->
+          <div class="card-accent-border"></div>
+          
+          <!-- Decorative Glow -->
+          <div class="card-glow-element"></div>
+          
+          <div *ngIf="plan.tier === 'pro'" class="popular-badge-wrapper">
+            <span class="popular-badge">
+              Most Popular
+            </span>
+          </div>
+          
+          <div class="card-content">
+            <div class="card-main">
+              <div class="card-title-row">
+                <i class="fa-solid fa-crown crown-icon"></i>
+                <h3 class="card-tier-title">{{ plan.name }}</h3>
+              </div>
+              <p class="card-tier-desc">{{ plan.description || 'For active developers needing unlimited potential.' }}</p>
+              <div class="price-container">
+                <span class="price-amount">
+                  {{ currency === 'USD' ? '$' + plan.price : (plan.price * 50) + ' EGP' }} 
+                </span>
+                <span class="price-period">/{{ plan.interval }}</span>
+              </div>
+              
+              <ul class="features-list">
+                <li *ngFor="let feature of plan.features" class="feature-item">
+                  <i class="bi bi-check-circle-fill check-icon pro-check"></i>
+                  <span class="feature-text">{{ feature }}</span>
+                </li>
+                <ng-container *ngIf="!plan.features || plan.features.length === 0">
+                    <li class="feature-item">
+                      <i class="bi bi-check-circle-fill check-icon pro-check"></i>
+                      <span class="feature-text">Unlimited projects</span>
+                    </li>
+                    <li class="feature-item">
+                      <i class="bi bi-check-circle-fill check-icon pro-check"></i>
+                      <span class="feature-text">Priority support</span>
+                    </li>
+                </ng-container>
+              </ul>
+            </div>
+
+            <button 
+              (click)="subscribe(plan._id)" 
+              [disabled]="isLoading"
+              class="btn-subscribe btn-pro">
+              <span *ngIf="!isLoading" class="btn-text">
+                Subscribe Now <i class="fa-solid fa-arrow-right arrow-icon"></i>
+              </span>
+              <div *ngIf="isLoading" class="btn-loading-spinner">
+                <svg class="animate-spin spinner-svg" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </div>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+    </div>
+  </div>
+</div>

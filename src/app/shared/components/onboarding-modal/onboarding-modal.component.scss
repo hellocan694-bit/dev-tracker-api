@@ -1,0 +1,736 @@
+// ═══════════════════════════════════════════════════════════════════
+//  ARIA Onboarding Modal — Glassmorphism / Cyberpunk Theme
+// ═══════════════════════════════════════════════════════════════════
+
+// ─── Design tokens ──────────────────────────────────────────────────
+$bg-glass        : rgba(10, 14, 26, 0.78);
+$bg-glass-light  : rgba(255, 255, 255, 0.04);
+$bg-glass-hover  : rgba(255, 255, 255, 0.07);
+$border-glass    : rgba(255, 255, 255, 0.10);
+$border-bright   : rgba(255, 255, 255, 0.18);
+
+$lime            : #a3e635;   // Cyber Lime
+$blue            : #38bdf8;   // Electric Blue
+$purple          : #c084fc;   // Neon Purple
+$red             : #f87171;   // Alert Red
+$amber           : #fbbf24;   // Warning Amber
+$white           : #f1f5f9;
+$muted           : #94a3b8;
+$dark            : #0a0e1a;
+
+$blur            : blur(20px);
+$blur-light      : blur(12px);
+$radius-lg       : 20px;
+$radius-md       : 12px;
+$radius-sm       : 6px;
+
+$font-mono       : 'JetBrains Mono', 'Fira Code', monospace;
+$font-sans       : 'Inter', system-ui, sans-serif;
+
+// ─── Google Fonts ───────────────────────────────────────────────────
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+// ─── Keyframes ──────────────────────────────────────────────────────
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(1.6); opacity: 0;   }
+  100% { transform: scale(1.6); opacity: 0;   }
+}
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+@keyframes glow-shift {
+  0%   { opacity: 0.5; transform: translateX(-20%) scaleX(0.8); }
+  50%  { opacity: 1;   transform: translateX(0%)   scaleX(1);   }
+  100% { opacity: 0.5; transform: translateX(20%)  scaleX(0.8); }
+}
+
+@keyframes mission-glow {
+  0%, 100% { box-shadow: 0 0 18px 2px rgba($lime, 0.25); }
+  50%       { box-shadow: 0 0 32px 6px rgba($lime, 0.50); }
+}
+
+@keyframes progress-shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  OVERLAY
+// ═══════════════════════════════════════════════════════════════════
+.aria-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: $blur-light;
+  -webkit-backdrop-filter: $blur-light;
+  cursor: pointer;
+  // GSAP controls visibility — starts hidden via gsap.set(autoAlpha:0)
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  PANEL
+// ═══════════════════════════════════════════════════════════════════
+.aria-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 9001;
+  margin: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+
+  width: min(94vw, 1140px);
+  max-height: 92vh;
+  overflow-y: auto;
+
+  // Glass surface
+  background: $bg-glass;
+  backdrop-filter: $blur;
+  -webkit-backdrop-filter: $blur;
+  border: 1px solid $border-bright;
+  border-radius: $radius-lg;
+
+  // Ambient glow
+  box-shadow:
+    0 0 0 1px rgba($lime, 0.06),
+    0 4px 6px  rgba(0,0,0,0.5),
+    0 20px 60px rgba(0,0,0,0.6),
+    inset 0 1px 0 $border-glass;
+
+  // scrollbar invisible
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+
+  // Top accent line
+  &::before {
+    content: '';
+    display: block;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, $lime 30%, $blue 70%, transparent);
+    flex-shrink: 0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  HEADER
+// ═══════════════════════════════════════════════════════════════════
+.aria-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid $border-glass;
+  background: rgba(255,255,255,0.02);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+  }
+
+  &__center {
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+}
+
+// ARIA pulsing logo mark
+.aria-logo {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid $lime;
+    animation: pulse-ring 2s cubic-bezier(0.455,0.03,0.515,0.955) infinite;
+  }
+
+  &__core {
+    position: relative;
+    font-family: $font-mono;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: $lime;
+    letter-spacing: 0.05em;
+    background: rgba($lime, 0.1);
+    border: 1px solid rgba($lime, 0.4);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.aria-agent-name {
+  font-family: $font-mono;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: $lime;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.aria-subject {
+  font-family: $font-sans;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 600;
+  color: $white;
+  letter-spacing: 0.01em;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// "System Authenticated" badge
+.aria-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: $font-mono;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+
+  &--auth {
+    background: rgba($lime, 0.1);
+    border: 1px solid rgba($lime, 0.3);
+    color: $lime;
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $lime;
+    box-shadow: 0 0 6px $lime;
+    animation: dot-blink 1.4s ease-in-out infinite;
+  }
+}
+
+.aria-close-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid $border-glass;
+  background: $bg-glass-light;
+  color: $muted;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $red;
+    color: $red;
+    background: rgba($red, 0.1);
+    box-shadow: 0 0 10px rgba($red, 0.3);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  BODY  (2-column grid)
+// ═══════════════════════════════════════════════════════════════════
+.aria-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  flex: 1;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.aria-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// ─── Greeting ───────────────────────────────────────────────────────
+.aria-greeting {
+  &__label {
+    font-family: $font-mono;
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: $blue;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0.5rem;
+
+    .label-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: $blue;
+      box-shadow: 0 0 8px $blue;
+    }
+  }
+
+  &__text {
+    font-family: $font-sans;
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: rgba($white, 0.82);
+    margin: 0;
+    min-height: 3.5rem; // space for typewriter cursor
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  CARDS  (shared)
+// ═══════════════════════════════════════════════════════════════════
+.aria-card {
+  background: $bg-glass-light;
+  border: 1px solid $border-glass;
+  border-radius: $radius-md;
+  padding: 1rem 1.1rem;
+  transition: border-color 0.3s ease, background 0.3s ease;
+
+  &:hover {
+    background: $bg-glass-hover;
+    border-color: $border-bright;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+  }
+
+  &__icon {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  &__title {
+    font-family: $font-mono;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: $blue;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+}
+
+// ─── Project Snapshot Card ──────────────────────────────────────────
+.snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+
+  @media (max-width: 480px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.snapshot-stat {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid $border-glass;
+  border-radius: $radius-sm;
+  padding: 0.6rem 0.4rem;
+  text-align: center;
+
+  &__value {
+    display: block;
+    font-family: $font-mono;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: $white;
+    line-height: 1;
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.6rem;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 0.25rem;
+  }
+}
+
+.accent-lime   { color: $lime   !important; text-shadow: 0 0 10px rgba($lime,   0.5); }
+.accent-blue   { color: $blue   !important; text-shadow: 0 0 10px rgba($blue,   0.5); }
+.accent-purple { color: $purple !important; text-shadow: 0 0 10px rgba($purple, 0.5); }
+
+.snapshot-progress {
+  margin-bottom: 0.75rem;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: $muted;
+    margin-bottom: 0.4rem;
+  }
+
+  &__track {
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.07);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, $lime 0%, $blue 100%);
+    background-size: 200% auto;
+    animation: progress-shimmer 2.5s linear infinite;
+    transition: width 1s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+}
+
+.snapshot-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.stack-chip {
+  font-family: $font-mono;
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: $blue;
+  background: rgba($blue, 0.08);
+  border: 1px solid rgba($blue, 0.25);
+  border-radius: 4px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// ─── Priority Files Card ────────────────────────────────────────────
+.priority-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.priority-item {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid $border-glass;
+  border-radius: $radius-sm;
+  padding: 0.6rem 0.75rem;
+  transition: border-color 0.2s ease;
+
+  &:hover { border-color: rgba($lime, 0.3); }
+
+  &__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  &__path {
+    font-family: $font-mono;
+    font-size: 0.7rem;
+    color: $lime;
+    word-break: break-all;
+    flex: 1;
+  }
+
+  &__reason {
+    font-size: 0.75rem;
+    color: $muted;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// Risk badges
+.risk-badge {
+  flex-shrink: 0;
+  font-family: $font-mono;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 4px;
+
+  &.risk--critical { background: rgba($red,    0.15); border: 1px solid rgba($red,    0.4); color: $red;    }
+  &.risk--high     { background: rgba($amber,  0.15); border: 1px solid rgba($amber,  0.4); color: $amber;  }
+  &.risk--medium   { background: rgba($blue,   0.12); border: 1px solid rgba($blue,   0.35); color: $blue;  }
+  &.risk--low      { background: rgba($lime,   0.10); border: 1px solid rgba($lime,   0.3); color: $lime;   }
+}
+
+// ─── Bottleneck Alerts Card ─────────────────────────────────────────
+.alert-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.alert-item {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: $radius-sm;
+  border-left: 3px solid transparent;
+
+  &__icon { font-size: 1rem; flex-shrink: 0; line-height: 1.4; }
+
+  &__body  { flex: 1; }
+
+  &__title {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $white;
+    margin-bottom: 0.2rem;
+  }
+
+  &__desc {
+    font-size: 0.72rem;
+    color: $muted;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  &--danger  {
+    background: rgba($red,   0.06);
+    border-left-color: $red;
+  }
+  &--warning {
+    background: rgba($amber, 0.06);
+    border-left-color: $amber;
+  }
+  &--info {
+    background: rgba($blue,  0.06);
+    border-left-color: $blue;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MISSION CARD
+// ═══════════════════════════════════════════════════════════════════
+.aria-mission {
+  position: relative;
+  overflow: hidden;
+  margin: 0 1.5rem 1.25rem;
+  padding: 1.25rem 1.4rem;
+  border-radius: $radius-md;
+  border: 1px solid rgba($lime, 0.35);
+  background: rgba($lime, 0.04);
+  animation: mission-glow 3s ease-in-out infinite;
+
+  &__glow {
+    position: absolute;
+    top: -40%;
+    left: 20%;
+    width: 60%;
+    height: 80%;
+    background: radial-gradient(ellipse, rgba($lime, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+    animation: glow-shift 4s ease-in-out infinite;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__icon  { font-size: 1.1rem; }
+
+  &__title {
+    font-family: $font-mono;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: $lime;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 0;
+    flex: 1;
+  }
+
+  &__priority {
+    font-family: $font-mono;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+
+  &__task-title {
+    font-family: $font-sans;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $white;
+    margin: 0 0 0.4rem;
+  }
+
+  &__desc {
+    font-size: 0.82rem;
+    color: rgba($white, 0.75);
+    line-height: 1.65;
+    margin: 0 0 0.85rem;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__files {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+  }
+}
+
+.priority--critical { background: rgba($red,    0.15); border: 1px solid rgba($red,    0.4); color: $red;    }
+.priority--high     { background: rgba($amber,  0.15); border: 1px solid rgba($amber,  0.4); color: $amber;  }
+.priority--medium   { background: rgba($blue,   0.12); border: 1px solid rgba($blue,   0.4); color: $blue;   }
+.priority--low      { background: rgba($lime,   0.10); border: 1px solid rgba($lime,   0.35); color: $lime;  }
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid $border-glass;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: $font-mono;
+  font-size: 0.68rem;
+  color: $muted;
+
+  &__icon { font-size: 0.75rem; }
+}
+
+.files-label {
+  font-family: $font-mono;
+  font-size: 0.62rem;
+  color: $muted;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.file-tag {
+  font-family: $font-mono;
+  font-size: 0.65rem;
+  color: $lime;
+  background: rgba($lime, 0.08);
+  border: 1px solid rgba($lime, 0.22);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  FOOTER
+// ═══════════════════════════════════════════════════════════════════
+.aria-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.5rem 1.3rem;
+  border-top: 1px solid $border-glass;
+  background: rgba(255,255,255,0.02);
+  flex-shrink: 0;
+
+  &__signal {
+    font-family: $font-mono;
+    font-size: 0.72rem;
+    color: $muted;
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// CTA button
+.aria-cta-btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba($lime, 0.5);
+  background: rgba($lime, 0.1);
+  color: $lime;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-transform: uppercase;
+
+  &__glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba($lime, 0.25), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &__text { position: relative; z-index: 1; }
+
+  &:hover {
+    background: rgba($lime, 0.18);
+    border-color: $lime;
+    box-shadow: 0 0 20px rgba($lime, 0.35), 0 0 40px rgba($lime, 0.15);
+    transform: translateY(-1px);
+
+    .aria-cta-btn__glow { opacity: 1; }
+  }
+
+  &:active { transform: translateY(0); }
+}

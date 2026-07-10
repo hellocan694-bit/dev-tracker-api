@@ -1,0 +1,128 @@
+<div class="dashboard-wrapper">
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <div class="welcome-msg">
+        <h1>Hello, {{developerName}} <span class="wave">👋</span></h1>
+        <p>Your workspace is ready. You have <strong>{{ countProjects }}</strong> active projects.</p>
+        <div class="quick-badges d-none d-md-flex gap-2 mt-2">
+           <span class="badge-custom"><i class="bi bi-cpu"></i> System: Online</span>
+           <span class="badge-custom"><i class="bi bi-shield-lock"></i> Secured</span>
+        </div>
+      </div>
+      <button class="btn-primary-action shadow-blue" (click)="gotoCreate()">
+        <i class="bi bi-plus-lg"></i> New Project
+      </button>
+    </header>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="icon-bg blue"><i class="bi bi-kanban"></i></div>
+        <div class="stat-info">
+          <h3>{{ countProjects }}</h3>
+          <p>Active</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-bg green"><i class="bi bi-stopwatch"></i></div>
+        <div class="stat-info">
+          <h3>{{weeklyHours}}h</h3>
+          <p>This Week</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-bg purple"><i class="bi bi-check2-circle"></i></div>
+        <div class="stat-info">
+          <h3>{{countHistoryProjects}}</h3>
+          <p>Completed</p>
+        </div>
+      </div>
+      <div class="stat-card d-none d-sm-flex">
+        <div class="icon-bg orange"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="stat-info">
+          <h3>$0/h</h3>
+          <p>Avg Rate</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="main-grid">
+      <div class="recent-projects">
+        <div class="section-title">
+          <h2>Active Operations</h2>
+          <a (click)="gotoToActive()" style="cursor: pointer;">View All</a>
+        </div>
+        
+        <div *ngIf="isLoading" class="loader-wrapper">
+          <div class="skeleton-project" *ngFor="let item of [1,2,3]">
+            <div class="skeleton-dot"></div>
+            <div class="skeleton-content">
+              <div class="skeleton-line title"></div>
+              <div class="skeleton-line sub"></div>
+            </div>
+          </div>
+          <div class="spinner-container">
+             <div class="spinner-border text-primary" role="status"></div>
+             <p>Updating operations...</p>
+          </div>
+        </div>
+
+        <div class="project-list" *ngIf="!isLoading">
+          <div class="project-item" [routerLink]="['/home/viewproject', project._id]" *ngFor="let project of projects" [ngClass]="{'is-completed': project.status === 'completed'}">
+            <div class="project-info">
+              <span class="status-dot" [ngClass]="project.status"></span>
+              <div>
+                <h4>{{ project.name }}</h4>
+                <p>{{ project.clientName }} • {{ project.updatedAt | date:'shortTime' }}</p>
+              </div>
+            </div>
+            
+            <div class="project-actions-wrapper">
+              <div class="project-meta">
+                <span class="rate">${{project.hourlyRate}}/h</span>
+                <i class="bi bi-chevron-right arrow"></i>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="projects.length === 0" class="text-center p-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <p class="text-muted mt-2">No projects found.</p>
+          </div>
+        </div>
+      </div>
+<div class="chart-wrapper">
+  <div class="chart-header">
+    <span class="chart-title">Weekly Productivity</span>
+    <span class="chart-value">{{weeklyHours}}h <small>this week</small></span>
+  </div>
+  
+  <div class="chart-container">
+    <ngx-charts-bar-vertical *ngIf="chartData && chartData.length > 0"
+      [results]="chartData"
+      [scheme]="colorScheme"
+      [xAxis]="true"
+      [yAxis]="false"
+      [showGridLines]="false"
+      [roundEdges]="true"
+      [barPadding]="22"
+      [animations]="true">
+    </ngx-charts-bar-vertical>
+
+    <div *ngIf="!chartData || chartData.length === 0" class="empty-chart-state">
+      <div class="ghost-bars">
+        <div class="ghost-bar" style="height: 30%"></div>
+        <div class="ghost-bar" style="height: 50%"></div>
+        <div class="ghost-bar" style="height: 40%"></div>
+        <div class="ghost-bar" style="height: 70%"></div>
+        <div class="ghost-bar" style="height: 20%"></div>
+      </div>
+      <div class="empty-msg">
+        <i class="bi bi-bar-chart"></i>
+        <p>No activity yet</p>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</div>

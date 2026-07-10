@@ -1,0 +1,203 @@
+<div class="fb-form-page">
+  <!-- Glassmorphism blobs -->
+  <div class="fb-floating-bg blob-1"></div>
+  <div class="fb-floating-bg blob-2"></div>
+
+  <div class="col-12 col-md-11 col-lg-9 mx-auto position-relative z-index-1">
+    <div class="fb-form-card overflow-hidden">
+      <div class="row g-0">
+
+        <!-- ── Left Column: Guidelines & Illustration (Visible on desktop) ── -->
+        <div class="col-12 col-md-5 d-none d-md-flex flex-column justify-content-between p-4 p-lg-5 fb-form-card__left">
+          <div>
+            <div class="fb-form-card__icon-wrap mb-4">
+              <span>{{ isEditMode ? '✏️' : '💬' }}</span>
+            </div>
+
+            <h2 class="fb-form-card__left-title mb-3">We're all ears.</h2>
+            <p class="fb-form-card__left-desc mb-4">
+              Your insights shape the future of DevTracker. Share details to help us build the ultimate developer
+              command center.
+            </p>
+
+            <ul class="fb-guides-list list-unstyled d-flex flex-column gap-3 mb-5">
+              <li class="d-flex align-items-start gap-2">
+                <span class="guide-icon">🐛</span>
+                <div>
+                  <strong>Bug Reports</strong>
+                  <p class="m-0 small text-muted">Include error details & steps to reproduce.</p>
+                </div>
+              </li>
+              <li class="d-flex align-items-start gap-2">
+                <span class="guide-icon">✨</span>
+                <div>
+                  <strong>Feature Requests</strong>
+                  <p class="m-0 small text-muted">Propose tools that optimize your flow.</p>
+                </div>
+              </li>
+              <li class="d-flex align-items-start gap-2">
+                <span class="guide-icon">🔧</span>
+                <div>
+                  <strong>Improvements</strong>
+                  <p class="m-0 small text-muted">Suggest enhancements for current features.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Decorative glass card visual -->
+          <div class="fb-visual-card p-3 rounded-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <div class="indicator-dot green"></div>
+              <span class="small text-muted fw-bold uppercase letter-spacing">Feedback Loop</span>
+            </div>
+            <div class="progress-bars d-flex flex-column gap-1.5">
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" style="width: 75%;"></div>
+              </div>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" style="width: 45%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Right Column: Interactive Form ───────────────────────────── -->
+        <div class="col-12 col-md-7 p-4 p-lg-5 fb-form-card__right">
+          <div class="fb-form-card__header mb-4">
+            <span class="d-md-none fb-form-card__mobile-icon me-2">{{ isEditMode ? '✏️' : '📝' }}</span>
+            <div>
+              <h1 class="m-0">{{ isEditMode ? 'Edit Feedback' : 'Submit Feedback' }}</h1>
+              <p class="text-muted small mt-1" *ngIf="!isEditMode">Help us improve DevTracker by sharing your thoughts.
+              </p>
+              <p *ngIf="isEditMode && isAdmin" class="admin-badge-label m-0 mt-1">🛡️ Editing as Admin</p>
+            </div>
+          </div>
+
+          <!-- Role Context for Admin -->
+          <div class="role-context mb-4" *ngIf="isAdmin">
+            <span class="role-context__badge">🛡️ Admin</span>
+            <span class="role-context__text">Editing with administrative controls.</span>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+            <!-- Type Selector Tabs -->
+            <div class="field-group">
+              <label class="field-label">Type</label>
+              <div class="type-tabs">
+                <button type="button" *ngFor="let t of types" class="type-tab"
+                  [class.type-tab--active]="form.get('type')!.value === t" [id]="'type-tab-' + t"
+                  (click)="form.get('type')!.setValue(t)">{{ typeLabels[t] }}</button>
+              </div>
+            </div>
+
+            <!-- Subject Input -->
+            <div class="field-group">
+              <label class="field-label" for="subject">
+                Subject <span class="required">*</span>
+              </label>
+              <div class="input-glow-wrapper">
+                <input id="subject" type="text" class="field-input"
+                  [class.field-input--error]="hasError('subject', 'required') || hasError('subject', 'minlength') || hasError('subject', 'maxlength')"
+                  [class.field-input--valid]="form.get('subject')!.valid && form.get('subject')!.touched"
+                  formControlName="subject" placeholder="Brief summary of your feedback" maxlength="120"
+                  autocomplete="off" />
+              </div>
+              <div class="field-feedback">
+                <div>
+                  <span class="field-error" *ngIf="hasError('subject', 'required')">Subject is required.</span>
+                  <span class="field-error" *ngIf="hasError('subject', 'minlength')">Minimum 3 characters.</span>
+                  <span class="field-error" *ngIf="hasError('subject', 'maxlength')">Maximum 120 characters.</span>
+                </div>
+                <span class="field-char-count">{{ form.get('subject')!.value?.length ?? 0 }}/120</span>
+              </div>
+            </div>
+
+            <!-- Message Textarea -->
+            <div class="field-group">
+              <label class="field-label" for="message">
+                Message <span class="required">*</span>
+              </label>
+              <div class="input-glow-wrapper">
+                <textarea id="message" class="field-input field-textarea"
+                  [class.field-input--error]="hasError('message', 'required') || hasError('message', 'minlength')"
+                  [class.field-input--valid]="form.get('message')!.valid && form.get('message')!.touched"
+                  formControlName="message" placeholder="Provide details, context, and steps if applicable..." rows="5"
+                  maxlength="2000"></textarea>
+              </div>
+              <div class="field-feedback">
+                <div>
+                  <span class="field-error" *ngIf="hasError('message', 'required')">Message is required.</span>
+                  <span class="field-error" *ngIf="hasError('message', 'minlength')">Minimum 10 characters.</span>
+                </div>
+                <span class="field-char-count" [class.near-limit]="msgLength > 1800">{{ msgLength }}/2000</span>
+              </div>
+            </div>
+
+            <!-- Rating Stars (CVA Rating Component) -->
+            <div class="field-group">
+              <label class="field-label">
+                Rating <span class="required">*</span>
+              </label>
+              <div class="rating-box-glow">
+                <app-star-rating formControlName="rating" id="fb-rating"
+                  (ratingChange)="form.get('rating')!.markAsTouched()"></app-star-rating>
+              </div>
+              <span class="field-error" *ngIf="form.get('rating')!.touched && form.get('rating')!.hasError('required')">
+                Please select a rating.
+              </span>
+            </div>
+
+            <!-- Admin-only Controls -->
+            <ng-container *ngIf="isAdmin && isEditMode">
+              <div class="admin-section">
+                <div class="admin-section__header">
+                  <span class="admin-section__icon">🛡️</span>
+                  <span class="admin-section__label">Admin Controls</span>
+                  <span class="admin-section__sub">Internal only</span>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="status">Status</label>
+                  <div class="select-glow-wrapper">
+                    <select id="status" class="field-input field-select" formControlName="status">
+                      <option *ngFor="let s of statuses" [value]="s">
+                        {{ s === 'pending' ? '⏳ Pending' : s === 'under_review' ? '🔍 Under Review' : s === 'resolved' ?
+                        '✅ Resolved' : '🔒 Closed' }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="adminNote">Admin Note</label>
+                  <div class="input-glow-wrapper">
+                    <textarea id="adminNote" class="field-input field-textarea" formControlName="adminNote"
+                      placeholder="Internal tracking notes visible to admins." rows="3" maxlength="1000"></textarea>
+                  </div>
+                  <span class="field-error" *ngIf="hasError('adminNote', 'maxlength')">Max 1000 characters.</span>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Actions buttons -->
+            <div class="form-actions gap-2">
+              <button type="button" class="btn-ghost" id="fb-cancel-btn" (click)="cancel()">
+                Cancel
+              </button>
+              <button type="submit" class="btn-submit-premium" id="fb-submit-btn" [disabled]="isSubmitting">
+                <span *ngIf="!isSubmitting">
+                  {{ isEditMode ? 'Save Changes' : 'Submit Feedback' }}
+                </span>
+                <span *ngIf="isSubmitting" class="btn-spinner"></span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

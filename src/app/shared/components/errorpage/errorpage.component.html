@@ -1,0 +1,43 @@
+<div class="error-stage">
+  <div class="noise-overlay"></div>
+  <div class="spotlight"></div>
+
+  <div class="container content-zone">
+    <div class="row align-items-center min-vh-100">
+      
+      <div class="col-lg-6 text-center text-lg-start">
+        <div class="massive-text">404</div>
+        <div class="error-indicator">
+            <span class="line"></span>
+            <span class="msg">UNREACHABLE ROUTE</span>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="info-card">
+          <h1 class="heading">Lost in the stack?</h1>
+          <p class="description">
+            The page you are looking for at 
+            doesn't exist. It might have been moved to a new endpoint or deleted permanently.
+          </p>
+          
+          <div class="navigation-guide">
+            <p class="guide-label">Suggested Actions:</p>
+            <div class="action-list">
+              <a (click)="gotoDashboard()" class="action-item">
+                <div class="icon"><i class="bi bi-grid-1x2"></i></div>
+                <div class="text">
+                  <strong >Return to Dashboard</strong>
+                  <span>Access your main workspace</span>
+                </div>
+                <i class="bi bi-chevron-right arrow"></i>
+              </a>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

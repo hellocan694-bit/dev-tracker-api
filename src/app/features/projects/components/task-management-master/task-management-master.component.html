@@ -1,0 +1,101 @@
+<div class="task-manager py-5">
+  <div class="container-fluid px-4 px-lg-5">
+    
+    <div class="header d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+      <h2 class="mb-0 text-glow fs-1 fw-bold text-white">Project Board</h2>
+      <div class="search-bar glass-input-wrapper w-100">
+        <div class="position-relative">
+          <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-white-50"></i>
+          <input 
+            type="text" 
+            class="form-control glass-input ps-5 py-2 rounded-pill" 
+            placeholder="Search tasks or members..." 
+            [(ngModel)]="searchTerm"
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- To-Do Column -->
+      <div class="col-12 col-xl-4">
+        <div class="task-column glass-panel p-4 rounded-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-3">
+            <h4 class="column-title mb-0 text-white-50">To-Do</h4>
+            <span class="badge rounded-pill bg-secondary fs-6 px-3 py-2">{{ getTasksByStatus('To-Do').length }}</span>
+          </div>
+          <div class="task-list">
+            <ng-container *ngTemplateOutlet="taskListTpl; context: { $implicit: getTasksByStatus('To-Do'), nextStatus: 'In-Progress' }"></ng-container>
+          </div>
+        </div>
+      </div>
+      
+      <!-- In-Progress Column -->
+      <div class="col-12 col-xl-4">
+        <div class="task-column glass-panel p-4 rounded-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-primary pb-3">
+            <h4 class="column-title mb-0 text-primary">In Progress</h4>
+            <span class="badge rounded-pill bg-primary fs-6 px-3 py-2">{{ getTasksByStatus('In-Progress').length }}</span>
+          </div>
+          <div class="task-list">
+            <ng-container *ngTemplateOutlet="taskListTpl; context: { $implicit: getTasksByStatus('In-Progress'), nextStatus: 'Completed' }"></ng-container>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Completed Column -->
+      <div class="col-12 col-xl-4">
+        <div class="task-column glass-panel p-4 rounded-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-success pb-3">
+            <h4 class="column-title mb-0 text-success">Completed</h4>
+            <span class="badge rounded-pill bg-success fs-6 px-3 py-2">{{ getTasksByStatus('Completed').length }}</span>
+          </div>
+          <div class="task-list">
+            <ng-container *ngTemplateOutlet="taskListTpl; context: { $implicit: getTasksByStatus('Completed'), nextStatus: null }"></ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <ng-template #taskListTpl let-tasks let-nextStatus="nextStatus">
+    <div 
+      *ngFor="let task of tasks; trackBy: trackByTaskId" 
+      class="task-card p-4 mx-1 mb-3 rounded-4"
+      (mouseenter)="onHoverIn($event)"
+      (mouseleave)="onHoverOut($event)"
+    >
+      <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+        <h5 class="task-title mb-0 text-white flex-grow-1">{{ task.title }}</h5>
+        <span class="badge rounded-pill px-3 py-2 shadow-sm" [ngClass]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+      </div>
+      
+      <div class="task-details mb-4 text-white-50 small d-flex flex-column gap-2">
+        <div class="d-flex align-items-center gap-2"><i class="bi bi-calendar-event opacity-75"></i> {{ task.dueDate }}</div>
+        <div class="d-flex align-items-center gap-2"><i class="bi bi-person-circle opacity-75"></i> {{ task.assignedMember }}</div>
+      </div>
+      
+      <div class="d-flex gap-2 justify-content-between align-items-center flex-wrap pt-3 border-top border-secondary border-opacity-25 mt-2">
+        <div class="d-flex gap-2">
+          <button class="btn action-btn text-info glass-btn" (click)="editTask(task)" title="Edit">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+          <button class="btn action-btn text-danger glass-btn" (click)="deleteTask(task, $event)" title="Delete">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
+        <div>
+          <button *ngIf="nextStatus" class="btn btn-sm glass-btn text-success px-3 py-1 fw-medium" (click)="moveTask(task, nextStatus, $event)">
+            Move to {{ nextStatus }} <i class="bi bi-arrow-right-short fs-5 align-middle"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="tasks.length === 0" class="text-center text-white-50 py-5 my-4 mx-2 glass-panel rounded-4 empty-state">
+      <i class="bi bi-inbox fs-1 mb-2 d-block opacity-50"></i>
+      <p class="mb-0 fw-medium">No tasks found</p>
+    </div>
+  </ng-template>
+</div>

@@ -1,0 +1,13 @@
+<div class="app-layout">
+  <app-sidebar *ngIf="showSidebar"></app-sidebar>
+
+  <div class="main-wrapper">
+    <app-navbar></app-navbar>
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+
+    <app-footer></app-footer>
+    </main>
+  </div>
+</div>

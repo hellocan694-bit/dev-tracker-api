@@ -1,0 +1,171 @@
+$purple:  #8e44ad;
+$orange:  #3498db;
+$text-muted: #abb2bf;
+
+// ─── Section wrapper ─────────────────────────────────────────────────────────
+
+.testimonials-section {
+  position: relative;
+  z-index: 10;
+  padding: 120px 5% 100px;
+  overflow: hidden;
+}
+
+// ─── Section Header ──────────────────────────────────────────────────────────
+
+.section-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: $purple;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, $purple, $orange);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: $text-muted;
+  max-width: 560px;
+  margin-inline: auto;
+  line-height: 1.6;
+}
+
+// ─── Columns layout ──────────────────────────────────────────────────────────
+
+.columns-wrapper {
+  display: flex;
+  gap: 20px;
+  height: 600px;                       // viewport window height
+  overflow: hidden;
+  align-items: flex-start;
+
+  // Fade mask top & bottom — the "infinite scroll" effect
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+}
+
+.scroll-column-outer {
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+}
+
+// The actual scrolling div — GSAP translates this
+.scroll-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  will-change: transform;
+}
+
+// ─── Testimonial Card (Glassmorphism) ────────────────────────────────────────
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    border-color: rgba($purple, 0.35);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba($purple, 0.12);
+  }
+}
+
+// ─── Card internals ──────────────────────────────────────────────────────────
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $purple 0%, $orange 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.author-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.author-role {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
+
+.card-content {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  line-height: 1.65;
+  margin: 0 0 14px;
+}
+
+.star-row {
+  display: flex;
+  gap: 3px;
+
+  i {
+    font-size: 0.75rem;
+    color: #fbbf24;   // amber star
+  }
+}
+
+// ─── Responsive tweaks ───────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .testimonials-section { padding: 80px 5% 60px; }
+  .columns-wrapper { height: 500px; }
+}

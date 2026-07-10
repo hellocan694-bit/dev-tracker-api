@@ -1,0 +1,111 @@
+.paymob-page-container {
+  height: 100vh;
+  width: 100%;
+  background-color: #080808;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+// Top Bar with Back Button
+.top-nav-bar {
+  background-color: #111827;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  z-index: 50;
+
+  // On larger screens, the desktop navbar might cover it, so we ensure visibility
+  @media (min-width: 640px) {
+    padding: 1.25rem 2rem;
+  }
+}
+
+.btn-cancel-payment {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  color: #9ca3af;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    color: #ffffff;
+    transform: translateX(-2px);
+  }
+
+  .back-arrow-svg {
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-right: 0.5rem;
+  }
+}
+
+// Error Container and Alert
+.error-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.error-alert-box {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid #ef4444;
+  border-radius: 8px;
+  padding: 1rem;
+  max-width: 28rem;
+  width: 100%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.alert-layout {
+  display: flex;
+}
+
+.alert-icon-wrapper {
+  flex-shrink: 0;
+
+  .alert-icon-svg {
+    height: 1.25rem;
+    width: 1.25rem;
+    color: #f87171;
+  }
+}
+
+.alert-text-wrapper {
+  margin-left: 0.75rem;
+
+  .alert-message {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #fca5a5;
+    font-weight: 500;
+    line-height: 1.25rem;
+  }
+}
+
+// embedded iframe
+.iframe-container {
+  flex: 1;
+  background-color: #ffffff; // Paymob checkout iframe requires a clean white canvas
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+.secure-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}

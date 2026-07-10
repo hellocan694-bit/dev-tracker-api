@@ -1,0 +1,62 @@
+// ننسخ نفس الستايل اللي عملناه لصفحة الـ Register
+.auth-wrapper {
+  background-color: #1a1a1a;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+
+  .auth-container {
+    width: 100%;
+    max-width: 420px;
+    z-index: 10;
+  }
+
+  .circle-top {
+    position: absolute; top: -50px; left: -60px;
+    width: 200px; height: 200px;
+    background-color: #6e5a1b; border-radius: 50%;
+  }
+
+  .circle-bottom {
+    position: absolute; bottom: -100px; right: -50px;
+    width: 300px; height: 300px;
+    background-color: #2b4566; border-radius: 50%;
+  }
+
+  .auth-input {
+    background-color: transparent !important;
+    border: 2px solid #ffffff !important;
+    border-radius: 12px;
+    color: white !important;
+    padding: 15px;
+    font-size: 1.3rem;
+    
+    // لإعطاء مسافة بين أرقام الكود
+    &.letter-spacing-lg {
+      letter-spacing: 0.5rem;
+      font-weight: bold;
+    }
+
+    &::placeholder {
+      color: #bbbbbb;
+      letter-spacing: normal; // يرجع الطبيعي في الـ placeholder
+      font-size: 1rem;
+    }
+  }
+
+  .action-btn {
+    border-radius: 20px;
+    padding: 12px;
+    font-size: 1.1rem;
+    background-color: #ffffff;
+    border: none;
+    color: #000;
+    &:hover { background-color: #f0f0f0; }
+  }
+
+  .auth-footer-text {
+    color: #4a90e2;
+    font-size: 0.9rem;
+  }
+}

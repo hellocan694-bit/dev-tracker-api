@@ -1,0 +1,210 @@
+$primary: #3b82f6;
+$accent: #a855f7;
+$bg-dark: #030303;
+$glass-bg: rgba(255, 255, 255, 0.03);
+$glass-border: rgba(255, 255, 255, 0.08);
+
+.invitations-wrapper {
+  background: $bg-dark;
+  min-height: 100vh;
+  padding: 80px 0; // قللت البادينج عشان الكونتينر هيظبط الجوانب
+  color: white;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+
+  .header-section {
+    margin-bottom: 50px;
+    padding: 0 15px;
+    .tag { color: $primary; font-weight: 800; letter-spacing: 3px; font-size: 0.7rem; text-transform: uppercase; }
+    h1 { 
+      font-size: clamp(2rem, 8vw, 3.5rem); // خط ريبونسب بيصغر مع الشاشة
+      font-weight: 900; 
+      span { color: $primary; } 
+    }
+  }
+
+  // الكارت هيفضل زي ما هو بالظبط مع تعديل بسيط للـ Flex
+  .invite-card {
+    background: $glass-bg;
+    backdrop-filter: blur(20px);
+    border: 1px solid $glass-border;
+    border-radius: 30px;
+    padding: 30px;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &:hover {
+      transform: translateY(-10px);
+      border-color: rgba($primary, 0.4);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .card-header {
+      display: flex; gap: 15px; align-items: center; margin-bottom: 25px;
+      
+      .avatar {
+        min-width: 60px; height: 60px; border-radius: 18px;
+        background: linear-gradient(135deg, $primary, $accent);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 1.5rem; color: white;
+      }
+
+      .meta {
+        h3 { font-size: 1.1rem; margin: 2px 0; font-weight: 700; color: #fff; }
+        p { font-size: 0.8rem; color: #64748b; margin: 0; }
+        .role-tag { font-size: 0.6rem; font-weight: 800; color: $primary; text-transform: uppercase; }
+      }
+    }
+
+    .card-body {
+      flex-grow: 1;
+      margin-bottom: 25px;
+      .invite-msg { color: #94a3b8; font-size: 0.9rem; line-height: 1.5; }
+    }
+
+    .card-actions {
+      display: flex; gap: 10px;
+      button {
+        flex: 1; padding: 12px; border-radius: 14px; font-weight: 800; border: none; transition: 0.3s;
+        font-size: 0.85rem;
+        &.btn-reject { background: rgba(239, 68, 68, 0.1); color: #ef4444; &:hover { background: #ef4444; color: white; } }
+        &.btn-accept { background: white; color: black; &:hover { transform: scale(1.03); } }
+      }
+    }
+  }
+
+  .empty-state-container {
+  padding-top: 100px !important;
+  
+  .empty-icon-wrapper {
+    font-size: 5rem;
+    color: rgba($primary, 0.2); // لون خفيف من الـ primary بتاعك
+    
+    .floating-icon {
+      animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba($primary, 0.1));
+    }
+  }
+
+  h3 {
+    color: #fff;
+    letter-spacing: 1px;
+  }
+}
+
+// أنيميشن للأيقونة عشان متبقاش ثابتة
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
+}
+
+// Skeleton Loader Styles
+.skeleton-card {
+  pointer-events: none;
+  .avatar-skeleton {
+    width: 60px; height: 60px; border-radius: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    position: relative; overflow: hidden;
+  }
+  
+  .line {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 10px;
+    border-radius: 4px;
+    position: relative; overflow: hidden;
+    &.short { width: 40%; }
+    &.medium { width: 60%; }
+    &.long { width: 80%; }
+    &.full { width: 100%; }
+    
+    // تأثير النور المتحرك
+    &::after, .avatar-skeleton::after {
+      content: "";
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+  }
+
+  .actions-skeleton {
+    display: flex; gap: 10px;
+    .btn-skeleton {
+      flex: 1; height: 40px; border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+// أنيميشن الأيقونة (زي ما عملناه)
+.floating-icon {
+  animation: float 3s ease-in-out infinite;
+}
+
+// زرار الريفريش اللي فوق في الهيدر
+.btn-refresh-top {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: $primary;
+  width: 45px; height: 45px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  transition: 0.3s;
+  &:hover {
+    background: $primary;
+    color: white;
+    transform: rotate(180deg);
+  }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// الزرار اللي في نص الـ Empty State
+.btn-cyber-refresh {
+  background: transparent;
+  border: 1px solid $primary;
+  color: $primary;
+  padding: 10px 25px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+  transition: 0.3s;
+  &:hover {
+    background: rgba($primary, 0.1);
+    box-shadow: 0 0 15px rgba($primary, 0.3);
+    transform: translateY(-2px);
+  }
+}
+
+// تعديل بسيط للـ Skeleton عشان يظبط مع الـ HTML الجديد
+.skeleton-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 30px;
+  padding: 30px;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+  .bg-decor .orb {
+    position: absolute; top: -100px; right: -50px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba($primary, 0.1) 0%, transparent 70%);
+    filter: blur(50px);
+  }
+}

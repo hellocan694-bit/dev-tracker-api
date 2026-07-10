@@ -1,0 +1,932 @@
+// Variables
+$bg-dark: #050505;
+$card-bg: #0f0f0f;
+$primary-blue: #0d6efd;
+$success-green: #10b981;
+$text-gray: #9ca3af;
+$text-muted: #4b5563;
+
+::ng-deep body {
+  background-color: $bg-dark !important;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.side-panel {
+  width: 100%;
+  min-width: 0; // مهم جداً عشان الـ Grid ميكسرش الـ Layout
+
+  .productivity-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .chart-wrapper {
+      width: 100%;
+      min-height: 250px; // ثبت ارتفاع أدنى عشان ميبقاش مضغوط
+
+      .chart-container {
+        width: 100%;
+        height: 100%; // يملأ الـ wrapper
+        display: block;
+
+        ::ng-deep {
+          ngx-charts-bar-vertical {
+            display: block;
+            width: 100% !important;
+          }
+
+          svg {
+            width: 100% !important; // ده اللي بيخليه Stretch
+            height: auto !important;
+          }
+        }
+      }
+    }
+  }
+}
+
+// تعديل الموبايل عشان الأعمدة متدخلش في بعضها
+@media (max-width: 576px) {
+  .productivity-card {
+    padding: 20px;
+
+    .chart-container {
+      height: 160px; // نصغر الطول شوية عشان الشاشة الصغيرة
+    }
+  }
+}
+
+
+::ng-deep body {
+  background-color: $bg-dark !important;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; // يمنع السكرول بالعرض نهائياً
+}
+
+.dashboard-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background-color: $bg-dark;
+  display: block; // غيرناه لـ block عشان الـ flex بيعمل مشاكل في العرض
+  position: relative;
+  overflow-x: hidden;
+
+  .dashboard-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 100px 20px 50px; // مسافة معقولة للهيدر
+    box-sizing: border-box;
+
+    @media (max-width: 768px) {
+      padding: 80px 15px 30px;
+    }
+
+    // --- Header ---
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap; // عشان الزرار ينزل تحت في الشاشات الصغيرة
+      gap: 20px;
+
+      @media (max-width: 576px) {
+        flex-direction: column;
+        text-align: center;
+
+        .btn-primary-action {
+          width: 100%;
+        }
+      }
+
+      h1 {
+        font-weight: 800;
+        font-size: calc(1.5rem + 1vw);
+        margin: 0;
+        color: white;
+      }
+
+      p {
+        color: $text-gray;
+        margin-top: 5px;
+      }
+    }
+
+    // --- Stats Grid ---
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+      width: 100%;
+
+      @media (max-width: 576px) {
+        grid-template-columns: repeat(2, 1fr); // كارتين في السطر للموبايل
+      }
+
+      @media (max-width: 400px) {
+        grid-template-columns: 1fr; // كارت واحد للموبايلات الضيقة جداً
+      }
+
+      .stat-card {
+        background: $card-bg;
+        border: 1px solid #1a1a1a;
+        padding: 20px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0; // يمنع خروج النص
+
+        .icon-bg {
+          width: 45px;
+          height: 45px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+
+          &.blue {
+            background: rgba($primary-blue, 0.1);
+            color: $primary-blue;
+          }
+
+          &.green {
+            background: rgba($success-green, 0.1);
+            color: $success-green;
+          }
+
+          &.purple {
+            background: rgba(168, 85, 247, 0.1);
+            color: #a855f7;
+          }
+        }
+
+        h3 {
+          font-size: 1.2rem;
+          margin: 0;
+          color: white;
+        }
+
+        p {
+          font-size: 0.75rem;
+          color: $text-muted;
+          margin: 0;
+        }
+      }
+    }
+
+    // --- Main Grid ---
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 20px;
+      width: 100%;
+
+      @media (max-width: 1100px) {
+        grid-template-columns: 1fr; // الشارت ينزل تحت الـ Projects
+      }
+    }
+
+    // --- Cards ---
+    .recent-projects,
+    .chart-wrapper {
+      background: $card-bg;
+      border: 1px solid #1a1a1a;
+      padding: 25px;
+      border-radius: 24px;
+      width: 100%;
+      box-sizing: border-box;
+      min-width: 0; // Critical for flex/grid children
+    }
+
+    // --- Projects List ---
+    .project-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #1a1a1a;
+      gap: 10px;
+
+      @media (max-width: 500px) {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .project-actions-wrapper {
+          width: 100%;
+          text-align: right;
+        }
+      }
+
+      .project-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        h4 {
+          font-size: 0.95rem;
+          margin: 0;
+          color: white;
+        }
+
+        p {
+          font-size: 0.8rem;
+          color: $text-muted;
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+// --- Chart UI Fix ---
+.chart-container {
+  width: 100%;
+  height: 250px;
+  margin-top: 20px;
+  overflow: hidden;
+
+  @media (max-width: 576px) {
+    height: 180px;
+  }
+
+  ::ng-deep svg {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+.btn-primary-action {
+  background: $primary-blue;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dashboard-wrapper {
+  min-height: 100vh;
+  display: flex; // لضمان وجود السايد بار بجانب المحتوى
+  font-family: 'Inter', sans-serif;
+  color: white;
+  position: relative;
+
+  // تأثير الأنوار - يظهر في الشاشات الكبيرة فقط
+  @media (min-width: 992px) {
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(150px);
+      z-index: 0;
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    &::before {
+      background: $primary-blue;
+      top: -100px;
+      right: -100px;
+    }
+
+    &::after {
+      background: #6366f1;
+      bottom: -100px;
+      left: -100px;
+    }
+  }
+
+  .dashboard-container {
+    flex-grow: 1;
+    z-index: 1;
+
+    // تعديل الـ Padding لهروب الكونتنت من تحت الـ Navbar
+    padding: 120px 4% 50px;
+
+    max-width: 1400px;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+      padding: 100px 15px 30px;
+    }
+
+    // Header
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+
+      h1 {
+        font-weight: 800;
+        font-size: 2.2rem;
+        letter-spacing: -1px;
+        margin: 0;
+      }
+
+      p {
+        color: $text-gray;
+        margin-top: 5px;
+      }
+
+      .badge-custom {
+        background: #1a1a1a;
+        padding: 4px 12px;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        color: $text-muted;
+        border: 1px solid #222;
+      }
+
+      .btn-primary-action {
+        background: $primary-blue;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 14px;
+        font-weight: 600;
+        transition: 0.3s;
+
+        &:hover {
+          transform: translateY(-2px);
+          filter: brightness(1.1);
+        }
+      }
+    }
+
+    // Stats Grid
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+
+      .stat-card {
+        background: $card-bg;
+        border: 1px solid #1a1a1a;
+        padding: 25px;
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        transition: 0.3s;
+
+        &:hover {
+          border-color: $primary-blue;
+          transform: translateY(-3px);
+        }
+
+        .icon-bg {
+          width: 50px;
+          height: 50px;
+          border-radius: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &.blue {
+            background: rgba($primary-blue, 0.1);
+            color: $primary-blue;
+          }
+
+          &.green {
+            background: rgba($success-green, 0.1);
+            color: $success-green;
+          }
+
+          &.purple {
+            background: rgba(168, 85, 247, 0.1);
+            color: #a855f7;
+          }
+
+          &.orange {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+          }
+        }
+
+        h3 {
+          font-size: 1.6rem;
+          font-weight: 800;
+          margin: 0;
+        }
+
+        p {
+          color: $text-muted;
+          font-size: 0.8rem;
+          margin: 0;
+          text-transform: uppercase;
+        }
+      }
+    }
+
+    // Main Grid Logic
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+
+      @media (max-width: 1100px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .recent-projects,
+    .productivity-card {
+      background: $card-bg;
+      border: 1px solid #1a1a1a;
+      padding: 30px;
+      border-radius: 28px;
+
+      h2 {
+        font-size: 1.2rem;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        a {
+          font-size: 0.85rem;
+          color: $primary-blue;
+          text-decoration: none;
+        }
+      }
+    }
+
+    // Project Items & Quick Actions
+    .project-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 20px;
+      border-bottom: 1px solid #1a1a1a;
+      border-radius: 18px;
+      transition: 0.3s;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.02);
+
+        .project-meta {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+
+        .quick-actions {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .project-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+
+          &.active {
+            background: $primary-blue;
+            box-shadow: 0 0 8px $primary-blue;
+          }
+        }
+
+        h4 {
+          font-size: 1rem;
+          margin: 0;
+          font-weight: 600;
+        }
+
+        p {
+          font-size: 0.8rem;
+          color: $text-muted;
+          margin: 0;
+        }
+      }
+
+      .project-actions-wrapper {
+        position: relative;
+        width: 110px;
+        display: flex;
+        justify-content: flex-end;
+
+        .project-meta {
+          transition: 0.3s;
+          color: white;
+          font-weight: 700;
+
+          .arrow {
+            margin-left: 8px;
+            color: #333;
+          }
+        }
+
+        .quick-actions {
+          position: absolute;
+          right: 0;
+          display: flex;
+          gap: 8px;
+          opacity: 0;
+          transform: translateX(20px);
+          transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+          .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &.complete {
+              background: $success-green;
+              color: white;
+            }
+
+            &.archive {
+              background: #222;
+              color: #ef4444;
+            }
+          }
+        }
+      }
+    }
+
+    // Productivity Chart
+    .chart-mock {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      height: 140px;
+      margin-bottom: 20px;
+
+      .bar {
+        flex: 1;
+        background: #222;
+        border-radius: 4px;
+        transition: 0.4s;
+
+        &.active {
+          background: $primary-blue;
+          box-shadow: 0 0 15px rgba($primary-blue, 0.4);
+        }
+      }
+    }
+
+    .chart-desc {
+      font-size: 0.85rem;
+      color: $text-muted;
+      text-align: center;
+    }
+
+    // Completed Projects Section
+    .completed-projects-section {
+      background: rgba(255, 255, 255, 0.01);
+      border-radius: 28px;
+      padding: 25px;
+      border: 1px solid #1a1a1a;
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+
+        h2 {
+          font-size: 1.1rem;
+
+          i {
+            color: $success-green;
+            margin-right: 8px;
+          }
+        }
+
+        .count-pill {
+          background: rgba($success-green, 0.1);
+          color: $success-green;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+        }
+      }
+
+      .completed-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: #0a0a0a;
+        border-radius: 16px;
+
+        .item-main {
+          display: flex;
+          gap: 15px;
+          align-items: center;
+
+          .done-icon {
+            color: $success-green;
+          }
+
+          h4 {
+            font-size: 0.95rem;
+            margin: 0;
+          }
+
+          p {
+            font-size: 0.8rem;
+            color: $text-muted;
+            margin: 0;
+          }
+        }
+
+        .item-stats {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+
+          .price {
+            font-weight: 700;
+          }
+
+          .view-btn {
+            background: #1a1a1a;
+            border: none;
+            color: #555;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+
+            &:hover {
+              background: $primary-blue;
+              color: white;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animations
+.shadow-blue {
+  box-shadow: 0 10px 25px rgba($primary-blue, 0.25);
+}
+
+.wave {
+  display: inline-block;
+  animation: wave-anim 2s infinite;
+}
+
+@keyframes wave-anim {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(20deg);
+  }
+}
+
+/* --- الروشتة النهائية للريبونسف --- */
+
+@media (max-width: 1100px) {
+  .dashboard-wrapper .dashboard-container {
+
+    // 1. تحويل الجريد لعمود واحد
+    .main-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-wrapper .dashboard-container {
+    // 2. تظبيط الهيدر والزرار
+    padding-top: 80px; // عشان ميبقاش لازق في السقف
+
+    .dashboard-header {
+      flex-direction: column;
+      text-align: center;
+      gap: 15px;
+
+      .btn-primary-action {
+        width: 100%;
+      }
+    }
+
+    // 3. الكروت: 2 في السطر بدل ما يختفوا أو يضربوا
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 10px;
+
+      .stat-card {
+        padding: 15px;
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    .project-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+
+
+      .project-actions-wrapper {
+        width: 100%;
+        justify-content: space-between;
+
+        .quick-actions {
+          position: static;
+          opacity: 1;
+          transform: none;
+        }
+      }
+    }
+  }
+}
+
+/* Premium Loader Styles */
+.loader-wrapper {
+  .skeleton-project {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: rgba(30, 41, 59, 0.5);
+    /* Semi-transparent navy */
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    position: relative;
+    overflow: hidden; // Critical for the shimmer effect
+
+    // The Magic Shimmer Effect
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg,
+          rgba(255, 255, 255, 0) 0,
+          rgba(255, 255, 255, 0.05) 20%,
+          rgba(255, 255, 255, 0.1) 60%,
+          rgba(255, 255, 255, 0));
+      animation: shimmer 2s infinite;
+    }
+
+    .skeleton-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #334155; // Darker slate
+      margin-right: 15px;
+    }
+
+    .skeleton-line {
+      background: #334155;
+      border-radius: 4px;
+
+      &.title {
+        width: 140px;
+        height: 12px;
+        margin-bottom: 10px;
+      }
+
+      &.sub {
+        width: 80px;
+        height: 8px;
+      }
+    }
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Spinner adjustment to match your theme */
+.spinner-border {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-width: 0.2em;
+  color: #38bdf8 !important;
+  /* Cyber Blue */
+}
+
+@media (max-width: 480px) {
+
+  // 5. الشاشات الصغيرة جداً: كل حاجة فوق بعض
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .completed-item {
+    flex-direction: column;
+    gap: 10px;
+
+    .item-stats {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+}
+
+.chart-wrapper {
+  background: rgba(255, 255, 255, 0.02); // خلفية شبه شفافة
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  backdrop-filter: blur(10px); // تأثير زجاجي خفيف
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: rgba(59, 130, 246, 0.4); // توهج أزرق خفيف عند الهوفر
+    box-shadow: 0 10px 30px -15px rgba(59, 130, 246, 0.2);
+  }
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+
+  .chart-title {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .chart-value {
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 700;
+
+    small {
+      font-size: 0.75rem;
+      color: #4ade80; // أخضر للنمو
+      font-weight: 400;
+    }
+  }
+}
+
+.chart-container {
+  height: 200px;
+  width: 100%;
+
+  ::ng-deep {
+
+    /* تجميل خطوط الـ X-Axis */
+    .ngx-charts text {
+      fill: rgba(255, 255, 255, 0.4) !important;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    /* إخفاء الخطوط اللي بتظهر تحت الحروف */
+    .domain {
+      display: none;
+    }
+
+    /* جعل الأعمدة لها تأثير ناعم */
+    .bar {
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+      filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.1));
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+/* حل نهائي لأي بروز في الـ Rows */
+::ng-deep .row {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}

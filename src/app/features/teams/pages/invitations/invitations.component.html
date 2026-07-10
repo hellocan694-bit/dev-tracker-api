@@ -1,0 +1,67 @@
+<div class="invitations-wrapper">
+  <div class="bg-decor">
+    <div class="orb"></div>
+  </div>
+
+  <div class="container">
+    <div class="header-section d-flex justify-content-between align-items-end">
+      <div>
+        <span class="tag">Incoming Protocol</span>
+        <h1>Invitations<span>.</span></h1>
+      </div>
+      <button class="btn-refresh-top" (click)="loadMyInvitations()" [disabled]="isLoading">
+        <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+      </button>
+    </div>
+
+    <div class="row g-4" *ngIf="isLoading">
+      <div class="col-12 col-md-6 col-lg-4" *ngFor="let item of [1,2,3]">
+        <div class="invite-card skeleton-card">
+          <div class="avatar-skeleton"></div>
+          <div class="line short mt-4"></div>
+          <div class="line long"></div>
+          <div class="line full mt-4"></div>
+          <div class="actions-skeleton mt-4">
+            <div class="btn-skeleton"></div>
+            <div class="btn-skeleton"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4" *ngIf="!isLoading && myInvitations.length > 0">
+      <div class="col-12 col-md-6 col-lg-4" *ngFor="let invite of myInvitations">
+        <div class="invite-card h-100">
+          <div class="card-header">
+            <div class="avatar">
+              {{ (invite.sender?.name?.[0] || 'A').toUpperCase() }}
+            </div>
+            <div class="meta">
+              <span class="role-tag">Team Lead</span>
+              <h3>{{ invite.sender?.name || 'Unknown Admin' }}</h3>
+              <p class="text-truncate" style="max-width: 120px;">{{ invite.sender?.email }}</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="invite-msg">Inviting you to join their elite development squad.</p>
+          </div>
+          <div class="card-actions">
+            <button class="btn-reject" (click)="handleInvite(invite._id, 'reject')">Decline</button>
+            <button class="btn-accept" (click)="handleInvite(invite._id, 'accept')">Join Squad</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && myInvitations.length === 0" class="empty-state-container text-center py-5">
+      <div class="empty-icon-wrapper mb-4">
+        <i class="fas fa-ghost floating-icon"></i>
+      </div>
+      <h3 class="fw-bold mb-2">Inbox is Clear</h3>
+      <p class="text-muted mx-auto mb-4" style="max-width: 300px;">No pending squad invites found.</p>
+      <button class="btn-cyber-refresh" (click)="loadMyInvitations()">
+        <i class="fas fa-redo-alt me-2"></i> Sync Buffer
+      </button>
+    </div>
+  </div>
+</div>

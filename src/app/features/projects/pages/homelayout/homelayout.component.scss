@@ -1,0 +1,64 @@
+.app-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #050505;
+
+  // ... (كود السايد بار والـ main-wrapper بتاعك زي ما هو) ...
+
+  .main-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+    height: 100vh;
+    overflow: hidden;
+
+    .content-area {
+      flex-grow: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 20px;
+      position: relative;
+      display: flex; // ضفنا دي عشان الفوتر يترحل لتحت لو الصفحة فاضية
+      flex-direction: column;
+
+      router-outlet + * { // زقة صغيرة عشان الفوتر ميبقاش لازق في المحتوى
+        flex-shrink: 0;
+      }
+
+      // --- ستايل الفوتر الجديد ---
+      .dashboard-footer {
+        margin-top: auto; // سحر: بيزق الفوتر لآخر الصفحة حتى لو مفيش كونتنت
+        padding-top: 2rem;
+
+        .footer-divider {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        }
+
+        .system-status {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          .status-indicator-pulse {
+            width: 6px; height: 6px; background: #10b981; border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+            animation: status-glow 2s infinite;
+          }
+          .smallest { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; }
+        }
+
+        .footer-link {
+          color: #666; text-decoration: none; font-size: 1.1rem; transition: 0.2s;
+          &:hover { color: #fff; transform: translateY(-2px); }
+        }
+      }
+    }
+  }
+}
+
+@keyframes status-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
