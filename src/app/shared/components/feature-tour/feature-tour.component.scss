@@ -99,6 +99,10 @@ $radius:    18px;
     border-top: none;
     border-left: none;
   }
+
+  &.ft-tooltip--arrow-none::before {
+    display: none;
+  }
 }
 
 // ─── Header ─────────────────────────────────────────────────────────────────

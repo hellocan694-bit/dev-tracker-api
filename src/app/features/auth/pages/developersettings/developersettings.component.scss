@@ -1,124 +1,512 @@
-// إعدادات الألوان والـ Glass
-$primary-blue: #38bdf8;
-$glass-bg: rgba(255, 255, 255, 0.05);
-$glass-border: rgba(255, 255, 255, 0.1);
+/* ═══════════════════════════════════════════════════════════════════════
+   Developer Settings — Component SCSS
+   Glassmorphism dark theme · Bootstrap 5 + custom · NO Tailwind
+   ═══════════════════════════════════════════════════════════════════════ */
 
+// ── Design Tokens ──────────────────────────────────────────────────────────────
+$bg-deep:       #040810;
+$bg-card:       rgba(255, 255, 255, 0.04);
+$bg-card-hover: rgba(255, 255, 255, 0.07);
+$border-glass:  rgba(255, 255, 255, 0.09);
+$accent-cyan:   #22d3ee;
+$accent-blue:   #3b82f6;
+$danger:        #ef4444;
+$danger-soft:   rgba(239, 68, 68, 0.12);
+$text-dim:      rgba(255, 255, 255, 0.45);
+
+// ── Page Wrapper ───────────────────────────────────────────────────────────────
 .settings-page-wrapper {
-  position: relative;
   min-height: 100vh;
-  overflow-x: hidden;
-  background-color: #030712; // لون غامق ناعم مش أسود صريح
-}
+  background:
+    radial-gradient(ellipse at 20% 10%,  rgba(34, 211, 238, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 90%,  rgba(59, 130, 246, 0.06) 0%, transparent 60%),
+    linear-gradient(160deg, #070d1a 0%, #0c1524 50%, #060b14 100%);
+  position: relative;
 
-// الباك جراوند الملونة (Gradient Blur)
-.bg-gradient-blur {
-  position: fixed;
-  top: -10%;
-  right: -5%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(56, 189, 248, 0) 70%);
-  filter: blur(80px);
-  z-index: 0;
-  pointer-events: none;
-
-  &::before {
-    content: '';
-    position: absolute;
-    bottom: -20%;
-    left: -100%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0) 70%);
-    filter: blur(80px);
+  .content-area {
+    position: relative;
+    z-index: 1;
   }
 }
 
-.content-area {
-  position: relative;
-  z-index: 1;
+// ── Loading Overlay ────────────────────────────────────────────────────────────
+.loading-overlay {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(4, 8, 16, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
 }
 
-// كروت الزجاج
+// ── Fade-in Animation ──────────────────────────────────────────────────────────
+.fade-in {
+  animation: fadeInUp 0.35s ease both;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Avatar (header small) ──────────────────────────────────────────────────────
+.avatar-sm {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $accent-cyan, $accent-blue);
+  align-items: center; justify-content: center;
+  font-size: 1.2rem; font-weight: 700; color: #fff;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.35);
+  span { color: #fff; }
+}
+
+// ── Glass Card ─────────────────────────────────────────────────────────────────
 .glass-card {
-  background: $glass-bg;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid $glass-border;
-  border-radius: 28px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  background: $bg-card;
+  border: 1px solid $border-glass;
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color 0.25s, box-shadow 0.25s;
+
+  &:hover {
+    border-color: rgba(34, 211, 238, 0.18);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  // Danger zone variant
+  &.danger-zone {
+    border-color: rgba($danger, 0.25);
+    background: rgba($danger, 0.04);
+
+    &:hover {
+      border-color: rgba($danger, 0.4);
+      box-shadow: 0 8px 40px rgba($danger, 0.12);
+    }
+  }
 }
 
-// الأفاتار مع الجلو (Glow)
+// ── Settings Tabs ──────────────────────────────────────────────────────────────
+.settings-tabs {
+  display: flex;
+  gap: 6px;
+  list-style: none;
+  padding: 6px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-glass;
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+}
+
+.settings-tab-btn {
+  display: flex;
+  align-items: center;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: $text-dim;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &.active {
+    background: linear-gradient(135deg, rgba($accent-cyan, 0.18), rgba($accent-blue, 0.18));
+    color: $accent-cyan;
+    border: 1px solid rgba($accent-cyan, 0.25);
+    font-weight: 600;
+    box-shadow: 0 2px 16px rgba($accent-cyan, 0.1);
+  }
+
+  &.danger-tab.active {
+    background: rgba($danger, 0.14);
+    color: $danger;
+    border-color: rgba($danger, 0.3);
+  }
+
+  &.danger-tab:hover:not(.active) {
+    color: $danger;
+  }
+}
+
+// ── Avatar (profile card) ──────────────────────────────────────────────────────
 .avatar-container {
   position: relative;
   display: inline-block;
-  
-  .avatar-glow {
-    width: 100px; height: 100px;
-    background: linear-gradient(135deg, $primary-blue, #8b5cf6);
-    border-radius: 35px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 2.2rem; font-weight: 800; color: white;
-    box-shadow: 0 15px 30px rgba(56, 189, 248, 0.3);
-  }
-
-  .btn-edit-avatar {
-    position: absolute; bottom: -5px; right: -5px;
-    background: #fff; border: none; width: 32px; height: 32px;
-    border-radius: 12px; color: #000; font-size: 0.9rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  }
 }
 
-// الـ Inputs المودرن
+.avatar-glow {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $accent-cyan, $accent-blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.6rem; font-weight: 800; color: #fff;
+  box-shadow:
+    0 0 0 3px rgba($accent-cyan, 0.2),
+    0 0 40px rgba($accent-cyan, 0.3);
+  margin: 0 auto;
+  letter-spacing: -1px;
+}
+
+// ── Badge ─────────────────────────────────────────────────────────────────────
+.badge-role {
+  background: rgba($accent-cyan, 0.1);
+  color: $accent-cyan;
+  border: 1px solid rgba($accent-cyan, 0.2);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+// ── Info Row ───────────────────────────────────────────────────────────────────
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-glass;
+  border-radius: 10px;
+  font-size: 0.83rem;
+}
+
+// ── Custom Input Group ─────────────────────────────────────────────────────────
 .custom-input-group {
   label {
-    display: block; font-size: 0.75rem; color: #94a3b8;
-    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+    display: block;
+    color: $text-dim;
+    font-size: 0.78rem;
     font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
   }
-  
-  input {
-    width: 100%; background: rgba(0, 0, 0, 0.2);
-    border: 1px solid $glass-border;
-    border-radius: 16px; padding: 14px 18px; color: #fff;
-    transition: all 0.3s ease;
+
+  input, .custom-select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid $border-glass;
+    border-radius: 12px;
+    color: #e2e8f0;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
 
     &:focus {
-      outline: none; border-color: $primary-blue;
-      background: rgba(0, 0, 0, 0.4);
-      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+      border-color: rgba($accent-cyan, 0.5);
+      box-shadow: 0 0 0 3px rgba($accent-cyan, 0.08);
+      background: rgba(34, 211, 238, 0.04);
     }
-    
-    &.locked { background: transparent; color: #64748b; cursor: not-allowed; }
+
+    &.locked {
+      cursor: not-allowed;
+      opacity: 0.65;
+      border-color: rgba(255, 255, 255, 0.06);
+
+      &:focus {
+        border-color: rgba(255, 255, 255, 0.06);
+        box-shadow: none;
+      }
+    }
+
+    &.is-invalid {
+      border-color: rgba($danger, 0.6);
+    }
+
+    &::placeholder { color: rgba(255, 255, 255, 0.25); }
+
+    option {
+      background: #0c1524;
+      color: #e2e8f0;
+    }
+  }
+
+  .invalid-feedback {
+    color: #f87171;
+    font-size: 0.78rem;
+    margin-top: 5px;
+    display: block;
+  }
+
+  small { font-size: 0.75rem; }
+}
+
+// ── Input with Icon (password eye / lock) ─────────────────────────────────────
+.input-with-icon {
+  position: relative;
+
+  input {
+    padding-right: 44px;
+  }
+
+  i, .btn-eye {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(34, 211, 238, 0.7);
+  }
+
+  .btn-eye {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+
+    i { position: static; transform: none; }
+
+    &:hover i { color: $accent-cyan; }
   }
 }
 
-.input-with-icon {
-  position: relative;
-  i { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); }
+// ── Toggle Cards (notification switches) ──────────────────────────────────────
+.toggle-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-glass;
+  border-radius: 14px;
+  transition: border-color 0.2s;
+
+  &:hover { border-color: rgba($accent-cyan, 0.18); }
+
+  .form-check-input {
+    width: 44px; height: 24px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+
+    &:checked {
+      background-color: $accent-cyan;
+      border-color: $accent-cyan;
+    }
+
+    &:focus { box-shadow: 0 0 0 3px rgba($accent-cyan, 0.15); }
+  }
 }
 
-// الأزرار
-.btn-glass-primary {
-  background: $primary-blue; color: #000; border: none;
-  padding: 12px 30px; border-radius: 16px; font-weight: 700;
-  transition: all 0.3s ease;
-  &:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2); }
+// ── Security Info Cards ────────────────────────────────────────────────────────
+.security-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-glass;
+  border-radius: 14px;
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  color: white;
-}
-.btn-glass-secondary {
-  background: rgba(255, 255, 255, 0.05); color: #fff;
-  border: 1px solid $glass-border; padding: 12px 30px; border-radius: 16px;
-  &:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+// ── Buttons ────────────────────────────────────────────────────────────────────
+.btn-primary-custom {
+  background: linear-gradient(135deg, $accent-cyan, $accent-blue);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 28px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba($accent-cyan, 0.25);
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba($accent-cyan, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 }
 
-.stats-box { background: rgba(0, 0, 0, 0.2); border: 1px solid $glass-border; }
+.btn-outline-secondary-custom {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 11px 24px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.btn-danger-zone {
+  background: rgba($danger, 0.1);
+  color: $danger;
+  border: 1px solid rgba($danger, 0.3);
+  border-radius: 12px;
+  padding: 11px 24px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba($danger, 0.2);
+    border-color: $danger;
+    box-shadow: 0 4px 20px rgba($danger, 0.2);
+  }
+}
+
+.btn-danger-confirm {
+  background: $danger;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 28px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: darken($danger, 8%);
+    box-shadow: 0 4px 24px rgba($danger, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-close-custom {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  line-height: 1;
+  transition: color 0.2s, background 0.2s;
+
+  &:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+// ── Delete Modal (custom Bootstrap-like) ──────────────────────────────────────
+.modal-backdrop-custom {
+  position: fixed; inset: 0;
+  background: rgba(4, 8, 16, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 1050;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-dialog-custom {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1055;
+  width: min(560px, calc(100vw - 32px));
+  animation: modalSlideIn 0.28s ease;
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translate(-50%, calc(-50% - 20px)) scale(0.97); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-content-custom {
+  background: #0d1626;
+  border: 1px solid rgba($danger, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 60px rgba($danger, 0.08);
+  overflow: hidden;
+}
+
+.modal-header-custom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba($danger, 0.05);
+}
+
+.modal-body-custom {
+  padding: 24px;
+}
+
+.modal-footer-custom {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+// ── Warning Banner (inside delete modal) ──────────────────────────────────────
+.warning-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba($danger, 0.08);
+  border: 1px solid rgba($danger, 0.2);
+  border-radius: 12px;
+  color: #fca5a5;
+  font-size: 0.875rem;
+  line-height: 1.5;
+
+  i { font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }
+}
+
+// ── Utility ───────────────────────────────────────────────────────────────────
+.x-small { font-size: 0.75rem; }
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 575.98px) {
+  .settings-tabs {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .settings-tab-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .modal-footer-custom {
+    flex-direction: column-reverse;
+
+    .btn-danger-confirm,
+    .btn-outline-secondary-custom {
+      width: 100%;
+      text-align: center;
+    }
+  }
+}

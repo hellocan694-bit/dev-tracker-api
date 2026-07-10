@@ -26,7 +26,7 @@ export class FeatureTourComponent implements OnInit, OnDestroy, AfterViewInit {
   // Tooltip positioning state
   tooltipStyle: { [key: string]: string } = {};
   highlightStyle: { [key: string]: string } = {};
-  arrowDirection: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
+  arrowDirection: 'top' | 'bottom' | 'left' | 'right' | 'none' = 'bottom';
 
   private sub?: Subscription;
   private resizeObserver?: ResizeObserver;
@@ -92,7 +92,30 @@ export class FeatureTourComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private positionTooltip(targetId: string, preferredPosition: 'top' | 'bottom' | 'left' | 'right'): void {
     const target = document.getElementById(targetId);
-    if (!target) return;
+    
+    // Check if target is visible in the DOM
+    const isVisible = target && target.offsetWidth > 0 && target.offsetHeight > 0;
+
+    if (!isVisible) {
+      // Centered fallback: target is hidden or doesn't exist (e.g. sidebar on mobile)
+      this.highlightStyle = {
+        display: 'none'
+      };
+      
+      this.tooltipStyle = {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '340px',
+        maxWidth: '90vw',
+        zIndex: '9002'
+      };
+      
+      this.arrowDirection = 'none';
+      this.cdr.markForCheck();
+      return;
+    }
 
     const rect = target.getBoundingClientRect();
     const scroll = { x: window.scrollX, y: window.scrollY };
@@ -102,8 +125,34 @@ export class FeatureTourComponent implements OnInit, OnDestroy, AfterViewInit {
     const GAP = 18;
     const HIGHLIGHT_PAD = 8;
 
-    // Highlight overlay around the target
+    // Mobile fallback (screen width < 576px)
+    if (window.innerWidth < 576) {
+      this.highlightStyle = {
+        display: 'block',
+        top: `${rect.top + scroll.y - HIGHLIGHT_PAD}px`,
+        left: `${rect.left + scroll.x - HIGHLIGHT_PAD}px`,
+        width: `${rect.width + HIGHLIGHT_PAD * 2}px`,
+        height: `${rect.height + HIGHLIGHT_PAD * 2}px`
+      };
+
+      this.tooltipStyle = {
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 'calc(100% - 32px)',
+        maxWidth: '360px',
+        zIndex: '9002'
+      };
+
+      this.arrowDirection = 'none';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Default target highlight style
     this.highlightStyle = {
+      display: 'block',
       top: `${rect.top + scroll.y - HIGHLIGHT_PAD}px`,
       left: `${rect.left + scroll.x - HIGHLIGHT_PAD}px`,
       width: `${rect.width + HIGHLIGHT_PAD * 2}px`,

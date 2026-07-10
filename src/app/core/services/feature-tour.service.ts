@@ -18,11 +18,11 @@ export interface TourState {
 
 const TOUR_STEPS: TourStep[] = [
   {
-    targetId: 'tour-step-projects',
-    title: '🚀 Your Projects Hub',
-    body: 'This is your Active Projects panel. Click any project to dive into tasks, timelines, and team members. Use the <strong>"New Project"</strong> button to create your first project.',
-    position: 'right',
-    icon: 'bi-folder2-open'
+    targetId: 'tour-step-welcome',
+    title: '🚀 Welcome to DevTrack!',
+    body: 'This is your developer workspace. Here you can see your active projects, track your weekly hours, and view productivity metrics. Click <strong>"New Project"</strong> to launch a new operation!',
+    position: 'bottom',
+    icon: 'bi-compass'
   },
   {
     targetId: 'tour-step-tracker',

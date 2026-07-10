@@ -1,103 +1,437 @@
-<div class="settings-page-wrapper" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); background-size: cover; background-position: center; min-height: 100vh;">
-  
+<!-- ══════════════════════════════════════════════════════════════════════
+     Developer Settings Page
+     Bootstrap 5 + Custom SCSS — NO Tailwind
+     Tabs: Profile Info | Preferences | Account Security (Danger Zone)
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<div class="settings-page-wrapper">
+
+  <!-- Loading Skeleton Overlay -->
+  <div *ngIf="isLoading && !profile" class="loading-overlay">
+    <div class="spinner-border text-info" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
   <div class="container py-5 content-area">
     <div class="row justify-content-center">
       <div class="col-xl-11">
-        
-        <header class="d-flex justify-content-between align-items-end mb-5 px-2">
+
+        <!-- ── Page Header ─────────────────────────────────────────────── -->
+        <header class="d-flex justify-content-between align-items-end mb-5 px-2 fade-in">
           <div class="title-group">
-            <h1 class="text-white fw-bold display-5 mb-1">Developer Settings</h1>
-            <p class="text-info opacity-75 mb-0"><i class="bi bi-shield-lock me-2"></i>Secure environment for profile management</p>
+            <h1 class="text-white fw-bold display-6 mb-1">
+              <i class="bi bi-sliders me-2 text-info"></i>Developer Settings
+            </h1>
+            <p class="text-muted mb-0 small">
+              <i class="bi bi-shield-lock me-1 text-info opacity-75"></i>
+              Manage your profile, preferences, and account security
+            </p>
           </div>
-          <div class="actions d-none d-md-flex gap-3">
-            <button type="button" class="btn btn-outline-light px-4">Discard</button>
-            <button type="button" (click)="updateUserName()" [disabled]="formData.invalid" class="btn btn-primary px-4 shadow-lg">Save Changes</button>
+          <!-- Profile Avatar Preview -->
+          <div class="avatar-sm d-none d-md-flex" *ngIf="profile">
+            <span>{{ avatarInitial }}</span>
           </div>
         </header>
 
-        <div class="row g-4">
-          <div class="col-lg-4">
-            <div class="glass-card text-center p-5 h-100 shadow-2xl">
-              <div class="avatar-container mb-4">
-                <div class="avatar-glow shadow-primary">{{ formData.get('name')?.value?.charAt(0) || 'D' }}</div>
-                <button class="btn-edit-avatar"><i class="bi bi-camera"></i></button>
+        <!-- ── Tabs Navigation ─────────────────────────────────────────── -->
+        <ul class="settings-tabs nav mb-4 fade-in" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              id="tab-profile"
+              class="settings-tab-btn"
+              [class.active]="activeTab === 'profile'"
+              (click)="setTab('profile')"
+              type="button" role="tab" aria-controls="pane-profile">
+              <i class="bi bi-person-badge me-2"></i>Profile Info
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              id="tab-prefs"
+              class="settings-tab-btn"
+              [class.active]="activeTab === 'preferences'"
+              (click)="setTab('preferences')"
+              type="button" role="tab" aria-controls="pane-prefs">
+              <i class="bi bi-toggles me-2"></i>Preferences
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              id="tab-security"
+              class="settings-tab-btn danger-tab"
+              [class.active]="activeTab === 'security'"
+              (click)="setTab('security')"
+              type="button" role="tab" aria-controls="pane-security">
+              <i class="bi bi-exclamation-triangle me-2"></i>Account Security
+            </button>
+          </li>
+        </ul>
+
+        <!-- ════════════════════════════════════════════════════════════════
+             TAB 1 — PROFILE INFO
+             ════════════════════════════════════════════════════════════════ -->
+        <div id="pane-profile" role="tabpanel" aria-labelledby="tab-profile"
+             *ngIf="activeTab === 'profile'" class="fade-in">
+          <div class="row g-4">
+
+            <!-- Left: Avatar Card -->
+            <div class="col-lg-4">
+              <div class="glass-card text-center p-4 h-100">
+                <div class="avatar-container mb-4">
+                  <div class="avatar-glow">{{ avatarInitial }}</div>
+                </div>
+                <h4 class="text-white fw-bold mb-1">
+                  {{ profile?.name || profileForm.get('name')?.value || 'Developer' }}
+                </h4>
+                <span class="badge badge-role mb-3">
+                  <i class="bi bi-shield-check me-1"></i>{{ profile?.role | titlecase }}
+                </span>
+                <div class="info-row">
+                  <i class="bi bi-envelope-at text-info"></i>
+                  <span class="text-light small">{{ profile?.email }}</span>
+                </div>
+                <div class="info-row mt-2">
+                  <i class="bi bi-calendar3 text-info"></i>
+                  <span class="text-muted small">
+                    Joined {{ profile?.createdAt | date:'mediumDate' }}
+                  </span>
+                </div>
+                <div class="info-row mt-2">
+                  <i class="bi bi-layers text-info"></i>
+                  <span class="text-muted small">
+                    Plan: <strong class="text-warning">{{ profile?.subscription?.plan | titlecase }}</strong>
+                  </span>
+                </div>
               </div>
-              <h4 class="text-white mb-1 fw-bold">{{ formData.get('name')?.value || 'Developer' }}</h4>
-              <p class="text-info small mb-4 uppercase tracking-wider">Senior Systems Architect</p>
-              
-              <div class="bio-section text-start mb-4">
-                <label class="text-light opacity-50 small d-block mb-2">Professional Bio</label>
-                <p class="text-white small lh-base">
-                  Passionate about building scalable web applications and exploring the depths of modern AI integrations. Always pushing the boundaries of what's possible in the digital realm.
-                </p>
+            </div>
+
+            <!-- Right: Profile Edit Form -->
+            <div class="col-lg-8">
+              <div class="glass-card p-4 p-md-5">
+                <h5 class="text-white mb-4 fw-semibold">
+                  <i class="bi bi-pencil-square me-2 text-info"></i>Edit Profile
+                </h5>
+                <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="row g-4" novalidate>
+
+                  <!-- Display Name -->
+                  <div class="col-md-6">
+                    <div class="custom-input-group">
+                      <label for="profile-name">Display Name</label>
+                      <input
+                        id="profile-name"
+                        type="text"
+                        formControlName="name"
+                        placeholder="Your full name"
+                        [class.is-invalid]="profileForm.get('name')?.touched && profileForm.get('name')?.invalid">
+                      <div class="invalid-feedback"
+                           *ngIf="profileForm.get('name')?.touched && profileForm.get('name')?.errors as errs">
+                        <span *ngIf="errs['required']">Name is required.</span>
+                        <span *ngIf="errs['minlength']">Minimum 3 characters.</span>
+                        <span *ngIf="errs['maxlength']">Maximum 50 characters.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Email (readonly) -->
+                  <div class="col-md-6">
+                    <div class="custom-input-group">
+                      <label>Primary Email</label>
+                      <div class="input-with-icon">
+                        <input type="email" [value]="profile?.email || ''" readonly class="locked">
+                        <i class="bi bi-lock text-info"></i>
+                      </div>
+                      <small class="text-muted">Email cannot be changed.</small>
+                    </div>
+                  </div>
+
+                  <!-- Role (readonly) -->
+                  <div class="col-md-6">
+                    <div class="custom-input-group">
+                      <label>System Role</label>
+                      <div class="input-with-icon">
+                        <input type="text" [value]="(profile?.role | titlecase) || '—'" readonly class="locked text-info fw-bold">
+                        <i class="bi bi-shield-check text-info"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Project Count (readonly) -->
+                  <div class="col-md-6">
+                    <div class="custom-input-group">
+                      <label>Total Projects</label>
+                      <div class="input-with-icon">
+                        <input type="text" [value]="profile?.projectCount ?? 0" readonly class="locked text-success fw-bold">
+                        <i class="bi bi-folder2-open text-success"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Submit -->
+                  <div class="col-12 d-flex gap-3">
+                    <button
+                      type="submit"
+                      id="save-profile-btn"
+                      class="btn btn-primary-custom px-5"
+                      [disabled]="profileForm.invalid || isLoading">
+                      <span *ngIf="!isLoading">
+                        <i class="bi bi-check2-circle me-2"></i>Save Changes
+                      </span>
+                      <span *ngIf="isLoading" class="d-flex align-items-center gap-2">
+                        <span class="spinner-border spinner-border-sm"></span> Saving…
+                      </span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary-custom" (click)="loadProfile()">
+                      <i class="bi bi-arrow-clockwise me-1"></i>Discard
+                    </button>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════════════
+             TAB 2 — PREFERENCES
+             ════════════════════════════════════════════════════════════════ -->
+        <div id="pane-prefs" role="tabpanel" aria-labelledby="tab-prefs"
+             *ngIf="activeTab === 'preferences'" class="fade-in">
+          <div class="glass-card p-4 p-md-5">
+            <h5 class="text-white mb-4 fw-semibold">
+              <i class="bi bi-palette me-2 text-info"></i>UI & Notification Preferences
+            </h5>
+            <form [formGroup]="prefsForm" (ngSubmit)="savePreferences()" class="row g-4" novalidate>
+
+              <!-- Theme -->
+              <div class="col-md-6">
+                <div class="custom-input-group">
+                  <label for="theme-select">Interface Theme</label>
+                  <select id="theme-select" formControlName="theme" class="custom-select">
+                    <option value="dark">🌙 Dark Mode</option>
+                    <option value="light">☀️ Light Mode</option>
+                    <option value="system">💻 System Default</option>
+                  </select>
+                </div>
               </div>
 
-              <div class="stats-box p-3 rounded-4 mt-auto" style="background: rgba(255,255,255,0.05)">
-                <div class="d-flex justify-content-between mb-2">
-                  <span class="text-light opacity-50 small">Node Uptime</span>
-                  <span class="text-success small fw-bold">99.9%</span>
+              <!-- Language -->
+              <div class="col-md-6">
+                <div class="custom-input-group">
+                  <label for="lang-select">Language</label>
+                  <select id="lang-select" formControlName="language" class="custom-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ar">🇪🇬 العربية</option>
+                  </select>
                 </div>
-                <div class="d-flex justify-content-between">
-                  <span class="text-light opacity-50 small">Trust Score</span>
-                  <span class="text-info small fw-bold">98/100</span>
+              </div>
+
+              <!-- Notifications -->
+              <div class="col-12">
+                <p class="text-light fw-semibold mb-3">
+                  <i class="bi bi-bell me-2 text-info"></i>Email Notifications
+                </p>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="toggle-card">
+                      <div>
+                        <p class="text-white mb-0 small fw-semibold">Task Completed</p>
+                        <p class="text-muted x-small mb-0">Get notified when a task is marked done.</p>
+                      </div>
+                      <div class="form-check form-switch ms-3">
+                        <input
+                          id="notif-task"
+                          class="form-check-input"
+                          type="checkbox"
+                          formControlName="emailOnTaskComplete"
+                          role="switch">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="toggle-card">
+                      <div>
+                        <p class="text-white mb-0 small fw-semibold">Project Updates</p>
+                        <p class="text-muted x-small mb-0">Receive alerts on project status changes.</p>
+                      </div>
+                      <div class="form-check form-switch ms-3">
+                        <input
+                          id="notif-project"
+                          class="form-check-input"
+                          type="checkbox"
+                          formControlName="emailOnProjectUpdate"
+                          role="switch">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <button
+                  type="submit"
+                  id="save-prefs-btn"
+                  class="btn btn-primary-custom px-5"
+                  [disabled]="prefsForm.invalid || isLoading">
+                  <span *ngIf="!isLoading">
+                    <i class="bi bi-check2-circle me-2"></i>Save Preferences
+                  </span>
+                  <span *ngIf="isLoading" class="d-flex align-items-center gap-2">
+                    <span class="spinner-border spinner-border-sm"></span> Saving…
+                  </span>
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════════════
+             TAB 3 — ACCOUNT SECURITY / DANGER ZONE
+             ════════════════════════════════════════════════════════════════ -->
+        <div id="pane-security" role="tabpanel" aria-labelledby="tab-security"
+             *ngIf="activeTab === 'security'" class="fade-in">
+
+          <!-- Security Info Cards -->
+          <div class="glass-card p-4 p-md-5 mb-4">
+            <h5 class="text-white mb-4 fw-semibold">
+              <i class="bi bi-fingerprint me-2 text-info"></i>Security Protocols
+            </h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="security-info-card">
+                  <i class="bi bi-shield-check text-success fs-4"></i>
+                  <div>
+                    <p class="text-white small mb-0 fw-semibold">Secure Cookie Auth</p>
+                    <p class="text-muted x-small mb-0">Your session uses HttpOnly cookies — safe from XSS.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="security-info-card">
+                  <i class="bi bi-key text-warning fs-4"></i>
+                  <div>
+                    <p class="text-white small mb-0 fw-semibold">Change Password</p>
+                    <p class="text-muted x-small mb-0">
+                      Use <a routerLink="/auth/emailtochangepassword" class="text-info">Forgot Password</a> to securely update via OTP.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="col-lg-8">
-            <div class="glass-card p-4 p-md-5 mb-4">
-              <h5 class="text-white mb-4 fw-bold"><i class="bi bi-person-badge me-2 text-info"></i>Identity Access</h5>
-              
-              <form [formGroup]="formData" (ngSubmit)="updateUserName()" class="row g-4">
-                <div class="col-md-6">
-                  <div class="custom-input-group">
-                    <label>Legal Display Name</label>
-                    <input type="text" formControlName="name" placeholder="Full name" [class.is-invalid]="formData.get('name')?.touched && formData.get('name')?.invalid">
-                  </div>
-                </div>
-                
-                <div class="col-md-6">
-                  <div class="custom-input-group">
-                    <label>System Permission Role</label>
-                    <div class="input-with-icon">
-                      <input type="text" value="Level 4 Administrator" readonly class="locked text-info fw-bold">
-                      <i class="bi bi-shield-check text-info"></i>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-12">
-                  <div class="custom-input-group">
-                    <label>Primary Secure Email</label>
-                    <input type="email" [value]="developermail" readonly class="locked opacity-75 border-info-subtle">
-                  </div>
-                </div>
-              </form>
-            </div>
-
-            <div class="glass-card p-4 p-md-5">
-              <h5 class="text-white mb-4 fw-bold"><i class="bi bi-fingerprint me-2 text-info"></i>Security Protocols</h5>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <div class="p-3 rounded-3 border border-secondary border-opacity-25 bg-black bg-opacity-25">
-                    <p class="text-white small mb-1">Two-Factor Authentication</p>
-                    <p class="text-light opacity-50 x-small mb-0">Enhanced protection enabled via Google Auth.</p>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="p-3 rounded-3 border border-secondary border-opacity-25 bg-black bg-opacity-25">
-                    <p class="text-white small mb-1">Last Secure Login</p>
-                    <p class="text-light opacity-50 x-small mb-0">12 minutes ago from Cairo, Egypt (IP: 192.168.1.1)</p>
-                  </div>
-                </div>
+          <!-- Danger Zone -->
+          <div class="glass-card danger-zone p-4 p-md-5">
+            <div class="d-flex align-items-center mb-3">
+              <i class="bi bi-exclamation-octagon-fill text-danger fs-3 me-3"></i>
+              <div>
+                <h5 class="text-danger mb-0 fw-bold">Danger Zone</h5>
+                <p class="text-muted x-small mb-0">Irreversible actions — proceed with extreme caution.</p>
               </div>
             </div>
+            <hr class="border-danger border-opacity-25 mb-4">
 
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+              <div>
+                <p class="text-white fw-semibold mb-1">Delete Account Permanently</p>
+                <p class="text-muted small mb-0">
+                  This will permanently delete your account and all associated projects, tasks,
+                  and session data. <strong class="text-danger">This action cannot be undone.</strong>
+                </p>
+              </div>
+              <button
+                id="open-delete-modal-btn"
+                type="button"
+                class="btn btn-danger-zone"
+                (click)="openDeleteModal()">
+                <i class="bi bi-trash3 me-2"></i>Delete My Account
+              </button>
+            </div>
           </div>
         </div>
 
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     DELETE ACCOUNT MODAL (Bootstrap 5 manual)
+     ══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop-custom" *ngIf="showDeleteModal" (click)="closeDeleteModal()"></div>
+
+<div class="modal-dialog-custom" *ngIf="showDeleteModal" id="delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+  <div class="modal-content-custom" (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="modal-header-custom">
+      <div class="d-flex align-items-center gap-3">
+        <i class="bi bi-exclamation-octagon-fill text-danger fs-3"></i>
+        <h5 class="modal-title text-white mb-0 fw-bold" id="delete-modal-title">Confirm Account Deletion</h5>
+      </div>
+      <button type="button" class="btn-close-custom" (click)="closeDeleteModal()" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body-custom">
+      <div class="warning-banner mb-4">
+        <i class="bi bi-info-circle me-2"></i>
+        <span>
+          You are about to permanently delete <strong>{{ profile?.name }}</strong>'s account
+          along with <strong>all projects and tasks</strong> associated with it.
+        </span>
+      </div>
+
+      <p class="text-light small mb-4">
+        To confirm, please enter your current password below:
+      </p>
+
+      <form [formGroup]="deleteForm" (ngSubmit)="confirmDeleteAccount()" novalidate>
+        <div class="custom-input-group">
+          <label for="confirm-password">Current Password</label>
+          <div class="input-with-icon">
+            <input
+              id="confirm-password"
+              [type]="showDeletePassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Enter your password to confirm"
+              autocomplete="current-password"
+              [class.is-invalid]="deleteForm.get('password')?.touched && deleteForm.get('password')?.invalid">
+            <button type="button" class="btn-eye" (click)="toggleDeletePassword()" tabindex="-1" aria-label="Toggle password visibility">
+              <i [class]="showDeletePassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback"
+               *ngIf="deleteForm.get('password')?.touched && deleteForm.get('password')?.errors as errs">
+            <span *ngIf="errs['required']">Password is required.</span>
+            <span *ngIf="errs['minlength']">Password must be at least 8 characters.</span>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer-custom">
+      <button type="button" class="btn btn-outline-secondary-custom" (click)="closeDeleteModal()">
+        <i class="bi bi-arrow-left me-1"></i>Cancel, Keep Account
+      </button>
+      <button
+        type="button"
+        id="confirm-delete-btn"
+        class="btn btn-danger-confirm"
+        [disabled]="deleteForm.invalid || isDeleting"
+        (click)="confirmDeleteAccount()">
+        <span *ngIf="!isDeleting">
+          <i class="bi bi-trash3-fill me-2"></i>Yes, Delete Permanently
+        </span>
+        <span *ngIf="isDeleting" class="d-flex align-items-center gap-2">
+          <span class="spinner-border spinner-border-sm"></span> Deleting account…
+        </span>
+      </button>
+    </div>
+
   </div>
 </div>
