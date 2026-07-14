@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/environment/environment';
-import { MyTeamsResponse } from 'src/app/shared/interfaces/team';
+import { MyTeamsResponse, Team } from 'src/app/shared/interfaces/team';
 
 @Injectable({
   providedIn: 'root'
@@ -82,11 +82,39 @@ export class TeamsService {
     return this.http.get(`${this.baseUrl}/members`);
   }
 
+  /**
+   * DELETE /invitations/members/:id
+   * Removes member from both ownedTeams and memberTeams in the cache instantly.
+   */
   removeMember(memberId: string): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/members/${memberId}`);
+    return this.http.delete(`${this.baseUrl}/members/${memberId}`).pipe(
+      tap(() => {
+        const current = this._teams$.getValue();
+        if (!current) return;
+        const filterMember = (teams: Team[]) =>
+          teams.map((t) => ({
+            ...t,
+            members: t.members.filter((m) => m._id !== memberId),
+          }));
+        this._teams$.next({
+          ...current,
+          data: {
+            ownedTeams: filterMember(current.data.ownedTeams),
+            memberTeams: filterMember(current.data.memberTeams),
+          },
+        });
+      })
+    );
   }
 
+  /**
+   * PATCH /invitations/members/:id/permissions
+   * Permission shape is server-authoritative — invalidate so next
+   * loadMyTeams() fetches the authoritative state.
+   */
   updateMemberPermission(memberId: string, key: string, value: boolean): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/members/${memberId}/permissions`, { key, value });
+    return this.http
+      .patch(`${this.baseUrl}/members/${memberId}/permissions`, { key, value })
+      .pipe(tap(() => this.invalidateCache()));
   }
 }
