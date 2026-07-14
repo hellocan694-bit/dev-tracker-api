@@ -1,0 +1,226 @@
+<!-- ══════════════════════════════════════════════════════════════════════
+     My Teams Page
+     Bootstrap 5 + Custom SCSS — NO Tailwind
+     Shows owned teams and member teams with clear role differentiation.
+     trackBy on both *ngFor loops for optimal DOM re-rendering.
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<div class="my-teams-wrapper">
+  <div class="container py-5">
+
+    <!-- ── Page Header ──────────────────────────────────────────────────── -->
+    <header class="teams-header mb-5 fade-in">
+      <div class="header-left">
+        <h1 class="teams-title">
+          <i class="bi bi-people-fill me-3"></i>My Teams
+        </h1>
+        <p class="teams-subtitle">
+          Manage every team you own or collaborate in, all in one place.
+        </p>
+      </div>
+      <div class="header-meta" *ngIf="!isLoading && !errorMessage">
+        <span class="total-badge">
+          <i class="bi bi-layers me-1"></i>
+          {{ totalTeams }} team{{ totalTeams !== 1 ? 's' : '' }} total
+        </span>
+      </div>
+    </header>
+
+    <!-- ── Loading State ────────────────────────────────────────────────── -->
+    <div *ngIf="isLoading" class="loading-grid fade-in">
+      <div class="skeleton-card" *ngFor="let s of [1,2,3,4]"></div>
+    </div>
+
+    <!-- ── Error State ───────────────────────────────────────────────────── -->
+    <div *ngIf="!isLoading && errorMessage" class="error-panel fade-in" role="alert">
+      <i class="bi bi-wifi-off fs-2 mb-3 text-danger"></i>
+      <p class="text-white fw-semibold mb-2">Could not load teams</p>
+      <p class="text-muted small mb-4">{{ errorMessage }}</p>
+      <button class="btn btn-retry" (click)="loadMyTeams()" id="retry-load-teams-btn">
+        <i class="bi bi-arrow-clockwise me-2"></i>Retry
+      </button>
+    </div>
+
+    <!-- ── Empty State ───────────────────────────────────────────────────── -->
+    <div *ngIf="!isLoading && !errorMessage && totalTeams === 0"
+         class="empty-panel fade-in" id="empty-teams-panel">
+      <i class="bi bi-people fs-1 mb-3"></i>
+      <p class="text-white fw-semibold mb-1">No teams yet</p>
+      <p class="text-muted small">
+        You are not a member or owner of any team. Ask your admin to send you an invitation.
+      </p>
+    </div>
+
+    <ng-container *ngIf="!isLoading && !errorMessage && totalTeams > 0">
+
+      <!-- ════════════════════════════════════════════════════════════════
+           SECTION 1 — TEAMS I OWN
+           ════════════════════════════════════════════════════════════════ -->
+      <section *ngIf="ownedTeams.length > 0" class="teams-section fade-in" id="owned-teams-section">
+        <div class="section-label owner-label">
+          <i class="bi bi-star-fill me-2"></i>Teams I Own
+          <span class="count-pill">{{ ownedTeams.length }}</span>
+        </div>
+
+        <div class="teams-grid">
+          <!-- trackBy prevents full re-render on refresh -->
+          <article class="team-card owner-card"
+                   *ngFor="let team of ownedTeams; trackBy: trackByTeamId"
+                   [id]="'owned-team-' + team._id">
+
+            <!-- Card Header -->
+            <div class="card-header-row">
+              <div class="team-icon owner-icon">
+                <i class="bi bi-building"></i>
+              </div>
+              <div class="team-meta">
+                <h2 class="team-name">{{ team.name }}</h2>
+                <span class="team-category">{{ team.category }}</span>
+              </div>
+              <span class="role-badge owner-badge">
+                <i class="bi bi-star-fill me-1"></i>Owner
+              </span>
+            </div>
+
+            <!-- Description -->
+            <p class="team-description" *ngIf="team.description">
+              {{ team.description }}
+            </p>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+              <div class="stat-item">
+                <i class="bi bi-people"></i>
+                <span>{{ team.members.length }} member{{ team.members.length !== 1 ? 's' : '' }}</span>
+              </div>
+              <div class="stat-item">
+                <i class="bi bi-calendar3"></i>
+                <span>{{ team.createdAt | date:'mediumDate' }}</span>
+              </div>
+            </div>
+
+            <!-- Member Avatars -->
+            <div class="members-section">
+              <div class="member-avatars" *ngIf="team.members.length > 0; else noMembers">
+                <!-- trackBy on members list -->
+                <div class="member-avatar-chip"
+                     *ngFor="let member of (expandedTeamId === team._id ? team.members : team.members.slice(0, 5));
+                             trackBy: trackByMemberId"
+                     [title]="member.name + ' · ' + member.email"
+                     [style.--avatar-hue]="getAvatarHue(member._id)">
+                  {{ getInitial(member.name) }}
+                </div>
+                <button class="more-btn"
+                        *ngIf="team.members.length > 5"
+                        (click)="toggleExpand(team._id)"
+                        [id]="'toggle-members-' + team._id">
+                  {{ expandedTeamId === team._id
+                     ? 'Show less'
+                     : '+' + (team.members.length - 5) + ' more' }}
+                </button>
+              </div>
+              <ng-template #noMembers>
+                <span class="no-members-hint">No members yet — invite someone!</span>
+              </ng-template>
+            </div>
+
+            <!-- Expanded Member List -->
+            <div class="expanded-members fade-in"
+                 *ngIf="expandedTeamId === team._id && team.members.length > 0">
+              <div class="expanded-member-row"
+                   *ngFor="let member of team.members; trackBy: trackByMemberId"
+                   [id]="'member-row-' + member._id">
+                <div class="member-avatar-sm" [style.--avatar-hue]="getAvatarHue(member._id)">
+                  {{ getInitial(member.name) }}
+                </div>
+                <div class="member-info">
+                  <span class="member-name">{{ member.name }}</span>
+                  <span class="member-email">{{ member.email }}</span>
+                </div>
+              </div>
+            </div>
+
+          </article>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════════
+           SECTION 2 — TEAMS I'M A MEMBER OF
+           ════════════════════════════════════════════════════════════════ -->
+      <section *ngIf="memberTeams.length > 0" class="teams-section fade-in" id="member-teams-section">
+        <div class="section-label member-label">
+          <i class="bi bi-person-check-fill me-2"></i>Teams I'm In
+          <span class="count-pill member-pill">{{ memberTeams.length }}</span>
+        </div>
+
+        <div class="teams-grid">
+          <article class="team-card member-card"
+                   *ngFor="let team of memberTeams; trackBy: trackByTeamId"
+                   [id]="'member-team-' + team._id">
+
+            <!-- Card Header -->
+            <div class="card-header-row">
+              <div class="team-icon member-icon">
+                <i class="bi bi-person-badge"></i>
+              </div>
+              <div class="team-meta">
+                <h2 class="team-name">{{ team.name }}</h2>
+                <span class="team-category">{{ team.category }}</span>
+              </div>
+              <span class="role-badge member-badge">
+                <i class="bi bi-person-check me-1"></i>Member
+              </span>
+            </div>
+
+            <!-- Description -->
+            <p class="team-description" *ngIf="team.description">
+              {{ team.description }}
+            </p>
+
+            <!-- Owner Row -->
+            <div class="owner-row">
+              <div class="owner-avatar"
+                   [style.--avatar-hue]="getAvatarHue(team.owner._id)"
+                   [title]="'Owner: ' + team.owner.name">
+                {{ getInitial(team.owner.name) }}
+              </div>
+              <div>
+                <p class="owner-label-text">Managed by</p>
+                <p class="owner-name-text">{{ team.owner.name }}</p>
+              </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+              <div class="stat-item">
+                <i class="bi bi-people"></i>
+                <span>{{ team.members.length }} member{{ team.members.length !== 1 ? 's' : '' }}</span>
+              </div>
+              <div class="stat-item">
+                <i class="bi bi-calendar3"></i>
+                <span>{{ team.createdAt | date:'mediumDate' }}</span>
+              </div>
+            </div>
+
+            <!-- Other Members Avatars -->
+            <div class="members-section" *ngIf="team.members.length > 0">
+              <div class="member-avatars">
+                <div class="member-avatar-chip"
+                     *ngFor="let member of team.members.slice(0, 5); trackBy: trackByMemberId"
+                     [title]="member.name + ' · ' + member.email"
+                     [style.--avatar-hue]="getAvatarHue(member._id)">
+                  {{ getInitial(member.name) }}
+                </div>
+                <span class="more-count" *ngIf="team.members.length > 5">
+                  +{{ team.members.length - 5 }}
+                </span>
+              </div>
+            </div>
+
+          </article>
+        </div>
+      </section>
+
+    </ng-container>
+  </div>
+</div>

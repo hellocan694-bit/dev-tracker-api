@@ -4,6 +4,7 @@ import { TeamsLayoutComponent } from './pages/teams-layout/teams-layout.componen
 import { InvitationsComponent } from './pages/invitations/invitations.component';
 import { loginGuard } from 'src/app/core/guards/login.guard';
 import { TeamleaderComponent } from './pages/teamleader/teamleader.component';
+import { MyTeamsComponent } from './pages/my-teams/my-teams.component';
 
 const routes: Routes = 
 [
@@ -12,8 +13,10 @@ const routes: Routes =
     path:"",
     component:TeamsLayoutComponent,
     children:[
-      {path:"invitations" , component:InvitationsComponent , canActivate:[loginGuard]},
-      {path:"teamleaderboard" , component:TeamleaderComponent , canActivate:[loginGuard]}
+      { path: "my-teams",       component: MyTeamsComponent,     canActivate: [loginGuard] },
+      { path: "invitations",    component: InvitationsComponent,  canActivate: [loginGuard] },
+      { path: "teamleaderboard",component: TeamleaderComponent,   canActivate: [loginGuard] },
+      { path: "",               redirectTo: "my-teams",           pathMatch: "full" }
     ]
   }
 ];

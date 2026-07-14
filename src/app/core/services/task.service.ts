@@ -25,7 +25,7 @@ export class TaskService {
 
   updateTask(projectId: string, taskId: string, data: Partial<Task>): Observable<TaskResponse> {
     return this.http.patch<TaskResponse>(
-      `${this.baseUrl}/dev/tasks/updatetask/${projectId}/${taskId}`,
+      `${this.baseUrl}/project/dev/tasks/updatetask/${projectId}/${taskId}`,
       data
     );
   }

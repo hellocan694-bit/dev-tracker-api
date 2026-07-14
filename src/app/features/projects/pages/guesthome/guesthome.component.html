@@ -49,43 +49,27 @@
 
     </div>
 
-    <!-- ── Dashboard Mockup (preserved + floating 3-D) ── -->
-    <div class="hero-dashboard-mockup floating-element">
+    <!-- ── Dashboard Mockup (preserved + floating 3-D + Spotlight reveal) ── -->
+    <div class="hero-dashboard-mockup floating-element mockup-spotlight-container">
       <div class="mockup-frame glass-panel">
 
         <div class="mac-dots">
           <span></span><span></span><span></span>
         </div>
 
-        <div class="mockup-body">
-          <div class="mockup-sidebar">
-            <div class="line"></div>
-            <div class="line"></div>
-            <div class="line active"></div>
-            <div class="line"></div>
+        <div class="mockup-body-wrapper">
+          <!-- Background image layer: Dimmed base -->
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
+            class="mockup-img-base" alt="DevTrack Dashboard Base">
+
+          <!-- Foreground image layer: Bright/Crisp, masked by spotlight -->
+          <div class="mockup-spotlight-mask">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
+              class="mockup-img-highlight" alt="DevTrack Dashboard Highlight">
           </div>
 
-          <div class="mockup-main">
-            <div class="mockup-header">
-              <div class="search-bar"></div>
-              <div class="profile-circle"></div>
-            </div>
-
-            <div class="mockup-stats-row">
-              <div class="stat-box"><div class="chart-mini"></div></div>
-              <div class="stat-box"><div class="chart-mini"></div></div>
-              <div class="stat-box"><div class="chart-mini"></div></div>
-            </div>
-
-            <div class="mockup-big-chart">
-              <div class="bar h-60"></div>
-              <div class="bar h-40"></div>
-              <div class="bar h-80"></div>
-              <div class="bar h-30"></div>
-              <div class="bar h-100"></div>
-              <div class="bar h-70"></div>
-            </div>
-          </div>
+          <!-- Highlight neon border glow overlay -->
+          <div class="spotlight-border-glow"></div>
         </div>
 
       </div>
@@ -109,7 +93,8 @@
   <section class="features-section" id="demo-section">
     <div class="section-header gsap-reveal">
       <h2 class="section-title">The anatomy of <span class="gradient-text">high performance</span>.</h2>
-      <p class="section-subtitle">Everything you need to orchestrate a world-class engineering team without the overhead of micro-management.</p>
+      <p class="section-subtitle">Everything you need to orchestrate a world-class engineering team without the overhead
+        of micro-management.</p>
     </div>
 
     <div class="features-grid">
@@ -119,7 +104,8 @@
           <i class="fa-solid fa-chart-line"></i>
         </div>
         <h3>Real-time Analytics</h3>
-        <p>Your entire Git history parsed and visualized. Identify bottlenecks, code churn, and deep work sessions instantly.</p>
+        <p>Your entire Git history parsed and visualized. Identify bottlenecks, code churn, and deep work sessions
+          instantly.</p>
       </div>
 
       <!-- Feature Card 2 -->
@@ -128,27 +114,310 @@
           <i class="fa-solid fa-users-viewfinder"></i>
         </div>
         <h3>Seamless Collaboration</h3>
-        <p>Automated daily standups generated from actual commits and pull requests. Keep everyone aligned automatically.</p>
+        <p>Automated daily standups generated from actual commits and pull requests. Keep everyone aligned
+          automatically.</p>
       </div>
 
       <!-- Feature Card 3 -->
       <div class="feature-card glass-panel neon-border">
         <div class="card-icon blue-glow">
-           <i class="fa-solid fa-brain"></i>
+          <i class="fa-solid fa-brain"></i>
         </div>
         <h3>AI Tech Lead</h3>
-        <p>Receive proactive suggestions on code quality and patterns of burnout. Your personal AI assistant for healthier workflows.</p>
+        <p>Receive proactive suggestions on code quality and patterns of burnout. Your personal AI assistant for
+          healthier workflows.</p>
       </div>
-      
+
       <!-- Feature Card 4 -->
       <div class="feature-card glass-panel neon-border">
         <div class="card-icon purple-glow">
           <i class="fa-solid fa-shield-halved"></i>
         </div>
         <h3>Enterprise Security</h3>
-        <p>Bank-grade encryption, SOC2 compliance, and precise role-based access controls to protect your intellectual property.</p>
+        <p>Bank-grade encryption, SOC2 compliance, and precise role-based access controls to protect your intellectual
+          property.</p>
       </div>
     </div>
+  </section>
+
+  <!-- ═══════════════ STICKY FEATURE SHOWCASE ═══════════════ -->
+  <section class="feature-showcase-section">
+
+    <div class="showcase-heading gsap-reveal">
+      <span class="showcase-label">DEEP DIVE</span>
+      <h2>Built for <span class="gradient-text">engineering excellence</span></h2>
+      <p>Every feature crafted to amplify your team's output.</p>
+    </div>
+
+    <div class="showcase-inner">
+
+      <!-- LEFT: scrolling text panels -->
+      <div class="showcase-text-col">
+
+        <div class="feature-panel" id="fp-0">
+          <div class="panel-content">
+            <span class="panel-num">01</span>
+            <div class="panel-icon"><i class="fa-solid fa-list-check"></i></div>
+            <h3>Smart Task Tracking</h3>
+            <p>Automatically sync tasks from GitHub issues, pull requests and commits. Every piece of work captured,
+              organized and prioritized without lifting a finger.</p>
+            <ul class="panel-checklist">
+              <li><i class="fa-solid fa-check"></i> Auto-sync from GitHub & GitLab</li>
+              <li><i class="fa-solid fa-check"></i> Intelligent priority scoring</li>
+              <li><i class="fa-solid fa-check"></i> Real-time progress tracking</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="feature-panel" id="fp-1">
+          <div class="panel-content">
+            <span class="panel-num">02</span>
+            <div class="panel-icon aria"><i class="fa-solid fa-brain"></i></div>
+            <h3>Aria — Your AI Tech Lead</h3>
+            <p>Aria analyzes your commit history, code velocity and team dynamics to proactively surface bottlenecks and
+              burnout risks before they become problems.</p>
+            <ul class="panel-checklist">
+              <li><i class="fa-solid fa-check"></i> Burnout detection & alerts</li>
+              <li><i class="fa-solid fa-check"></i> Code quality suggestions</li>
+              <li><i class="fa-solid fa-check"></i> Proactive sprint planning</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="feature-panel" id="fp-2">
+          <div class="panel-content">
+            <span class="panel-num">03</span>
+            <div class="panel-icon analytics"><i class="fa-solid fa-chart-mixed"></i></div>
+            <h3>Advanced Productivity Analytics</h3>
+            <p>Transform raw git data into actionable insights. Visualize deep work sessions, identify flow patterns and
+              quantify engineering output with precision.</p>
+            <ul class="panel-checklist">
+              <li><i class="fa-solid fa-check"></i> Deep work session analysis</li>
+              <li><i class="fa-solid fa-check"></i> Velocity trend forecasting</li>
+              <li><i class="fa-solid fa-check"></i> Custom KPI dashboards</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="feature-panel" id="fp-3">
+          <div class="panel-content">
+            <span class="panel-num">04</span>
+            <div class="panel-icon team"><i class="fa-solid fa-users"></i></div>
+            <h3>Seamless Team Collaboration</h3>
+            <p>Automated standups, real-time activity feeds and sprint leaderboards that celebrate contributors. Keep
+              everyone aligned without the overhead of meetings.</p>
+            <ul class="panel-checklist">
+              <li><i class="fa-solid fa-check"></i> Auto-generated standups</li>
+              <li><i class="fa-solid fa-check"></i> Live contributor leaderboard</li>
+              <li><i class="fa-solid fa-check"></i> Slack & Discord integration</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: sticky visual -->
+      <div class="showcase-visual-col">
+        <div class="showcase-sticky-frame">
+
+          <div class="showcase-window glass-panel">
+            <div class="sw-titlebar">
+              <div class="mac-dots"><span></span><span></span><span></span></div>
+              <div class="window-tabs">
+                <span class="sw-tab active" id="sw-tab-0">Tasks</span>
+                <span class="sw-tab" id="sw-tab-1">Aria AI</span>
+                <span class="sw-tab" id="sw-tab-2">Analytics</span>
+                <span class="sw-tab" id="sw-tab-3">Team</span>
+              </div>
+            </div>
+
+            <div class="showcase-screens">
+
+              <!-- Screen 0: Kanban -->
+              <div class="showcase-screen active" id="sw-screen-0">
+                <div class="kanban-board">
+                  <div class="kb-col">
+                    <div class="kb-col-header todo">To Do <span>3</span></div>
+                    <div class="kb-card"><span class="kb-tag blue">Feature</span>
+                      <p>API rate limiting</p>
+                      <div class="kb-meta"><span class="kb-avatar"></span><span class="kb-pri high">High</span></div>
+                    </div>
+                    <div class="kb-card"><span class="kb-tag purple">Refactor</span>
+                      <p>Auth middleware</p>
+                      <div class="kb-meta"><span class="kb-avatar"></span><span class="kb-pri med">Med</span></div>
+                    </div>
+                    <div class="kb-card"><span class="kb-tag green">Docs</span>
+                      <p>API Reference v2</p>
+                    </div>
+                  </div>
+                  <div class="kb-col">
+                    <div class="kb-col-header wip">In Progress <span>2</span></div>
+                    <div class="kb-card kb-active"><span class="kb-tag blue">Feature</span>
+                      <p>Dashboard redesign</p>
+                      <div class="kb-meta"><span class="kb-avatar you"></span><span class="kb-pri high">High</span>
+                      </div>
+                    </div>
+                    <div class="kb-card"><span class="kb-tag purple">Fix</span>
+                      <p>WebSocket reconnect</p>
+                    </div>
+                  </div>
+                  <div class="kb-col">
+                    <div class="kb-col-header done">Done <span>5</span></div>
+                    <div class="kb-card kb-done"><span class="kb-tag green">Feature</span>
+                      <p>OAuth2 integration</p>
+                    </div>
+                    <div class="kb-card kb-done"><span class="kb-tag blue">Feature</span>
+                      <p>Notification system</p>
+                    </div>
+                    <div class="kb-card kb-done"><span class="kb-tag green">Fix</span>
+                      <p>Memory leak fix</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Screen 1: Aria AI -->
+              <div class="showcase-screen" id="sw-screen-1">
+                <div class="aria-chat">
+                  <div class="aria-chat-header">
+                    <div class="aria-avatar-badge"><i class="fa-solid fa-brain"></i></div>
+                    <div><strong>Aria</strong><span class="aria-online">● Analyzing codebase</span></div>
+                    <span class="aria-ai-label">AI</span>
+                  </div>
+                  <div class="aria-messages">
+                    <div class="aria-bubble bot">I've detected a 34% drop in commit velocity for <strong>@alex</strong>.
+                      This often precedes burnout. Shall I schedule a 1:1?</div>
+                    <div class="aria-bubble user">Yes — also what's blocking PR #142?</div>
+                    <div class="aria-bubble bot">PR #142 has 3 unresolved comments from <strong>@sarah</strong>. I've
+                      flagged it as priority and notified the reviewer. 🔔</div>
+                    <div class="aria-typing"><span></span><span></span><span></span></div>
+                  </div>
+                  <div class="aria-chat-input">
+                    <input type="text" placeholder="Ask Aria anything..." readonly>
+                    <button><i class="fa-solid fa-paper-plane"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Screen 2: Analytics -->
+              <div class="showcase-screen" id="sw-screen-2">
+                <div class="analytics-view">
+                  <div class="av-stats">
+                    <div class="av-chip">
+                      <div class="av-val blue">2,847</div>
+                      <div class="av-lbl">Commits</div>
+                    </div>
+                    <div class="av-chip">
+                      <div class="av-val purple">94%</div>
+                      <div class="av-lbl">Velocity</div>
+                    </div>
+                    <div class="av-chip">
+                      <div class="av-val green">6.2h</div>
+                      <div class="av-lbl">Deep Work</div>
+                    </div>
+                  </div>
+                  <div class="av-chart">
+                    <div class="av-chart-label">Commit Frequency — Last 30 Days</div>
+                    <div class="av-bars">
+                      <div class="av-bar" style="--h:45%">
+                        <div class="av-bar-fill blue"></div>
+                      </div>
+                      <div class="av-bar" style="--h:60%">
+                        <div class="av-bar-fill blue"></div>
+                      </div>
+                      <div class="av-bar" style="--h:30%">
+                        <div class="av-bar-fill blue"></div>
+                      </div>
+                      <div class="av-bar" style="--h:80%">
+                        <div class="av-bar-fill purple"></div>
+                      </div>
+                      <div class="av-bar" style="--h:55%">
+                        <div class="av-bar-fill blue"></div>
+                      </div>
+                      <div class="av-bar" style="--h:90%">
+                        <div class="av-bar-fill purple"></div>
+                      </div>
+                      <div class="av-bar" style="--h:70%">
+                        <div class="av-bar-fill blue"></div>
+                      </div>
+                      <div class="av-bar" style="--h:100%">
+                        <div class="av-bar-fill purple highlight"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="av-sparklines">
+                    <div class="av-spark"><span>Code Review</span>
+                      <div class="av-spark-track">
+                        <div class="av-spark-fill" style="--w:78%"></div>
+                      </div><span>78%</span>
+                    </div>
+                    <div class="av-spark"><span>PR Merge Rate</span>
+                      <div class="av-spark-track">
+                        <div class="av-spark-fill purple" style="--w:92%"></div>
+                      </div><span>92%</span>
+                    </div>
+                    <div class="av-spark"><span>Test Coverage</span>
+                      <div class="av-spark-track">
+                        <div class="av-spark-fill green" style="--w:64%"></div>
+                      </div><span>64%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Screen 3: Team -->
+              <div class="showcase-screen" id="sw-screen-3">
+                <div class="team-view">
+                  <div class="tv-header"><span>Team Activity</span><span class="tv-live"><span></span>Live</span></div>
+                  <div class="tv-list">
+                    <div class="tv-member highlight">
+                      <div class="tv-av a1">JD</div>
+                      <div class="tv-info"><strong>James Davis</strong><span>Pushed 3 commits to main</span></div><span
+                        class="tv-time">2m</span>
+                    </div>
+                    <div class="tv-member">
+                      <div class="tv-av a2">SA</div>
+                      <div class="tv-info"><strong>Sarah Allen</strong><span>Reviewed PR #142 — Dashboard</span></div>
+                      <span class="tv-time">8m</span>
+                    </div>
+                    <div class="tv-member">
+                      <div class="tv-av a3">AL</div>
+                      <div class="tv-info"><strong>Alex Lee</strong><span>Opened PR #143 — Auth refactor</span></div>
+                      <span class="tv-time">15m</span>
+                    </div>
+                    <div class="tv-member">
+                      <div class="tv-av a4">MK</div>
+                      <div class="tv-info"><strong>Maya Khan</strong><span>Closed 2 issues — Sprint 14</span></div><span
+                        class="tv-time">22m</span>
+                    </div>
+                  </div>
+                  <div class="tv-board">
+                    <div class="tv-board-title">🏆 Sprint Leaders</div>
+                    <div class="tv-row"><span class="tv-rank gold">1</span><span>James Davis</span><span
+                        class="tv-pts">124 pts</span></div>
+                    <div class="tv-row"><span class="tv-rank silver">2</span><span>Sarah Allen</span><span
+                        class="tv-pts">98 pts</span></div>
+                    <div class="tv-row"><span class="tv-rank bronze">3</span><span>Maya Khan</span><span
+                        class="tv-pts">87 pts</span></div>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /showcase-screens -->
+          </div><!-- /showcase-window -->
+
+          <!-- Progress dots -->
+          <div class="sw-progress">
+            <div class="sw-dot active" data-i="0"></div>
+            <div class="sw-dot" data-i="1"></div>
+            <div class="sw-dot" data-i="2"></div>
+            <div class="sw-dot" data-i="3"></div>
+          </div>
+
+        </div>
+      </div><!-- /showcase-visual-col -->
+
+    </div><!-- /showcase-inner -->
   </section>
 
   <!-- TESTIMONIALS -->
@@ -184,7 +453,7 @@
         </div>
         <div class="link-group">
           <strong>Legal</strong>
-          <a href="#">Privacy Policy</a>
+          <a (click)="navigateToPrivacy()">Privacy Policy</a>
           <a href="#">Terms of Service</a>
         </div>
       </div>

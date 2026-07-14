@@ -734,3 +734,199 @@ $font-sans       : 'Inter', system-ui, sans-serif;
 
   &:active { transform: translateY(0); }
 }
+
+// ─── TAILORED SETUP ROADMAP ──────────────────────────────────────────
+.aria-card--roadmap {
+  background: rgba($dark, 0.5) !important;
+  border-left: 2px solid $blue !important;
+
+  .roadmap-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+
+  .roadmap-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+
+    &__left {
+      flex-shrink: 0;
+    }
+
+    &__right {
+      flex-grow: 1;
+    }
+  }
+
+  .roadmap-phase {
+    font-family: $font-mono;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: $blue;
+    background: rgba($blue, 0.1);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid rgba($blue, 0.2);
+  }
+
+  .roadmap-action {
+    display: block;
+    font-size: 0.82rem;
+    color: $white;
+    margin-bottom: 0.15rem;
+  }
+
+  .roadmap-details {
+    font-size: 0.72rem;
+    color: $muted;
+    margin: 0;
+    line-height: 1.35;
+  }
+}
+
+// ─── INTERACTIVE Q&A SECTION ─────────────────────────────────────────
+.aria-qa-section {
+  padding: 0 1.5rem;
+  margin-top: 1rem;
+  flex-shrink: 0;
+}
+
+.aria-card--qa {
+  background: rgba($dark, 0.4) !important;
+  border: 1px solid $border-glass !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  backdrop-filter: $blur-light;
+  padding: 1rem;
+  border-radius: $radius-md;
+
+  .aria-card__badge {
+    font-family: $font-mono;
+    font-size: 0.65rem;
+    background: rgba($lime, 0.12);
+    color: $lime;
+    border: 1px solid rgba($lime, 0.3);
+    padding: 0.1rem 0.4rem;
+    border-radius: 10px;
+    margin-left: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.aria-qa-response {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: $radius-sm;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  .response-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: rgba($white, 0.9);
+    margin-bottom: 0.35rem;
+    font-family: $font-sans;
+
+    .response-indicator {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: $purple;
+      box-shadow: 0 0 8px $purple;
+    }
+  }
+
+  .response-content {
+    font-family: $font-mono;
+    font-size: 0.74rem;
+    color: rgba($white, 0.85);
+    line-height: 1.45;
+
+    p {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+  }
+}
+
+.aria-qa-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  align-items: center;
+
+  .aria-qa-input {
+    flex-grow: 1;
+    background: rgba($dark, 0.6);
+    border: 1px solid $border-glass;
+    border-radius: $radius-sm;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.78rem;
+    color: $white;
+    transition: all 0.2s ease;
+    font-family: $font-sans;
+
+    &:focus {
+      outline: none;
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+      background: rgba($dark, 0.85);
+    }
+
+    &::placeholder {
+      color: rgba($white, 0.35);
+    }
+  }
+
+  .aria-qa-send-btn {
+    flex-shrink: 0;
+    padding: 0.5rem 1.1rem;
+    font-family: $font-mono;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: $radius-sm;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    background: rgba(99, 102, 241, 0.12);
+    color: rgba($white, 0.95);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: rgba(99, 102, 241, 0.22);
+      border-color: rgba(99, 102, 241, 0.7);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Loading Dots Animation
+.loading-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  
+  .dot {
+    width: 4px;
+    height: 4px;
+    background-color: $muted;
+    border-radius: 50%;
+    animation: dot-blink 1.4s infinite both;
+
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+  }
+}
+

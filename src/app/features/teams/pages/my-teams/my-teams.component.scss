@@ -1,0 +1,487 @@
+// my-teams.component.scss
+// Bootstrap 5 + Custom SCSS — NO Tailwind
+// Design: Dark glassmorphic theme, matching the existing settings page aesthetic.
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+// ── Design Tokens ─────────────────────────────────────────────────────────────
+$bg-page:         #0d0f1a;
+$glass-bg:        rgba(255, 255, 255, 0.04);
+$glass-border:    rgba(255, 255, 255, 0.08);
+$glass-hover:     rgba(255, 255, 255, 0.07);
+$accent-owner:    #00c9a7;   // teal — owner
+$accent-member:   #6c8cff;   // violet — member
+$accent-owner-bg: rgba(0, 201, 167, 0.1);
+$accent-member-bg:rgba(108, 140, 255, 0.1);
+$text-primary:    #f0f2ff;
+$text-muted:      #737992;
+$radius-card:     18px;
+$radius-badge:    50px;
+$shadow-card:     0 4px 30px rgba(0, 0, 0, 0.35);
+$shadow-hover:    0 8px 40px rgba(0, 0, 0, 0.5);
+
+// ── Base ──────────────────────────────────────────────────────────────────────
+.my-teams-wrapper {
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  background: $bg-page;
+  color: $text-primary;
+}
+
+// ── Fade-in animation ─────────────────────────────────────────────────────────
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeInUp 0.4s ease both;
+}
+
+// ── Page Header ───────────────────────────────────────────────────────────────
+.teams-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  .teams-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: $text-primary;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.25rem;
+
+    i { color: $accent-owner; }
+  }
+
+  .teams-subtitle {
+    color: $text-muted;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+  }
+
+  .total-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: $glass-bg;
+    border: 1px solid $glass-border;
+    color: $text-muted;
+    font-size: 0.8rem;
+    padding: 0.4rem 1rem;
+    border-radius: $radius-badge;
+    white-space: nowrap;
+  }
+}
+
+// ── Section Label ─────────────────────────────────────────────────────────────
+.teams-section {
+  margin-bottom: 3rem;
+
+  &:not(:first-of-type) {
+    margin-top: 1rem;
+  }
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: $accent-owner;
+  margin-bottom: 1.25rem;
+  gap: 0.25rem;
+
+  &.member-label { color: $accent-member; }
+}
+
+.count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  background: $accent-owner-bg;
+  color: $accent-owner;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-left: 0.5rem;
+
+  &.member-pill {
+    background: $accent-member-bg;
+    color: $accent-member;
+  }
+}
+
+// ── Teams Grid ────────────────────────────────────────────────────────────────
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+// ── Team Card ─────────────────────────────────────────────────────────────────
+.team-card {
+  background: $glass-bg;
+  border: 1px solid $glass-border;
+  border-radius: $radius-card;
+  padding: 1.5rem;
+  box-shadow: $shadow-card;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: $shadow-hover;
+  }
+
+  &.owner-card {
+    border-color: rgba($accent-owner, 0.25);
+
+    &:hover { border-color: rgba($accent-owner, 0.5); }
+  }
+
+  &.member-card {
+    border-color: rgba($accent-member, 0.2);
+
+    &:hover { border-color: rgba($accent-member, 0.45); }
+  }
+}
+
+// ── Card Header Row ───────────────────────────────────────────────────────────
+.card-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.team-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+
+  &.owner-icon {
+    background: $accent-owner-bg;
+    color: $accent-owner;
+  }
+
+  &.member-icon {
+    background: $accent-member-bg;
+    color: $accent-member;
+  }
+}
+
+.team-meta {
+  flex: 1;
+  min-width: 0;
+
+  .team-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .team-category {
+    font-size: 0.72rem;
+    color: $text-muted;
+    text-transform: capitalize;
+    letter-spacing: 0.05em;
+  }
+}
+
+// ── Role Badges ───────────────────────────────────────────────────────────────
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  border-radius: $radius-badge;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+
+  &.owner-badge {
+    background: $accent-owner-bg;
+    color: $accent-owner;
+    border: 1px solid rgba($accent-owner, 0.3);
+  }
+
+  &.member-badge {
+    background: $accent-member-bg;
+    color: $accent-member;
+    border: 1px solid rgba($accent-member, 0.3);
+  }
+}
+
+// ── Team Description ──────────────────────────────────────────────────────────
+.team-description {
+  font-size: 0.83rem;
+  color: $text-muted;
+  line-height: 1.6;
+  margin-bottom: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ── Stats Row ─────────────────────────────────────────────────────────────────
+.stats-row {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: $text-muted;
+
+  i { font-size: 0.85rem; }
+}
+
+// ── Owner Row (member cards only) ─────────────────────────────────────────────
+.owner-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba($accent-member, 0.05);
+  border: 1px solid rgba($accent-member, 0.12);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+
+  .owner-label-text {
+    font-size: 0.68rem;
+    color: $text-muted;
+    margin-bottom: 0.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .owner-name-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $text-primary;
+    margin-bottom: 0;
+  }
+}
+
+.owner-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: hsl(var(--avatar-hue, 210), 55%, 40%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+// ── Member Avatars ────────────────────────────────────────────────────────────
+.members-section {
+  margin-top: auto; // push to bottom of card
+}
+
+.member-avatars {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.member-avatar-chip {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: hsl(var(--avatar-hue, 220), 50%, 38%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  cursor: default;
+  transition: transform 0.2s ease;
+
+  &:hover { transform: scale(1.15); }
+}
+
+.more-btn {
+  background: $glass-bg;
+  border: 1px solid $glass-border;
+  color: $text-muted;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    color: $text-primary;
+    border-color: rgba(255,255,255,0.2);
+  }
+}
+
+.more-count {
+  font-size: 0.72rem;
+  color: $text-muted;
+  padding: 0 0.4rem;
+}
+
+.no-members-hint {
+  font-size: 0.75rem;
+  color: $text-muted;
+  font-style: italic;
+}
+
+// ── Expanded Member List ──────────────────────────────────────────────────────
+.expanded-members {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $glass-border;
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.expanded-member-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.25rem 0.25rem;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+
+  &:hover { background: rgba(255,255,255,0.04); }
+}
+
+.member-avatar-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: hsl(var(--avatar-hue, 220), 50%, 38%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  .member-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .member-email {
+    font-size: 0.7rem;
+    color: $text-muted;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ── Loading Skeleton ──────────────────────────────────────────────────────────
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.skeleton-card {
+  height: 220px;
+  border-radius: $radius-card;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 100%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+// ── Error & Empty States ──────────────────────────────────────────────────────
+.error-panel,
+.empty-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: $glass-bg;
+  border: 1px solid $glass-border;
+  border-radius: $radius-card;
+  color: $text-muted;
+}
+
+.btn-retry {
+  background: $accent-owner-bg;
+  border: 1px solid rgba($accent-owner, 0.35);
+  color: $accent-owner;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: $radius-badge;
+  transition: background 0.25s ease, transform 0.2s ease;
+
+  &:hover {
+    background: rgba($accent-owner, 0.2);
+    transform: translateY(-1px);
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .teams-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .teams-title { font-size: 1.5rem; }
+  }
+
+  .teams-grid {
+    grid-template-columns: 1fr;
+  }
+}

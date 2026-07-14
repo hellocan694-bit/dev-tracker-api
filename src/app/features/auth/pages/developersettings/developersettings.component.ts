@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DeveloperService } from 'src/app/core/services/developer.service';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { SubscriptionService } from 'src/app/core/services/subscription.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -29,7 +30,8 @@ export class DevelopersettingsComponent implements OnInit {
     private fb: FormBuilder,
     private developerService: DeveloperService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private subscriptionService: SubscriptionService
   ) {
     this.profileForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
@@ -179,6 +181,26 @@ export class DevelopersettingsComponent implements OnInit {
   // ── Helpers ────────────────────────────────────────────────────────────────
   get avatarInitial(): string {
     return this.profile?.name?.charAt(0)?.toUpperCase() || 'D';
+  }
+
+  get subscriptionExpired(): boolean {
+    return this.subscriptionService.isExpired(this.profile?.subscription);
+  }
+
+  get subscriptionActive(): boolean {
+    return this.subscriptionService.isSubscriptionActive(this.profile?.subscription);
+  }
+
+  get planLabel(): string {
+    const sub = this.profile?.subscription;
+    if (!sub?.isPremium) return 'Free';
+    const type = sub.planType || sub.interval || 'monthly';
+    return type.charAt(0).toUpperCase() + type.slice(1);
+  }
+
+  get expiresAt(): Date | null {
+    const expiresAt = this.profile?.subscription?.subscriptionExpiresAt;
+    return expiresAt ? new Date(expiresAt) : null;
   }
 
   private showToast(icon: 'success' | 'error' | 'info', title: string): void {

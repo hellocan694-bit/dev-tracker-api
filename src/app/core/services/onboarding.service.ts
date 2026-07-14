@@ -60,6 +60,22 @@ export class OnboardingService {
   }
 
   /**
+   * Ask ARIA a custom question inside the onboarding session.
+   * POST /onboarding/qa
+   */
+  askAria(question: string, techStack: string[] = [], projectName = ''): Observable<{ status: string; answer: string }> {
+    return this.http.post<{ status: string; answer: string }>(
+      `${this.apiUrl}/onboarding/qa`,
+      { question, techStack, projectName }
+    ).pipe(
+      catchError(error => {
+        console.error('[OnboardingService] QA Error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
    * Programmatically push a message into the stream
    * (useful for testing or after a successful REST call).
    */

@@ -23,7 +23,7 @@
     <!-- ─── HEADER ──────────────────────────────────────────────────────── -->
     <header class="aria-header">
       <div class="aria-header__left">
-        <span class="aria-logo">
+        <span #ariaLogo class="aria-logo">
           <span class="aria-logo__ring"></span>
           <span class="aria-logo__core">AI</span>
         </span>
@@ -113,6 +113,26 @@
           </div>
         </div><!-- /snapshot card -->
 
+        <!-- Tailored Setup Roadmap Card (Contextual Suggestion) -->
+        <div class="aria-card aria-card--roadmap mt-3">
+          <div class="aria-card__header">
+            <span class="aria-card__icon">🗺️</span>
+            <span class="aria-card__title">Tailored Setup Roadmap</span>
+          </div>
+          <div class="roadmap-timeline">
+            <div class="roadmap-item" *ngFor="let step of roadmap">
+              <div class="roadmap-item__left">
+                <span class="roadmap-phase">{{ step.phase }}</span>
+              </div>
+              <div class="roadmap-item__right">
+                <strong class="roadmap-action">{{ step.action }}</strong>
+                <p class="roadmap-details">{{ step.details }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
       </div><!-- /left column -->
 
       <!-- ░░ RIGHT COLUMN ░░ -->
@@ -200,6 +220,50 @@
         >{{ f }}</code>
       </div>
     </div><!-- /mission -->
+
+    <!-- ─── INTERACTIVE Q&A SECTION ───────────────────────────────────── -->
+    <div class="aria-qa-section">
+      <div class="aria-card aria-card--qa">
+        <div class="aria-card__header">
+          <span class="aria-card__icon">💬</span>
+          <span class="aria-card__title">Interactive Mainframe Q&A</span>
+          <span class="aria-card__badge">Live Assist</span>
+        </div>
+        
+        <!-- Live Response Stream -->
+        <div #ariaResponseBox class="aria-qa-response" *ngIf="ariaResponse || isAriaThinking">
+          <div class="response-header">
+            <span class="response-indicator animate-pulse"></span>
+            <strong>ARIA Response</strong>
+          </div>
+          <div class="response-content">
+            <span class="loading-dots" *ngIf="isAriaThinking">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </span>
+            <p class="response-text" [hidden]="isAriaThinking"></p>
+          </div>
+        </div>
+
+        <!-- Question Input Panel -->
+        <div class="aria-qa-input-wrapper">
+          <input
+            type="text"
+            class="aria-qa-input"
+            placeholder="Type custom setup questions to ARIA (e.g., 'How to run migrations?')..."
+            [(ngModel)]="userQuestion"
+            (keyup.enter)="submitQuestion()"
+            [disabled]="isAriaThinking"
+          />
+          <button 
+            class="aria-qa-send-btn" 
+            (click)="submitQuestion()"
+            [disabled]="!userQuestion.trim() || isAriaThinking"
+          >
+            <span>Ask</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- ─── FOOTER ──────────────────────────────────────────────────────── -->
     <footer class="aria-footer">

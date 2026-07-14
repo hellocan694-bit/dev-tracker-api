@@ -1,0 +1,82 @@
+@import "src/assets/scss/variables";
+
+.privacy-container {
+  max-width: 900px;
+  margin-top: 40px;
+  margin-bottom: 80px;
+  position: relative;
+  z-index: 10;
+}
+
+.privacy-card {
+  background: rgba(13, 15, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba($electric-blue, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.icon-box {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: rgba($electric-blue, 0.12);
+  border: 1px solid rgba($electric-blue, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i {
+    color: $electric-blue;
+    font-size: 1.4rem;
+  }
+}
+
+.policy-content {
+  section {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+
+    &:last-of-type {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  h2 {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    i {
+      opacity: 0.8;
+      font-size: 1.1rem;
+    }
+  }
+
+  h3 {
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  .list-group-item {
+    padding-left: 0;
+    padding-right: 0;
+    color: #94a3b8;
+    
+    i {
+      font-size: 0.95rem;
+    }
+  }
+
+  a {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      color: lighten($electric-blue, 15%) !important;
+      text-shadow: 0 0 10px rgba($electric-blue, 0.4);
+    }
+  }
+}

@@ -1,6 +1,6 @@
 <nav class="glass-nav">
   <div class="nav-container">
-    
+
     <!-- Left: Brand / Toggle -->
     <div class="brand-section">
       <!-- Menu Trigger (Only visible when logged in) -->
@@ -16,7 +16,7 @@
       </a>
     </div>
 
-    <!-- Center: Links -->
+    <!-- Center: Links (guest only) -->
     <div class="nav-links-center d-none d-md-flex" *ngIf="!isLoggedIn">
       <a routerLink="/" class="center-link active">Home</a>
       <a routerLink="/features" class="center-link">Features</a>
@@ -27,7 +27,8 @@
 
     <!-- Right: Actions -->
     <div class="nav-actions">
-      <!-- Unauthenticated -->
+
+      <!-- ── Unauthenticated ───────────────────────────────────── -->
       <ng-container *ngIf="!isLoggedIn">
         <a routerLink="/auth/login" class="nav-link login-link">
           <span class="action-text">Login</span>
@@ -37,35 +38,77 @@
         </a>
       </ng-container>
 
-      <!-- Authenticated -->
+      <!-- ── Authenticated ────────────────────────────────────── -->
       <ng-container *ngIf="isLoggedIn">
 
-        <!-- Not Pro: Upgrade CTA -->
-        <a *ngIf="!isPro && !isPremium" (click)="gotopremium()" class="nav-link premium-link">
-          <i class="fa-solid fa-crown"></i> 
-          <span class="action-text">Pro</span>
+        <!-- ❶ Expired paid plan — show urgent renew CTA -->
+        <a *ngIf="subscriptionExpired" (click)="gotopremium()" class="nav-link premium-link premium-link--expired"
+          title="Subscription expired — click to renew">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span class="action-text">Renew</span>
         </a>
 
-        <!-- Pro Trial: Active badge -->
-        <a *ngIf="isPro && !isPremium" (click)="gotopremium()" class="nav-link premium-link premium-link--active"
+        <!-- ❷ Active paid Premium plan -->
+        <a *ngIf="isPremium && subscriptionActive" class="nav-link premium-link premium-link--premium"
+          [title]="planLabel + ' plan · ' + (daysRemaining !== null ? daysRemaining + ' days left' : 'Lifetime')">
+          <i class="fa-solid fa-gem"></i>
+          <span class="action-text">{{ planLabel }}</span>
+          <span class="pro-badge-dot pro-badge-dot--premium"></span>
+        </a>
+
+        <!-- ❸ Active trial Pro (not yet paid) -->
+        <a *ngIf="isPro && !isPremium && !subscriptionExpired" (click)="gotopremium()" class="nav-link premium-link premium-link--active"
           [title]="daysRemaining !== null ? daysRemaining + ' days remaining' : 'Unlimited'">
           <i class="fa-solid fa-crown"></i>
           <span class="action-text">Pro</span>
           <span class="pro-badge-dot"></span>
         </a>
 
-        <!-- Premium (paid): Distinguished badge -->
-        <a *ngIf="isPremium" class="nav-link premium-link premium-link--premium"
-          [title]="daysRemaining !== null ? daysRemaining + ' days remaining' : 'Unlimited Premium'">
-          <i class="fa-solid fa-gem"></i>
-          <span class="action-text">Premium</span>
-          <span class="pro-badge-dot pro-badge-dot--premium"></span>
+        <!-- ❹ Free / no Pro — Upgrade CTA -->
+        <a *ngIf="!isPro && !isPremium && !subscriptionExpired" (click)="gotopremium()" class="nav-link premium-link">
+          <i class="fa-solid fa-crown"></i>
+          <span class="action-text">Upgrade</span>
         </a>
 
-        <button (click)="logout()" class="logout-pill">
-          <i class="fa-solid fa-power-off"></i>
-          <span>Logout</span>
-        </button>
+        <!-- Profile Dropdown -->
+        <div class="profile-dropdown-wrapper">
+          <button (click)="toggleDropdown($event)" class="profile-trigger-btn" aria-label="Open profile menu">
+            <img [src]="'https://ui-avatars.com/api/?name=' + (currentUser?.name || 'Developer') + '&background=0d6efd&color=fff'" alt="Avatar" class="avatar-img" />
+            <span class="user-name-span d-none d-sm-inline">{{ currentUser?.name || 'Developer' }}</span>
+            <i class="fa-solid fa-chevron-down chevron-icon" [class.rotated]="isDropdownOpen"></i>
+          </button>
+
+          <div class="profile-dropdown-menu" style="display: none;">
+            <div class="dropdown-header">
+              <div class="user-details">
+                <p class="user-fullname">{{ currentUser?.name || 'Developer' }}</p>
+                <p class="user-email">{{ currentUser?.email || 'session@devtrack.io' }}</p>
+              </div>
+              <!-- Subscription pill inside dropdown -->
+              <span class="sub-pill" [class.sub-pill--active]="subscriptionActive"
+                [class.sub-pill--expired]="subscriptionExpired"
+                *ngIf="currentUser?.subscription?.isPremium">
+                <i class="fa-solid" [class.fa-gem]="subscriptionActive" [class.fa-circle-xmark]="subscriptionExpired"></i>
+                {{ subscriptionExpired ? 'Expired' : planLabel }}
+              </span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a (click)="navigateAndClose('/auth/developersettings')" class="dropdown-item">
+              <i class="fa-solid fa-gear"></i> <span>Settings</span>
+            </a>
+            <a (click)="navigateAndClose('/teams/my-teams')" class="dropdown-item">
+              <i class="fa-solid fa-users"></i> <span>My Teams</span>
+            </a>
+            <a *ngIf="subscriptionExpired" (click)="gotopremium()" class="dropdown-item renew-item">
+              <i class="fa-solid fa-arrow-rotate-right"></i> <span>Renew Plan</span>
+            </a>
+            <div class="dropdown-divider"></div>
+            <button (click)="logout()" class="dropdown-item logout-item">
+              <i class="fa-solid fa-power-off"></i> <span>Logout</span>
+            </button>
+          </div>
+        </div>
+
       </ng-container>
     </div>
 

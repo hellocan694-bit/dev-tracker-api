@@ -12,16 +12,23 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import gsap from 'gsap';
 
 import { OnboardingMessage, BottleneckAlert, PriorityFile } from 'src/app/shared/interfaces/onboarding.model';
 import { OnboardingService } from 'src/app/core/services/onboarding.service';
 
+interface RoadmapStep {
+  phase: string;
+  action: string;
+  details: string;
+}
+
 @Component({
   selector: 'app-onboarding-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './onboarding-modal.component.html',
   styleUrls: ['./onboarding-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -38,6 +45,8 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
   @ViewChild('priorityCard') priorityRef!: ElementRef<HTMLElement>;
   @ViewChild('alertsCard') alertsRef!: ElementRef<HTMLElement>;
   @ViewChild('missionCard') missionRef!: ElementRef<HTMLElement>;
+  @ViewChild('ariaLogo') logoRef!: ElementRef<HTMLElement>;
+  @ViewChild('ariaResponseBox') responseBoxRef!: ElementRef<HTMLElement>;
 
   // ─── Inputs / Outputs ─────────────────────────────────────────────────────
   @Input() set triggerMessage(msg: OnboardingMessage | null) {
@@ -51,9 +60,16 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
   isAnimating = false;
   message: OnboardingMessage | null = null;
 
+  // Q&A State
+  userQuestion = '';
+  ariaResponse = '';
+  isAriaThinking = false;
+  roadmap: RoadmapStep[] = [];
+
   // GSAP text-scramble state
   private scrambleTween?: gsap.core.Tween;
   private subscription?: Subscription;
+  private floatTween?: gsap.core.Tween;
 
   // Scramble character pool (cyberpunk feel)
   private readonly CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*';
@@ -82,6 +98,7 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
     this.scrambleTween?.kill();
+    this.floatTween?.kill();
   }
 
   // ─── Public helpers ───────────────────────────────────────────────────────
@@ -114,14 +131,22 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
       }
     };
 
+    // Generate roadmap dynamically (Contextual Setup Roadmap)
+    this.generateRoadmap(this.message.projectSnapshot.techStack || []);
+
     this.isVisible = true;
+    this.ariaResponse = '';
+    this.userQuestion = '';
+    this.isAriaThinking = false;
     this.cdr.detectChanges();          // let Angular render the template first
     this.runEntranceAnimation();
+    this.startFloatingAvatar();
   }
 
   close(): void {
     if (this.isAnimating) return;
     this.isAnimating = true;
+    this.floatTween?.kill();
 
     const tl = gsap.timeline({
       onComplete: () => {
@@ -142,6 +167,67 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
         autoAlpha: 0, duration: 0.25, ease: 'none'
       }, '<');
     }
+  }
+
+  /** Generates tailored roadmap based on technologies parsed from projectSnapshot */
+  generateRoadmap(stack: string[]): void {
+    const list: RoadmapStep[] = [];
+    const lower = stack.map(s => s.toLowerCase());
+
+    list.push({ phase: '01', action: 'Initialize Repository', details: 'Fork & clone the repository, run npm install or pip install requirements.' });
+
+    if (lower.some(s => s.includes('node') || s.includes('express') || s.includes('js') || s.includes('ts'))) {
+      list.push({ phase: '02', action: 'Node.js Env Config', details: 'Copy config.env.example to config.env. Setup MongoDB local connection string.' });
+    }
+    if (lower.some(s => s.includes('angular') || s.includes('react') || s.includes('vue') || s.includes('web'))) {
+      list.push({ phase: '03', action: 'Dev Server Run', details: 'Boot application client via "npm run start" or "ng serve" on localhost.' });
+    } else {
+      list.push({ phase: '03', action: 'Local Testing', details: 'Run testing scripts via "npm run test" or equivalent suite.' });
+    }
+
+    list.push({ phase: '04', action: 'Verify Mainframe', details: 'Check connection to the core dashboard and authenticate linked APIs.' });
+    this.roadmap = list;
+  }
+
+  /** Handles Custom Q&A user input queries */
+  submitQuestion(): void {
+    const q = this.userQuestion.trim();
+    if (!q || this.isAriaThinking) return;
+
+    this.isAriaThinking = true;
+    this.ariaResponse = '';
+    this.cdr.detectChanges();
+
+    const stack = this.message?.projectSnapshot.techStack || [];
+    const projName = this.message?.projectSnapshot.projectName || 'DevTracker';
+
+    this.onboardingService.askAria(q, stack, projName).subscribe({
+      next: (res) => {
+        this.isAriaThinking = false;
+        this.ariaResponse = res.answer;
+        this.cdr.detectChanges();
+
+        // GSAP animate typing effect & response expansion
+        const target = this.responseBoxRef?.nativeElement;
+        if (target) {
+          gsap.fromTo(target, 
+            { height: 0, opacity: 0 },
+            { height: 'auto', opacity: 1, duration: 0.35, ease: 'power2.out' }
+          );
+
+          // Typing staggers
+          const textEl = target.querySelector('.response-text');
+          if (textEl) {
+            this.typewriterEffect(textEl as HTMLElement, this.ariaResponse, gsap.timeline());
+          }
+        }
+      },
+      error: () => {
+        this.isAriaThinking = false;
+        this.ariaResponse = 'Transmission failed. Mainframe offline.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   /** Utility for the template to pick the right severity icon */
@@ -173,16 +259,20 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
 
   // ─── GSAP Animations ──────────────────────────────────────────────────────
 
+  private startFloatingAvatar(): void {
+    setTimeout(() => {
+      const avatar = this.logoRef?.nativeElement;
+      if (avatar) {
+        this.floatTween = gsap.fromTo(avatar,
+          { y: 0, filter: 'drop-shadow(0 0 4px rgba(99, 102, 241, 0.4))' },
+          { y: -6, filter: 'drop-shadow(0 0 10px rgba(99, 102, 241, 0.8))', duration: 1.8, repeat: -1, yoyo: true, ease: 'sine.inOut' }
+        );
+      }
+    }, 100);
+  }
+
   /**
    * ngAfterViewInit entry point for the full entrance sequence.
-   *
-   * Flow:
-   *  1. Overlay fades in.
-   *  2. Panel rises + fades in.
-   *  3. Subject text scrambles into its final value.
-   *  4. Cards stagger-slide in: Snapshot → Priority Files → Alerts → Mission.
-   *  5. Greeting types out character-by-character.
-   *  6. Closing signal appears with a flicker.
    */
   private runEntranceAnimation(): void {
     // Guard: refs might not be available yet after detectChanges
@@ -241,7 +331,6 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
 
   /**
    * Text-scramble effect: cycles random chars before resolving to the real value.
-   * Plugs directly into a GSAP timeline via the position param.
    */
   private scrambleText(
     el: HTMLElement,
@@ -303,3 +392,4 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
     tl.to({}, { duration: text.length * perChar });
   }
 }
+

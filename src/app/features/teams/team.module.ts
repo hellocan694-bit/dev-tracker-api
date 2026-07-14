@@ -6,6 +6,8 @@ import { TeamsLayoutComponent } from './pages/teams-layout/teams-layout.componen
 import { InvitationsComponent } from './pages/invitations/invitations.component';
 import { TeamleaderComponent } from './pages/teamleader/teamleader.component';
 import { FormsModule } from '@angular/forms';
+import { MyTeamsComponent } from './pages/my-teams/my-teams.component';
+
 
 
 @NgModule({
@@ -17,6 +19,7 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     TeamRoutingModule,
     TeamsLayoutComponent,
+    MyTeamsComponent,
     FormsModule
   ]
 })

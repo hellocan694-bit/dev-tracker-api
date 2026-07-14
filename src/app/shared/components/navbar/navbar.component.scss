@@ -1,13 +1,16 @@
+// Remove old ng-deep wrapper paddings
+::ng-deep .main-wrapper {
+  padding-top: 0 !important;
+}
+
 .glass-nav {
-  position: fixed;
-  top: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 40px);
-  max-width: 1400px;
-  height: 70px;
-  background: transparent; // Keeps the outer root transparent to allow floating effect
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: auto;
   z-index: 1000;
+  padding: 16px 24px 8px 24px;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,18 +18,18 @@
 
   .nav-container {
     width: 100%;
-    height: 100%;
+    height: 64px;
     padding: 0 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(8, 8, 10, 0.6); // Premium dark glass
+    background: rgba(8, 8, 10, 0.7); // Premium dark glass
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
+    border-radius: 16px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.5),
+      0 8px 32px rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -194,6 +197,23 @@
           box-shadow: 0 0 15px rgba(251, 191, 36, 0.15);
         }
 
+        // Expired plan — urgent amber/red style
+        &--expired {
+          color: #f87171;
+          background: rgba(239, 68, 68, 0.07);
+          border-color: rgba(239, 68, 68, 0.25);
+          animation: expired-pulse 2.2s ease-in-out infinite;
+
+          i { color: #f87171; filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.5)); }
+
+          &:hover {
+            background: rgba(239, 68, 68, 0.14);
+            border-color: rgba(239, 68, 68, 0.45);
+            color: #fca5a5;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.25);
+          }
+        }
+
         // Active Pro state styling (cyan/blue theme)
         &--active {
           color: #38bdf8;
@@ -289,30 +309,184 @@
       }
     }
 
-    .logout-pill {
-      background: rgba(239, 68, 68, 0.05);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.15);
-      padding: 8px 18px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
+    .profile-dropdown-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .profile-trigger-btn {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 6px 14px;
+      border-radius: 50px;
+      cursor: pointer;
+      color: #f1f5f9;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
-        background: #ef4444;
-        color: white;
-        border-color: #ef4444;
-        transform: translateY(-1px);
-        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
       }
 
-      &:active {
-        transform: translateY(1px);
+      .avatar-img {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1.5px solid rgba(13, 110, 253, 0.3);
+        box-shadow: 0 0 8px rgba(13, 110, 253, 0.2);
+        transition: transform 0.25s;
+      }
+
+      &:hover .avatar-img {
+        transform: scale(1.06);
+      }
+
+      .user-name-span {
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: -0.2px;
+      }
+
+      .chevron-icon {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        transition: transform 0.25s;
+
+        &.rotated {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .profile-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 220px;
+      background: rgba(8, 8, 10, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      padding: 8px;
+      z-index: 1050;
+      transform-origin: top right;
+
+      .dropdown-header {
+        padding: 10px 12px 6px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+
+        .user-fullname {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: #f8fafc;
+          margin: 0;
+        }
+
+        .user-email {
+          font-size: 0.75rem;
+          color: #64748b;
+          margin: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        // Subscription pill inside dropdown header
+        .sub-pill {
+          flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 3px 9px;
+          border-radius: 20px;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 0.4px;
+          background: rgba(192, 132, 252, 0.1);
+          color: #c084fc;
+          border: 1px solid rgba(192, 132, 252, 0.22);
+
+          &--active {
+            background: rgba(52, 211, 153, 0.1);
+            color: #34d399;
+            border-color: rgba(52, 211, 153, 0.25);
+          }
+
+          &--expired {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.25);
+          }
+        }
+      }
+
+      .dropdown-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        margin: 6px 0;
+      }
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 10px;
+        color: #cbd5e1;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: left;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s ease;
+
+        i {
+          font-size: 0.95rem;
+          color: #94a3b8;
+          transition: color 0.2s;
+        }
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.04);
+          color: #fff;
+
+          i { color: #0d6efd; }
+        }
+
+        &.renew-item {
+          color: #fbbf24;
+          i { color: #fbbf24; }
+
+          &:hover {
+            background: rgba(251, 191, 36, 0.08);
+            color: #fcd34d;
+            i { color: #fcd34d; }
+          }
+        }
+
+        &.logout-item {
+          color: #f87171;
+          i { color: #f87171; }
+
+          &:hover {
+            background: rgba(239, 68, 68, 0.08);
+            color: #ef4444;
+            i { color: #ef4444; }
+          }
+        }
       }
     }
   }
@@ -323,16 +497,24 @@
   50% { transform: translateY(-2px) rotate(5deg); }
 }
 
+@keyframes expired-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  50% { box-shadow: 0 0 8px 2px rgba(239, 68, 68, 0.25); }
+}
+
 // Responsive adjustments
 @media (max-width: 991px) {
   .glass-nav {
-    top: 10px;
-    width: calc(100% - 20px);
-    height: 60px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: auto;
+    padding: 10px 16px 4px 16px;
 
     .nav-container {
-      padding: 0 14px;
-      border-radius: 16px;
+      height: 56px;
+      padding: 0 12px;
+      border-radius: 12px;
     }
 
     .brand-section {
@@ -380,17 +562,11 @@
         }
       }
 
-      .logout-pill {
-        padding: 8px 12px;
-        border-radius: 8px;
-
-        span {
+      .profile-trigger-btn {
+        padding: 4px 8px;
+        
+        .chevron-icon {
           display: none;
-        }
-
-        i {
-          margin: 0;
-          font-size: 1rem;
         }
       }
     }

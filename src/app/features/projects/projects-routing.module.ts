@@ -10,6 +10,7 @@ import { CreateprojectComponent } from './pages/createproject/createproject.comp
 import { HistoryComponent } from './pages/history/history.component';
 import { ViewMainProjectComponent } from './pages/view-main-project/view-main-project.component';
 import { TaskManagementMasterComponent } from './components/task-management-master/task-management-master.component';
+import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
 
 const routes: Routes = [
   {path:'',
@@ -18,6 +19,7 @@ const routes: Routes = [
       {path: '', redirectTo:'guesthomepage', pathMatch: 'full'},
       {path:'masterhome' , component:MasterhomeComponent ,  canActivate:[loginGuard]}, 
       {path:'guesthomepage'  , component:GuesthomeComponent},
+      {path:'privacy-policy'  , component:PrivacyPolicyComponent},
       {path:'projects' , component:ProjectsListComponent ,  canActivate:[loginGuard]} ,  
       {path:'archivedprojects' , component:ArchivedProjectsComponent , canActivate:[loginGuard]},
       {path:'createproject' , component:CreateprojectComponent , canActivate:[loginGuard]},

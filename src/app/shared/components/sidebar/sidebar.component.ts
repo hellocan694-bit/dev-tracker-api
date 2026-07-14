@@ -1,16 +1,19 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, HostListener } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarService } from 'src/app/core/services/sidebar.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { OnboardingService } from 'src/app/core/services/onboarding.service';
 import { ProjectService } from 'src/app/core/services/project.service';
 import { GithubService } from 'src/app/core/services/github.service';
+import { SubscriptionService } from 'src/app/core/services/subscription.service';
 import { Developer } from 'src/app/shared/interfaces/developer';
 import { TrialStatus } from 'src/app/shared/interfaces/github';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { TrialBannerComponent } from 'src/app/shared/components/trial-banner/trial-banner.component';
 import Swal from 'sweetalert2';
+import gsap from 'gsap';
 
 @Component({
   selector: 'app-sidebar',
@@ -19,12 +22,14 @@ import Swal from 'sweetalert2';
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
-export class SidebarComponent implements OnInit, OnDestroy {
+export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   activeRoute = 'dashboard';
   currentUser: Developer | null = null;
   isAdmin = false;
   private authSub?: Subscription;
   private trialSub?: Subscription;
+  private routeSub?: Subscription;
+  private sidebarOpenSub?: Subscription;
 
   // Pro widget state
   trialStatus: TrialStatus | null = null;
@@ -32,18 +37,35 @@ export class SidebarComponent implements OnInit, OnDestroy {
   get isPremium(): boolean { return this.trialStatus?.isPremium ?? false; }
   get daysRemaining(): number | null { return this.trialStatus?.daysRemaining ?? null; }
 
+  // Expiry-aware subscription state
+  get subscriptionActive(): boolean {
+    return this.subscriptionService.isSubscriptionActive(this.currentUser?.subscription);
+  }
+  get subscriptionExpired(): boolean {
+    return this.subscriptionService.isExpired(this.currentUser?.subscription);
+  }
+  get planLabel(): string {
+    const sub = this.currentUser?.subscription;
+    if (!sub?.isPremium) return '';
+    const t = sub.planType || sub.interval || 'monthly';
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
   private isOpenSubject = new BehaviorSubject<boolean>(false);
   isOpen$ = this.isOpenSubject.asObservable();
 
   isAriaLoading = false;
+  isMobileDrawerOpen = false;
 
   constructor(
+    private el: ElementRef,
     private router: Router,
     public sidebarService: SidebarService,
     private authService: AuthService,
     private onboardingService: OnboardingService,
     private projectService: ProjectService,
-    private githubService: GithubService
+    private githubService: GithubService,
+    private subscriptionService: SubscriptionService
   ) { }
 
   toggle() {
@@ -65,11 +87,247 @@ export class SidebarComponent implements OnInit, OnDestroy {
       next: status => { this.trialStatus = status; },
       error: () => { this.trialStatus = null; }
     });
+
+    // Synchronize activeRoute on load
+    this.updateActiveRoute(this.router.url);
+
+    // Subscribe to router events for automatic route synchronization
+    this.routeSub = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.updateActiveRoute(event.urlAfterRedirects || event.url);
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Call resize to setup initial styles cleanly
+    this.onResize();
+
+    // Subscribe to mobile open/close events
+    this.sidebarOpenSub = this.sidebarService.isOpen$.subscribe(isOpen => {
+      this.isMobileDrawerOpen = isOpen;
+      this.animateMobileDrawer(isOpen);
+    });
   }
 
   ngOnDestroy(): void {
     this.authSub?.unsubscribe();
     this.trialSub?.unsubscribe();
+    this.routeSub?.unsubscribe();
+    this.sidebarOpenSub?.unsubscribe();
+
+    // Clean up GSAP tweens to avoid memory leaks
+    const sidebarEl = this.el.nativeElement.querySelector('.sidebar-master');
+    const overlayEl = this.el.nativeElement.querySelector('.sidebar-overlay');
+    const navLinks = this.el.nativeElement.querySelectorAll('.nav-item-wrapper');
+    const animElements = this.el.nativeElement.querySelectorAll(
+      '.brand-text, .nav-label, .profile-name, .pro-widget__info, .expired-widget__info'
+    );
+
+    if (sidebarEl) gsap.killTweensOf(sidebarEl);
+    if (overlayEl) gsap.killTweensOf(overlayEl);
+    if (navLinks && navLinks.length) gsap.killTweensOf(navLinks);
+    if (animElements && animElements.length) gsap.killTweensOf(animElements);
+  }
+
+  @HostListener('mouseenter')
+  onMouseEnter(): void {
+    if (window.innerWidth >= 992) {
+      this.expandSidebar();
+    }
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave(): void {
+    if (window.innerWidth >= 992) {
+      this.collapseSidebar();
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    const isDesktop = window.innerWidth >= 992;
+    const sidebarEl = this.el.nativeElement.querySelector('.sidebar-master');
+    const overlayEl = this.el.nativeElement.querySelector('.sidebar-overlay');
+    const animElements = this.el.nativeElement.querySelectorAll(
+      '.brand-text, .nav-label, .profile-name, .pro-widget__info, .expired-widget__info'
+    );
+
+    if (isDesktop) {
+      // Clean mobile style overrides
+      if (sidebarEl) {
+        gsap.set(sidebarEl, { clearProps: 'transform,x,xPercent' });
+      }
+      if (overlayEl) {
+        gsap.set(overlayEl, { clearProps: 'opacity,pointer-events' });
+      }
+      
+      // Hide labels on desktop collapsed layout initially
+      if (animElements.length) {
+        gsap.set(animElements, { display: 'none', opacity: 0, x: -12 });
+      }
+    } else {
+      // Clean desktop style overrides
+      if (sidebarEl) {
+        gsap.set(sidebarEl, { clearProps: 'width' });
+      }
+      if (animElements.length) {
+        gsap.set(animElements, { clearProps: 'opacity,x,display' });
+      }
+      // Re-trigger mobile drawer styles on resize to prevent visual glitches
+      this.animateMobileDrawer(this.isMobileDrawerOpen);
+    }
+  }
+
+  private animateMobileDrawer(isOpen: boolean): void {
+    const isMobile = window.innerWidth < 992;
+    if (!isMobile) return;
+
+    const sidebarEl = this.el.nativeElement.querySelector('.sidebar-master');
+    const overlayEl = this.el.nativeElement.querySelector('.sidebar-overlay');
+
+    if (isOpen) {
+      // Open Mobile Drawer
+      if (overlayEl) {
+        gsap.to(overlayEl, { 
+          opacity: 1, 
+          pointerEvents: 'auto', 
+          duration: 0.35, 
+          ease: 'power2.out',
+          overwrite: 'auto'
+        });
+      }
+
+      if (sidebarEl) {
+        gsap.to(sidebarEl, { 
+          x: '0%', 
+          duration: 0.4, 
+          ease: 'power3.out', 
+          overwrite: 'auto' 
+        });
+        
+        // Stagger animate navigation links
+        const navLinks = this.el.nativeElement.querySelectorAll('.nav-item-wrapper');
+        if (navLinks.length) {
+          gsap.fromTo(navLinks,
+            { x: -20, opacity: 0 },
+            { x: 0, opacity: 1, duration: 0.3, stagger: 0.03, ease: 'power2.out', delay: 0.1 }
+          );
+        }
+      }
+    } else {
+      // Close Mobile Drawer
+      if (sidebarEl) {
+        gsap.to(sidebarEl, {
+          x: '-100%',
+          duration: 0.3,
+          ease: 'power3.in',
+          overwrite: 'auto'
+        });
+      }
+      
+      if (overlayEl) {
+        gsap.to(overlayEl, {
+          opacity: 0,
+          pointerEvents: 'none',
+          duration: 0.25,
+          ease: 'power2.in',
+          overwrite: 'auto'
+        });
+      }
+    }
+  }
+
+  private expandSidebar(): void {
+    const sidebarEl = this.el.nativeElement.querySelector('.sidebar-master');
+    const animElements = this.el.nativeElement.querySelectorAll(
+      '.brand-text, .nav-label, .profile-name, .pro-widget__info, .expired-widget__info'
+    );
+
+    if (sidebarEl) {
+      gsap.to(sidebarEl, {
+        width: 260,
+        duration: 0.35,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    }
+
+    if (animElements.length) {
+      gsap.set(animElements, { display: (i, el) => {
+        if (el.classList.contains('brand-text') || el.classList.contains('profile-name')) {
+          return 'inline';
+        }
+        if (el.classList.contains('pro-widget__info') || el.classList.contains('expired-widget__info')) {
+          return 'flex';
+        }
+        return 'inline-block';
+      }});
+
+      gsap.to(animElements, {
+        opacity: 1,
+        x: 0,
+        duration: 0.3,
+        stagger: 0.02,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    }
+  }
+
+  private collapseSidebar(): void {
+    const sidebarEl = this.el.nativeElement.querySelector('.sidebar-master');
+    const animElements = this.el.nativeElement.querySelectorAll(
+      '.brand-text, .nav-label, .profile-name, .pro-widget__info, .expired-widget__info'
+    );
+
+    if (sidebarEl) {
+      gsap.to(sidebarEl, {
+        width: 80,
+        duration: 0.3,
+        ease: 'power2.inOut',
+        overwrite: 'auto'
+      });
+    }
+
+    if (animElements.length) {
+      gsap.to(animElements, {
+        opacity: 0,
+        x: -12,
+        duration: 0.2,
+        ease: 'power2.in',
+        overwrite: 'auto',
+        onComplete: () => {
+          gsap.set(animElements, { display: 'none' });
+        }
+      });
+    }
+  }
+
+  private updateActiveRoute(url: string): void {
+    if (url.includes('home/masterhome')) {
+      this.activeRoute = 'dashboard';
+    } else if (url.includes('home/activeprojects')) {
+      this.activeRoute = 'activeproject';
+    } else if (url.includes('home/completedprojects')) {
+      this.activeRoute = 'completed';
+    } else if (url.includes('auth/developersettings')) {
+      this.activeRoute = 'developersettings';
+    } else if (url.includes('teams/my-teams')) {
+      this.activeRoute = 'my-teams';
+    } else if (url.includes('teams/teamleaderboard')) {
+      this.activeRoute = 'teams';
+    } else if (url.includes('teams/invitations')) {
+      this.activeRoute = 'invitations';
+    } else if (url.includes('feedback/wall') || url.includes('/feedback')) {
+      if (url.includes('feedback/admin')) {
+        this.activeRoute = 'feedback-admin';
+      } else {
+        this.activeRoute = 'feedbacks';
+      }
+    } else if (url.includes('github/dashboard')) {
+      this.activeRoute = 'github';
+    }
   }
 
   navigate(route: string): void {
@@ -84,6 +342,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (route === 'developersettings') this.router.navigate(['auth/developersettings']);
 
     // مسارات الـ Teams الجديدة
+    if (route === 'my-teams') this.router.navigate(['teams/my-teams']);
     if (route === 'teams') this.router.navigate(['teams/teamleaderboard']);
     if (route === 'invitations') this.router.navigate(['teams/invitations']);
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, OnDestroy, HostListener, NgZone, Renderer2 } from '@angular/core';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { Router } from '@angular/router';
 import { gsap } from 'gsap';
@@ -14,15 +14,22 @@ gsap.registerPlugin(ScrollTrigger);
 export class GuesthomeComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoggedIn = false;
   private isMobile = false;
-  
+
   // Track specific listeners for proper ngOnDestroy cleanup
   private mouseMoveHandler?: (e: MouseEvent) => void;
   private mouseLeaveHandler?: () => void;
 
+  // Spotlight pointer listeners
+  private pointerMoveListener?: () => void;
+  private pointerLeaveListener?: () => void;
+  private pointerEnterListener?: () => void;
+
   constructor(
-    private authService: AuthService, 
+    private authService: AuthService,
     private router: Router,
-    private el: ElementRef
+    private el: ElementRef,
+    private ngZone: NgZone,
+    private renderer: Renderer2
   ) {
     this.checkScreenSize();
   }
@@ -45,7 +52,93 @@ export class GuesthomeComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     setTimeout(() => {
       this.initCinematicAnimations();
+      this.initSpotlightEffect();
+      this.initStickyShowcase();
     }, 100);
+  }
+
+  initStickyShowcase() {
+    const panels = this.el.nativeElement.querySelectorAll('.feature-panel');
+    if (!panels.length) return;
+
+    const activate = (index: number) => {
+      this.el.nativeElement.querySelectorAll('.showcase-screen').forEach((s: any) => s.classList.remove('active'));
+      const screen = this.el.nativeElement.querySelector(`#sw-screen-${index}`);
+      if (screen) {
+        screen.classList.add('active');
+        gsap.fromTo(screen,
+          { opacity: 0, y: 18, scale: 0.97 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: 'power3.out' }
+        );
+      }
+      this.el.nativeElement.querySelectorAll('.sw-tab').forEach((t: any) => t.classList.remove('active'));
+      const tab = this.el.nativeElement.querySelector(`#sw-tab-${index}`);
+      if (tab) tab.classList.add('active');
+      this.el.nativeElement.querySelectorAll('.sw-dot').forEach((d: any) => d.classList.remove('active'));
+      const dot = this.el.nativeElement.querySelector(`.sw-dot[data-i="${index}"]`);
+      if (dot) dot.classList.add('active');
+    };
+
+    // ScrollTrigger screen swap triggers
+    panels.forEach((panel: any, i: number) => {
+      ScrollTrigger.create({
+        trigger: panel,
+        scroller: '.content-area',
+        start: 'top 55%',
+        end: 'bottom 45%',
+        onEnter: () => activate(i),
+        onEnterBack: () => activate(i),
+      });
+
+      const content = panel.querySelector('.panel-content');
+      if (content) {
+        gsap.from(content, {
+          scrollTrigger: {
+            trigger: panel,
+            scroller: '.content-area',
+            start: 'top 72%',
+            toggleActions: 'play none none reverse',
+          },
+          y: 70,
+          opacity: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+        });
+      }
+    });
+
+    if (!this.isMobile) {
+      const inner = this.el.nativeElement.querySelector('.showcase-inner');
+      const visualCol = this.el.nativeElement.querySelector('.showcase-visual-col');
+      if (inner && visualCol) {
+        ScrollTrigger.create({
+          trigger: inner,
+          scroller: '.content-area',
+          start: 'top top',
+          end: 'bottom bottom',
+          pin: visualCol,
+          pinSpacing: true
+        });
+      }
+    }
+  }
+
+  initSpotlightEffect() {
+    if (this.isMobile) return;
+
+    const container = this.el.nativeElement.querySelector('.mockup-body-wrapper');
+    if (!container) return;
+
+    this.ngZone.runOutsideAngular(() => {
+      this.pointerMoveListener = this.renderer.listen(container, 'pointermove', (e: PointerEvent) => {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        container.style.setProperty('--x', `${x}px`);
+        container.style.setProperty('--y', `${y}px`);
+      });
+    });
   }
 
   initCinematicAnimations() {
@@ -59,13 +152,13 @@ export class GuesthomeComponent implements OnInit, AfterViewInit, OnDestroy {
       .from(q('.hero-subtitle'), { y: 30, opacity: 0, duration: 0.8 }, "-=0.6")
       .from(q('.hero-status'), { y: 20, opacity: 0, duration: 0.6 }, "-=0.5")
       .from(q('.hero-cta-group'), { y: 20, opacity: 0, scale: 0.95, duration: 0.8 }, "-=0.4")
-      .from(q('.hero-dashboard-mockup'), { 
-        y: 100, 
-        rotateX: 10, 
+      .from(q('.hero-dashboard-mockup'), {
+        y: 100,
+        rotateX: 10,
         scale: 0.92,
-        opacity: 0, 
-        duration: 1.5, 
-        ease: 'power4.out' 
+        opacity: 0,
+        duration: 1.5,
+        ease: 'power4.out'
       }, "-=0.4");
 
     // TASK 2: Ambient Levitation (Floating Effect)
@@ -80,20 +173,20 @@ export class GuesthomeComponent implements OnInit, AfterViewInit, OnDestroy {
     // TASK 2: 3D Mouse Interaction
     const heroSection = this.el.nativeElement.querySelector('.hero-section');
     const mockupFrame = this.el.nativeElement.querySelector('.mockup-frame');
-    
+
     if (heroSection && mockupFrame) {
       this.mouseMoveHandler = (e: MouseEvent) => {
         // TASK 4: Disable 3D follow on mobile
-        if (this.isMobile) return; 
+        if (this.isMobile) return;
 
         const rect = heroSection.getBoundingClientRect();
-        
+
         // Calculate coordinate shifts relative to the center of the hero bounds (-0.5 to 0.5)
         const xPos = (e.clientX - rect.left) / rect.width - 0.5;
         const yPos = (e.clientY - rect.top) / rect.height - 0.5;
 
         // Determine max tilt angle (15 degrees)
-        const tiltX = -yPos * 15; 
+        const tiltX = -yPos * 15;
         const tiltY = xPos * 15;
 
         gsap.to(mockupFrame, {
@@ -105,10 +198,10 @@ export class GuesthomeComponent implements OnInit, AfterViewInit, OnDestroy {
           ease: 'power2.out'
         });
       };
-      
+
       this.mouseLeaveHandler = () => {
         if (this.isMobile) return;
-        
+
         // Smooth snap back to identity
         gsap.to(mockupFrame, {
           rotateX: 0,
@@ -123,7 +216,7 @@ export class GuesthomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // TASK 3: Scroll-Triggered Reveals (Sophisticated scale/slide)
-    
+
     // Abstract elements generic reveal
     const revealElements = q('.gsap-reveal');
     revealElements.forEach((el: any) => {
@@ -164,7 +257,7 @@ export class GuesthomeComponent implements OnInit, AfterViewInit, OnDestroy {
   gotoRegister() {
     this.router.navigate(['auth/register']);
   }
-  
+
   gotoDemo() {
     const demoSection = this.el.nativeElement.querySelector('#demo-section');
     if (demoSection) {
@@ -172,15 +265,22 @@ export class GuesthomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  navigateToPrivacy() {
+    this.router.navigate(['home/privacy-policy'])
+  }
+
   // TASK 3: Strict Memory Management
   ngOnDestroy() {
     const heroSection = this.el.nativeElement.querySelector('.hero-section');
-    
+
     // Clean up specific DOM listeners
     if (heroSection) {
       if (this.mouseMoveHandler) heroSection.removeEventListener('mousemove', this.mouseMoveHandler);
       if (this.mouseLeaveHandler) heroSection.removeEventListener('mouseleave', this.mouseLeaveHandler);
     }
+
+    // Unsubscribe Renderer2 spotlight listeners
+    if (this.pointerMoveListener) this.pointerMoveListener();
 
     // Kill all GSAP context, Timelines, and ScrollTriggers for this class
     ScrollTrigger.getAll().forEach(trigger => trigger.kill());

@@ -160,6 +160,37 @@
           repos</span>
       </div>
 
+      <!-- ── Toolbar: Search + View toggle ──────────────────────── -->
+      <div class="repo-toolbar d-flex align-items-center gap-2 mb-3" *ngIf="!isLoadingRepos && repos.length">
+        <div class="repo-search flex-grow-1">
+          <svg class="repo-search__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" width="14" height="14">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input class="repo-search__input" type="text" placeholder="Search repos, language…"
+            [(ngModel)]="repoSearchQuery" id="repo-search-input" autocomplete="off" />
+        </div>
+        <div class="view-toggle d-flex">
+          <button class="view-toggle__btn" [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')"
+            id="view-grid-btn" title="Grid view">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </button>
+          <button class="view-toggle__btn" [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
+            id="view-list-btn" title="List view">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" width="13" height="13">
+              <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <!-- Skeleton loaders -->
       <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4" *ngIf="isLoadingRepos">
         <div class="col" *ngFor="let sk of skeletonItems">
@@ -178,21 +209,23 @@
 
       <!-- Repo cards -->
       <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4" #repoGrid
-        *ngIf="!isLoadingRepos && repos.length">
-        <div class="col" *ngFor="let repo of repos">
+        *ngIf="!isLoadingRepos && filteredRepos.length && viewMode === 'grid'">
+        <div class="col" *ngFor="let repo of filteredRepos; trackBy: trackByRepoId">
           <div class="repo-card h-100 d-flex flex-column" [class.repo-card--selected]="isSelected(repo.repoId)"
-            (click)="toggleRepo(repo)" [id]="'repo-card-' + repo.repoId" role="button"
+            [class.repo-card--expanded]="isRepoExpanded(repo.repoId)"
+            [id]="'repo-card-' + repo.repoId" role="button"
             [attr.aria-pressed]="isSelected(repo.repoId)">
             <!-- Selection checkmark -->
-            <div class="repo-card__check" [class.visible]="isSelected(repo.repoId)">
+            <div class="repo-card__check" [class.visible]="isSelected(repo.repoId)"
+              (click)="toggleRepo(repo)">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
 
-            <!-- Card body -->
-            <div class="repo-card__top mb-2">
+            <!-- Card body (click to expand files) -->
+            <div class="repo-card__top mb-2" (click)="toggleRepo(repo)">
               <div class="repo-card__icon me-2">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="1.8" width="15" height="15">
@@ -202,15 +235,41 @@
               </div>
               <div class="repo-card__name-wrap flex-grow-1 min-w-0">
                 <p class="repo-card__name text-truncate mb-0" [title]="repo.name">{{ repo.name }}</p>
-                <div class="mt-1">
+                <div class="mt-1 d-flex gap-1 flex-wrap">
                   <span class="repo-card__private-badge" *ngIf="repo.private">private</span>
                   <span class="repo-card__public-badge" *ngIf="!repo.private">public</span>
+                  <span class="repo-card__topic-badge" *ngFor="let t of repo.topics?.slice(0,2)">{{ t }}</span>
                 </div>
               </div>
             </div>
 
-            <p class="repo-card__desc mb-3 small text-muted flex-grow-1">{{ repo.description || 'No description
-              provided' }}</p>
+            <p class="repo-card__desc mb-2 small text-muted flex-grow-1" (click)="toggleRepo(repo)">
+              {{ repo.description || 'No description provided' }}
+            </p>
+
+            <!-- Enriched meta row -->
+            <div class="repo-card__meta-row d-flex gap-2 mb-2 flex-wrap" (click)="toggleRepo(repo)">
+              <span class="repo-meta-chip" *ngIf="repo.forks">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" width="10" height="10">
+                  <line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/>
+                  <circle cx="6" cy="18" r="3"/><circle cx="6" cy="6" r="3"/>
+                  <path d="M18 9a9 9 0 0 1-9 9"/>
+                </svg>
+                {{ repo.forks }}
+              </span>
+              <span class="repo-meta-chip repo-meta-chip--issues" *ngIf="repo.openIssues">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" width="10" height="10">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                {{ repo.openIssues }}
+              </span>
+              <span class="repo-meta-chip repo-meta-chip--size" *ngIf="repo.sizeKb">
+                {{ repo.sizeKb >= 1024 ? (repo.sizeKb / 1024 | number:'1.1-1') + ' MB' : repo.sizeKb + ' KB' }}
+              </span>
+            </div>
 
             <div
               class="repo-card__footer mt-auto pt-2 border-top border-opacity-10 border-white d-flex align-items-center justify-content-between">
@@ -229,8 +288,18 @@
                 </div>
               </div>
 
-              <!-- Toggle switch and time -->
+              <!-- File inspect + toggle -->
               <div class="d-flex align-items-center gap-2">
+                <button class="btn-inspect" [class.active]="isRepoExpanded(repo.repoId)"
+                  (click)="$event.stopPropagation(); toggleRepoContents(repo)"
+                  [id]="'inspect-btn-' + repo.repoId" title="Browse files">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" width="12" height="12">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  Files
+                </button>
                 <div class="repo-card__updated text-muted small">{{ relativeTime(repo.updatedAt) }}</div>
                 <div class="repo-toggle" (click)="$event.stopPropagation(); toggleRepo(repo)">
                   <div class="repo-toggle__track" [class.on]="isSelected(repo.repoId)">
@@ -243,10 +312,142 @@
         </div>
       </div>
 
+      <!-- List view -->
+      <div class="repo-list" *ngIf="!isLoadingRepos && filteredRepos.length && viewMode === 'list'">
+        <div class="repo-list-item d-flex align-items-center gap-3"
+          *ngFor="let repo of filteredRepos; trackBy: trackByRepoId"
+          [class.repo-list-item--selected]="isSelected(repo.repoId)"
+          [id]="'repo-list-' + repo.repoId">
+          <div class="repo-list-item__lang-dot">
+            <span class="lang-dot" [style.background]="langColor(repo.language)"></span>
+          </div>
+          <div class="flex-grow-1 min-w-0">
+            <span class="repo-list-item__name fw-semibold">{{ repo.name }}</span>
+            <span class="repo-list-item__full ms-1 text-muted small">{{ repo.fullName }}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <span class="repo-meta-chip" *ngIf="repo.sizeKb">
+              {{ repo.sizeKb >= 1024 ? (repo.sizeKb / 1024 | number:'1.1-1') + ' MB' : repo.sizeKb + ' KB' }}
+            </span>
+            <span class="repo-card__updated text-muted small">{{ relativeTime(repo.updatedAt) }}</span>
+            <button class="btn-inspect" [class.active]="isRepoExpanded(repo.repoId)"
+              (click)="toggleRepoContents(repo)" title="Browse files">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" width="12" height="12">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              Files
+            </button>
+            <div class="repo-toggle" (click)="toggleRepo(repo)">
+              <div class="repo-toggle__track" [class.on]="isSelected(repo.repoId)">
+                <div class="repo-toggle__thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ File Analytics Panel ══════════════════════════════════════════════ -->
+      <div class="file-panel" *ngIf="expandedRepoId !== null" id="file-analytics-panel">
+
+        <!-- Panel header -->
+        <div class="file-panel__header d-flex align-items-center gap-2 mb-3">
+          <span class="file-panel__icon">📂</span>
+          <span class="file-panel__title fw-bold">
+            {{ expandedRepoData?.repoFullName ?? 'Repository' }} &mdash; File Analytics
+          </span>
+          <span class="file-panel__badge ms-auto" *ngIf="expandedRepoData">
+            {{ expandedRepoData.totalFiles }} files
+          </span>
+          <button class="file-panel__close" (click)="expandedRepoId = null; expandedRepoData = null"
+            id="close-file-panel">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" width="14" height="14">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Lang breakdown bar -->
+        <div class="lang-breakdown mb-3" *ngIf="expandedRepoData && expandedRepoData.langBreakdown.length">
+          <div class="lang-breakdown__bar d-flex mb-2">
+            <div class="lang-breakdown__segment"
+              *ngFor="let lb of expandedRepoData.langBreakdown; trackBy: trackByLang"
+              [style.width.%]="lb.percent"
+              [style.background]="langColorSafe(lb.language)"
+              [title]="lb.language + ' · ' + lb.percent + '%'">
+            </div>
+          </div>
+          <div class="lang-breakdown__legend d-flex flex-wrap gap-2">
+            <span class="lang-chip" *ngFor="let lb of expandedRepoData.langBreakdown; trackBy: trackByLang">
+              <span class="lang-dot" [style.background]="langColorSafe(lb.language)"></span>
+              {{ lb.language }} <span class="lang-chip__pct">{{ lb.percent }}%</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- File search -->
+        <div class="file-search mb-2" *ngIf="expandedRepoData">
+          <svg class="file-search__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" width="13" height="13">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input class="file-search__input" type="text" placeholder="Filter files by name, path, or language…"
+            [(ngModel)]="fileSearchQuery" id="file-search-input" autocomplete="off" />
+        </div>
+
+        <!-- Loading state -->
+        <div class="file-panel__loading d-flex align-items-center gap-2 py-3" *ngIf="isLoadingContents">
+          <span class="btn-spinner"></span>
+          <span class="text-muted small">Fetching file tree…</span>
+        </div>
+
+        <!-- Error state -->
+        <div class="gh-dash__msg-error mb-2" *ngIf="contentsError">{{ contentsError }}</div>
+
+        <!-- File rows -->
+        <div class="file-table" *ngIf="expandedRepoData && !isLoadingContents">
+          <div class="file-table__head d-flex align-items-center px-3 py-1 mb-1">
+            <span class="file-table__col-name">File</span>
+            <span class="file-table__col-dir ms-auto me-3">Directory</span>
+            <span class="file-table__col-lang">Language</span>
+            <span class="file-table__col-size">Size</span>
+          </div>
+
+          <div class="file-row d-flex align-items-center px-3 py-2"
+            *ngFor="let file of filteredFiles; trackBy: trackByFilePath"
+            [id]="'file-' + file.sha.slice(0,8)">
+            <span class="file-row__icon me-2">{{ fileIcon(file.extension) }}</span>
+            <div class="file-row__info flex-grow-1 min-w-0">
+              <span class="file-row__name text-truncate d-block fw-medium">{{ file.name }}</span>
+            </div>
+            <span class="file-row__dir text-muted small text-truncate me-3" [title]="file.directory">
+              {{ file.directory || '/' }}
+            </span>
+            <span class="lang-chip flex-shrink-0 me-2" *ngIf="file.language">
+              <span class="lang-dot" [style.background]="langColorSafe(file.language)"></span>
+              {{ file.language }}
+            </span>
+            <span class="file-row__size text-muted small flex-shrink-0">{{ formatBytes(file.sizeBytes) }}</span>
+          </div>
+
+          <!-- Empty filter result -->
+          <div class="py-3 text-center text-muted small" *ngIf="filteredFiles.length === 0">
+            No files match "{{ fileSearchQuery }}"
+          </div>
+        </div>
+
+        <!-- Truncation notice -->
+        <div class="file-panel__truncated text-muted small mt-2" *ngIf="expandedRepoData?.truncated">
+          ⚠️ This tree was truncated by GitHub (> 100k objects). Only the first 300 files are shown.
+        </div>
+      </div><!-- /.file-panel -->
+
       <!-- Empty repos state -->
-      <div class="gh-dash__empty py-5" *ngIf="!isLoadingRepos && !repos.length && !proAccessError">
-        <div class="gh-dash__empty-icon mb-3">📂</div>
-        <p class="text-muted">No repositories found. Make sure your GitHub account has public or private repos.</p>
+      <div class="gh-dash__empty py-5" *ngIf="!isLoadingRepos && !filteredRepos.length && !proAccessError">
+        <div class="gh-dash__empty-icon mb-3">{{ repoSearchQuery ? '🔍' : '📂' }}</div>
+        <p class="text-muted">{{ repoSearchQuery ? 'No repos match your search.' : 'No repositories found. Make sure your GitHub account has public or private repos.' }}</p>
       </div>
     </section>
 

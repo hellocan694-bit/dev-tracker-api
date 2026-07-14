@@ -51,3 +51,43 @@ html:not(.aos-enabled) [data-aos] {
   opacity: 1 !important;
   transform: none !important;
 }
+
+/* --- Global Layout Variables & Shell Rules (Bootstrap / SCSS) --- */
+:root {
+  --sidebar-width: 80px;
+}
+
+@media (max-width: 991px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+}
+
+.app-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #050505;
+}
+
+.main-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+  margin-left: var(--sidebar-width) !important;
+  padding-top: 0 !important; // Remove any old padding top offsets from navbar
+  transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.content-area {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}

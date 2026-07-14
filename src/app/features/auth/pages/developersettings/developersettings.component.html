@@ -37,32 +37,20 @@
         <!-- ── Tabs Navigation ─────────────────────────────────────────── -->
         <ul class="settings-tabs nav mb-4 fade-in" role="tablist">
           <li class="nav-item" role="presentation">
-            <button
-              id="tab-profile"
-              class="settings-tab-btn"
-              [class.active]="activeTab === 'profile'"
-              (click)="setTab('profile')"
-              type="button" role="tab" aria-controls="pane-profile">
+            <button id="tab-profile" class="settings-tab-btn" [class.active]="activeTab === 'profile'"
+              (click)="setTab('profile')" type="button" role="tab" aria-controls="pane-profile">
               <i class="bi bi-person-badge me-2"></i>Profile Info
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button
-              id="tab-prefs"
-              class="settings-tab-btn"
-              [class.active]="activeTab === 'preferences'"
-              (click)="setTab('preferences')"
-              type="button" role="tab" aria-controls="pane-prefs">
+            <button id="tab-prefs" class="settings-tab-btn" [class.active]="activeTab === 'preferences'"
+              (click)="setTab('preferences')" type="button" role="tab" aria-controls="pane-prefs">
               <i class="bi bi-toggles me-2"></i>Preferences
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button
-              id="tab-security"
-              class="settings-tab-btn danger-tab"
-              [class.active]="activeTab === 'security'"
-              (click)="setTab('security')"
-              type="button" role="tab" aria-controls="pane-security">
+            <button id="tab-security" class="settings-tab-btn danger-tab" [class.active]="activeTab === 'security'"
+              (click)="setTab('security')" type="button" role="tab" aria-controls="pane-security">
               <i class="bi bi-exclamation-triangle me-2"></i>Account Security
             </button>
           </li>
@@ -71,8 +59,21 @@
         <!-- ════════════════════════════════════════════════════════════════
              TAB 1 — PROFILE INFO
              ════════════════════════════════════════════════════════════════ -->
-        <div id="pane-profile" role="tabpanel" aria-labelledby="tab-profile"
-             *ngIf="activeTab === 'profile'" class="fade-in">
+        <div id="pane-profile" role="tabpanel" aria-labelledby="tab-profile" *ngIf="activeTab === 'profile'"
+          class="fade-in">
+
+          <!-- Renewal Banner (shown when subscription is expired) -->
+          <div class="renewal-banner alert d-flex align-items-center gap-3 mb-4" *ngIf="subscriptionExpired">
+            <i class="bi bi-exclamation-circle-fill text-warning fs-4 flex-shrink-0"></i>
+            <div class="flex-grow-1">
+              <strong class="text-white">Your {{ planLabel }} subscription expired on {{ expiresAt | date:'mediumDate' }}.</strong>
+              <span class="text-light d-block small">Renew now to restore premium access.</span>
+            </div>
+            <a routerLink="/subscriptions/pricing" class="btn btn-warning btn-sm fw-semibold text-dark ms-auto">
+              <i class="bi bi-arrow-repeat me-1"></i>Renew Plan
+            </a>
+          </div>
+
           <div class="row g-4">
 
             <!-- Left: Avatar Card -->
@@ -100,8 +101,23 @@
                 <div class="info-row mt-2">
                   <i class="bi bi-layers text-info"></i>
                   <span class="text-muted small">
-                    Plan: <strong class="text-warning">{{ profile?.subscription?.plan | titlecase }}</strong>
+                    Plan: <strong [class.text-success]="subscriptionActive" [class.text-warning]="!subscriptionActive && profile?.subscription?.isPremium" [class.text-secondary]="!profile?.subscription?.isPremium">{{ planLabel }}</strong>
                   </span>
+                </div>
+                <div class="info-row mt-2" *ngIf="profile?.subscription?.isPremium && profile?.subscription?.planType !== 'lifetime'">
+                  <i class="bi bi-calendar-check text-info"></i>
+                  <span class="text-muted small">
+                    <ng-container *ngIf="subscriptionActive">
+                      Renews: <strong class="text-success">{{ expiresAt | date:'mediumDate' }}</strong>
+                    </ng-container>
+                    <ng-container *ngIf="subscriptionExpired">
+                      Expired: <strong class="text-danger">{{ expiresAt | date:'mediumDate' }}</strong>
+                    </ng-container>
+                  </span>
+                </div>
+                <div class="info-row mt-2" *ngIf="profile?.subscription?.planType === 'lifetime'">
+                  <i class="bi bi-infinity text-info"></i>
+                  <span class="text-muted small">Lifetime Access</span>
                 </div>
               </div>
             </div>
@@ -118,14 +134,10 @@
                   <div class="col-md-6">
                     <div class="custom-input-group">
                       <label for="profile-name">Display Name</label>
-                      <input
-                        id="profile-name"
-                        type="text"
-                        formControlName="name"
-                        placeholder="Your full name"
+                      <input id="profile-name" type="text" formControlName="name" placeholder="Your full name"
                         [class.is-invalid]="profileForm.get('name')?.touched && profileForm.get('name')?.invalid">
                       <div class="invalid-feedback"
-                           *ngIf="profileForm.get('name')?.touched && profileForm.get('name')?.errors as errs">
+                        *ngIf="profileForm.get('name')?.touched && profileForm.get('name')?.errors as errs">
                         <span *ngIf="errs['required']">Name is required.</span>
                         <span *ngIf="errs['minlength']">Minimum 3 characters.</span>
                         <span *ngIf="errs['maxlength']">Maximum 50 characters.</span>
@@ -150,7 +162,8 @@
                     <div class="custom-input-group">
                       <label>System Role</label>
                       <div class="input-with-icon">
-                        <input type="text" [value]="(profile?.role | titlecase) || '—'" readonly class="locked text-info fw-bold">
+                        <input type="text" [value]="(profile?.role | titlecase) || '—'" readonly
+                          class="locked text-info fw-bold">
                         <i class="bi bi-shield-check text-info"></i>
                       </div>
                     </div>
@@ -161,7 +174,8 @@
                     <div class="custom-input-group">
                       <label>Total Projects</label>
                       <div class="input-with-icon">
-                        <input type="text" [value]="profile?.projectCount ?? 0" readonly class="locked text-success fw-bold">
+                        <input type="text" [value]="profile?.projectCount ?? 0" readonly
+                          class="locked text-success fw-bold">
                         <i class="bi bi-folder2-open text-success"></i>
                       </div>
                     </div>
@@ -169,10 +183,7 @@
 
                   <!-- Submit -->
                   <div class="col-12 d-flex gap-3">
-                    <button
-                      type="submit"
-                      id="save-profile-btn"
-                      class="btn btn-primary-custom px-5"
+                    <button type="submit" id="save-profile-btn" class="btn btn-primary-custom px-5"
                       [disabled]="profileForm.invalid || isLoading">
                       <span *ngIf="!isLoading">
                         <i class="bi bi-check2-circle me-2"></i>Save Changes
@@ -195,8 +206,8 @@
         <!-- ════════════════════════════════════════════════════════════════
              TAB 2 — PREFERENCES
              ════════════════════════════════════════════════════════════════ -->
-        <div id="pane-prefs" role="tabpanel" aria-labelledby="tab-prefs"
-             *ngIf="activeTab === 'preferences'" class="fade-in">
+        <div id="pane-prefs" role="tabpanel" aria-labelledby="tab-prefs" *ngIf="activeTab === 'preferences'"
+          class="fade-in">
           <div class="glass-card p-4 p-md-5">
             <h5 class="text-white mb-4 fw-semibold">
               <i class="bi bi-palette me-2 text-info"></i>UI & Notification Preferences
@@ -239,12 +250,8 @@
                         <p class="text-muted x-small mb-0">Get notified when a task is marked done.</p>
                       </div>
                       <div class="form-check form-switch ms-3">
-                        <input
-                          id="notif-task"
-                          class="form-check-input"
-                          type="checkbox"
-                          formControlName="emailOnTaskComplete"
-                          role="switch">
+                        <input id="notif-task" class="form-check-input" type="checkbox"
+                          formControlName="emailOnTaskComplete" role="switch">
                       </div>
                     </div>
                   </div>
@@ -255,12 +262,8 @@
                         <p class="text-muted x-small mb-0">Receive alerts on project status changes.</p>
                       </div>
                       <div class="form-check form-switch ms-3">
-                        <input
-                          id="notif-project"
-                          class="form-check-input"
-                          type="checkbox"
-                          formControlName="emailOnProjectUpdate"
-                          role="switch">
+                        <input id="notif-project" class="form-check-input" type="checkbox"
+                          formControlName="emailOnProjectUpdate" role="switch">
                       </div>
                     </div>
                   </div>
@@ -268,10 +271,7 @@
               </div>
 
               <div class="col-12">
-                <button
-                  type="submit"
-                  id="save-prefs-btn"
-                  class="btn btn-primary-custom px-5"
+                <button type="submit" id="save-prefs-btn" class="btn btn-primary-custom px-5"
                   [disabled]="prefsForm.invalid || isLoading">
                   <span *ngIf="!isLoading">
                     <i class="bi bi-check2-circle me-2"></i>Save Preferences
@@ -289,8 +289,8 @@
         <!-- ════════════════════════════════════════════════════════════════
              TAB 3 — ACCOUNT SECURITY / DANGER ZONE
              ════════════════════════════════════════════════════════════════ -->
-        <div id="pane-security" role="tabpanel" aria-labelledby="tab-security"
-             *ngIf="activeTab === 'security'" class="fade-in">
+        <div id="pane-security" role="tabpanel" aria-labelledby="tab-security" *ngIf="activeTab === 'security'"
+          class="fade-in">
 
           <!-- Security Info Cards -->
           <div class="glass-card p-4 p-md-5 mb-4">
@@ -313,7 +313,8 @@
                   <div>
                     <p class="text-white small mb-0 fw-semibold">Change Password</p>
                     <p class="text-muted x-small mb-0">
-                      Use <a routerLink="/auth/emailtochangepassword" class="text-info">Forgot Password</a> to securely update via OTP.
+                      Use <a routerLink="/auth/emailtochangepassword" class="text-info">Forgot Password</a> to securely
+                      update via OTP.
                     </p>
                   </div>
                 </div>
@@ -340,11 +341,7 @@
                   and session data. <strong class="text-danger">This action cannot be undone.</strong>
                 </p>
               </div>
-              <button
-                id="open-delete-modal-btn"
-                type="button"
-                class="btn btn-danger-zone"
-                (click)="openDeleteModal()">
+              <button id="open-delete-modal-btn" type="button" class="btn btn-danger-zone" (click)="openDeleteModal()">
                 <i class="bi bi-trash3 me-2"></i>Delete My Account
               </button>
             </div>
@@ -361,7 +358,8 @@
      ══════════════════════════════════════════════════════════════════════ -->
 <div class="modal-backdrop-custom" *ngIf="showDeleteModal" (click)="closeDeleteModal()"></div>
 
-<div class="modal-dialog-custom" *ngIf="showDeleteModal" id="delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+<div class="modal-dialog-custom" *ngIf="showDeleteModal" id="delete-modal" role="dialog" aria-modal="true"
+  aria-labelledby="delete-modal-title">
   <div class="modal-content-custom" (click)="$event.stopPropagation()">
 
     <!-- Modal Header -->
@@ -393,19 +391,16 @@
         <div class="custom-input-group">
           <label for="confirm-password">Current Password</label>
           <div class="input-with-icon">
-            <input
-              id="confirm-password"
-              [type]="showDeletePassword ? 'text' : 'password'"
-              formControlName="password"
-              placeholder="Enter your password to confirm"
-              autocomplete="current-password"
+            <input id="confirm-password" [type]="showDeletePassword ? 'text' : 'password'" formControlName="password"
+              placeholder="Enter your password to confirm" autocomplete="current-password"
               [class.is-invalid]="deleteForm.get('password')?.touched && deleteForm.get('password')?.invalid">
-            <button type="button" class="btn-eye" (click)="toggleDeletePassword()" tabindex="-1" aria-label="Toggle password visibility">
+            <button type="button" class="btn-eye" (click)="toggleDeletePassword()" tabindex="-1"
+              aria-label="Toggle password visibility">
               <i [class]="showDeletePassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
             </button>
           </div>
           <div class="invalid-feedback"
-               *ngIf="deleteForm.get('password')?.touched && deleteForm.get('password')?.errors as errs">
+            *ngIf="deleteForm.get('password')?.touched && deleteForm.get('password')?.errors as errs">
             <span *ngIf="errs['required']">Password is required.</span>
             <span *ngIf="errs['minlength']">Password must be at least 8 characters.</span>
           </div>
@@ -418,12 +413,8 @@
       <button type="button" class="btn btn-outline-secondary-custom" (click)="closeDeleteModal()">
         <i class="bi bi-arrow-left me-1"></i>Cancel, Keep Account
       </button>
-      <button
-        type="button"
-        id="confirm-delete-btn"
-        class="btn btn-danger-confirm"
-        [disabled]="deleteForm.invalid || isDeleting"
-        (click)="confirmDeleteAccount()">
+      <button type="button" id="confirm-delete-btn" class="btn btn-danger-confirm"
+        [disabled]="deleteForm.invalid || isDeleting" (click)="confirmDeleteAccount()">
         <span *ngIf="!isDeleting">
           <i class="bi bi-trash3-fill me-2"></i>Yes, Delete Permanently
         </span>

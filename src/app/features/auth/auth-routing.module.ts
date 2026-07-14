@@ -14,21 +14,20 @@ import { LearnaboutusComponent } from './pages/learnaboutus/learnaboutus.compone
 const routes: Routes = [
   {
     path: '',
-    component: AuthLayoutComponent, 
+    component: AuthLayoutComponent,
     children: [
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
-      { path: 'verifyEmail', component: VerfiyEmailComponent, canActivate: [authGuard] },
+      { path: 'verifyEmail', component: VerfiyEmailComponent },
       { path: 'developersettings', component: DevelopersettingsComponent, canActivate: [loginGuard] },
       { path: 'emailtochangepassword', component: ChangepasswordemailpageComponent },
       { path: 'changepassword', component: UpdatepasswordComponent },
       { path: 'learnaboutus', component: LearnaboutusComponent },
-      
-      // الـ Route الجديد بتاع جيتهاب (Standalone)
-      { 
-        path: 'github/callback', 
+
+      {
+        path: 'github/callback',
         loadComponent: () => import('../../shared/github-callback/github-callback.component')
-          .then(m => m.GithubCallbackComponent) 
+          .then(m => m.GithubCallbackComponent)
       }
     ]
   }

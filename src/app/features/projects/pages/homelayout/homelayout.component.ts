@@ -30,8 +30,8 @@ export class HomelayoutComponent implements OnInit, OnDestroy {
   }
 
   checkRoute(url: string) {
-    // Hide sidebar on the guest home page
-    this.showSidebar = !url.includes('/guesthomepage');
+    // Hide sidebar on the guest home page and privacy policy page
+    this.showSidebar = !url.includes('/guesthomepage') && !url.includes('/privacy-policy');
   }
 
   ngOnDestroy() {

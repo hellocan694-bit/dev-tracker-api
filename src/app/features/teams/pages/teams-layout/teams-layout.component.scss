@@ -18,7 +18,7 @@
     .content-area {
       flex-grow: 1;
       overflow-y: auto;
-      overflow-x: hidden;
+      overflow-x: clip;
       padding: 20px;
       position: relative;
       display: flex; // ضفنا دي عشان الفوتر يترحل لتحت لو الصفحة فاضية

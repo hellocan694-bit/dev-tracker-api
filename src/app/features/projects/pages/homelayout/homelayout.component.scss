@@ -18,10 +18,11 @@
     .content-area {
       flex-grow: 1;
       overflow-y: auto;
-      overflow-x: hidden;
-      padding: 20px;
+      overflow-x: clip;
+      padding: 0;
       position: relative;
-      display: flex; // ضفنا دي عشان الفوتر يترحل لتحت لو الصفحة فاضية
+      scroll-behavior: smooth;
+      display: flex;
       flex-direction: column;
 
       router-outlet + * { // زقة صغيرة عشان الفوتر ميبقاش لازق في المحتوى

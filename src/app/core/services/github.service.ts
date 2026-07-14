@@ -9,7 +9,8 @@ import {
   LinkedRepo,
   DeveloperActivity,
   ProAccessError,
-  GitHubLinkResponse
+  GitHubLinkResponse,
+  RepoContentsResponse
 } from 'src/app/shared/interfaces/github';
 import { AuthService } from './auth.service';
 
@@ -35,22 +36,29 @@ export class GithubService {
   // 1.  OAuth Connect — redirect browser to GitHub OAuth flow
   // ───────────────────────────────────────────────────────────────────────────
   connectToGitHub(): void {
-    // With cookie-based auth the token is HttpOnly — JS cannot read it.
-    // The browser forwards the cookie automatically when it navigates to the
-    // backend URL, so the protect middleware authenticates the user server-side.
-    // We only guard locally using the in-memory login flag.
     if (!this.authService.loggedIn.value) {
       console.error('GithubService: user is not logged in.');
       return;
     }
 
-    // Clear trialStatus payload (including stagnant githubLogin overrides) before starting the linking flow.
+    // The real JWT is in an HttpOnly cookie JS cannot read.
+    // Step 1: Call the protected endpoint — browser sends the cookie automatically.
+    //         Backend verifies it and returns a short-lived (5 min) link-only JWT.
+    // Step 2: Redirect to the OAuth initiate route with that token in the URL.
+    //         Backend embeds it as `state`, GitHub echoes it back on callback.
     this._trialStatus.next(null);
     this.clearRepoCache();
 
-    // No ?token= needed — the HttpOnly cookie is sent automatically by the browser.
-    const redirectUrl = `${this.baseUrl}/auth/github`;
-    window.location.href = redirectUrl;
+    this.http.get<{ status: string; linkToken: string }>(
+      `${this.baseUrl}/auth/github/get-link-token`
+    ).subscribe({
+      next: ({ linkToken }) => {
+        window.location.href = `${this.baseUrl}/auth/github?token=${encodeURIComponent(linkToken)}`;
+      },
+      error: (err) => {
+        console.error('GithubService: failed to obtain link token.', err);
+      }
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -89,6 +97,36 @@ export class GithubService {
   /** Invalidate the repo cache (call after selectRepos or re-link) */
   clearRepoCache(): void {
     this.reposCache = null;
+    this._contentsCache.clear();
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // 3b. Repository File Analytics (enriched file tree)
+  // ───────────────────────────────────────────────────────────────────────────
+  private _contentsCache = new Map<string, { data: RepoContentsResponse; timestamp: number }>();
+
+  /**
+   * Fetches enriched file tree for a repo. Caches per-repo for CACHE_TTL ms.
+   * Agent 3: all data is strictly typed; no raw HTML rendered from API response.
+   */
+  getRepoContents(owner: string, repo: string, branch = 'HEAD'): Observable<RepoContentsResponse> {
+    const cacheKey = `${owner}/${repo}@${branch}`;
+    const cached = this._contentsCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+      return of(cached.data);
+    }
+
+    return this.http
+      .get<RepoContentsResponse>(`${this.baseUrl}/github/repos/${owner}/${repo}/contents`, {
+        params: { branch },
+      })
+      .pipe(
+        tap((data) => this._contentsCache.set(cacheKey, { data, timestamp: Date.now() })),
+        catchError((err: HttpErrorResponse) => {
+          this._handleProAccessError(err);
+          return throwError(() => err);
+        })
+      );
   }
 
   // ───────────────────────────────────────────────────────────────────────────

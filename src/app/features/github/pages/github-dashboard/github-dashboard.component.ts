@@ -2,15 +2,18 @@ import {
   Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import gsap from 'gsap';
 import Swal from 'sweetalert2';
 
 import { GithubService } from 'src/app/core/services/github.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import {
-  GitHubRepo, LinkedRepo, DeveloperActivity, TrialStatus, ProAccessError
+  GitHubRepo, LinkedRepo, DeveloperActivity, TrialStatus, ProAccessError,
+  FileEntry, LangBreakdownEntry, RepoContentsResponse
 } from 'src/app/shared/interfaces/github';
 
 // Language → colour map for dots
@@ -26,19 +29,30 @@ const LANG_COLORS: Record<string, string> = {
 @Component({
   selector: 'app-github-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './github-dashboard.component.html',
   styleUrls: ['./github-dashboard.component.scss']
 })
 export class GitHubDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('repoGrid', { static: false }) repoGrid!: ElementRef;
 
-  // ── State ──────────────────────────────────────────────────────────────────
+  // ── State ───────────────────────────────────────────────────────────────────────
   trialStatus: TrialStatus | null = null;
   repos: GitHubRepo[] = [];
   activity: DeveloperActivity[] = [];
   selectedRepos = new Set<number>();      // tracks selected repoIds
   savedRepos: LinkedRepo[] = [];
+
+  // ── View mode ─────────────────────────────────────────────────────────────────
+  viewMode: 'grid' | 'list' = 'grid';
+  repoSearchQuery = '';
+
+  // ── File Analytics Panel ───────────────────────────────────────────────────────
+  expandedRepoId: number | null = null;
+  expandedRepoData: RepoContentsResponse | null = null;
+  isLoadingContents = false;
+  contentsError = '';
+  fileSearchQuery = '';
 
   isLoadingTrial = true;
   isLoadingRepos = true;
@@ -62,7 +76,8 @@ export class GitHubDashboardComponent implements OnInit, AfterViewInit, OnDestro
     private githubSvc: GithubService,
     private authSvc: AuthService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private sanitizer: DomSanitizer
   ) { }
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -248,7 +263,7 @@ export class GitHubDashboardComponent implements OnInit, AfterViewInit, OnDestro
     this.githubSvc.connectToGitHub();
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
+  // ── Helpers ──────────────────────────────────────────────────────────────────────
   langColor(lang: string | null): string {
     if (!lang) return LANG_COLORS['default'];
     return LANG_COLORS[lang] ?? LANG_COLORS['default'];
@@ -270,5 +285,111 @@ export class GitHubDashboardComponent implements OnInit, AfterViewInit, OnDestro
 
   goToPricing(): void {
     this.router.navigate(['/subscriptions/pricing']);
+  }
+
+  // ── View helpers ──────────────────────────────────────────────────────────────────
+  setViewMode(mode: 'grid' | 'list'): void {
+    this.viewMode = mode;
+  }
+
+  get filteredRepos(): GitHubRepo[] {
+    const q = this.repoSearchQuery.trim().toLowerCase();
+    if (!q) return this.repos;
+    return this.repos.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      r.description?.toLowerCase().includes(q) ||
+      r.language?.toLowerCase().includes(q)
+    );
+  }
+
+  get filteredFiles(): FileEntry[] {
+    if (!this.expandedRepoData) return [];
+    const q = this.fileSearchQuery.trim().toLowerCase();
+    if (!q) return this.expandedRepoData.files;
+    return this.expandedRepoData.files.filter(f =>
+      f.name.toLowerCase().includes(q) ||
+      f.path.toLowerCase().includes(q) ||
+      (f.language?.toLowerCase() ?? '').includes(q)
+    );
+  }
+
+  // trackBy functions for performance ──────────────────────────────────────────
+  trackByRepoId(_: number, repo: GitHubRepo): number { return repo.repoId; }
+  trackByFilePath(_: number, file: FileEntry): string { return file.path; }
+  trackByLang(_: number, entry: LangBreakdownEntry): string { return entry.language; }
+
+  // File Analytics ───────────────────────────────────────────────────────────────────
+  toggleRepoContents(repo: GitHubRepo): void {
+    if (this.expandedRepoId === repo.repoId) {
+      // Collapse
+      this.expandedRepoId = null;
+      this.expandedRepoData = null;
+      this.fileSearchQuery = '';
+      return;
+    }
+
+    this.expandedRepoId = repo.repoId;
+    this.expandedRepoData = null;
+    this.fileSearchQuery = '';
+    this.isLoadingContents = true;
+    this.contentsError = '';
+
+    const [owner, repoName] = repo.fullName.split('/');
+    this.githubSvc.getRepoContents(owner, repoName, repo.defaultBranch || 'HEAD').subscribe({
+      next: (res) => {
+        this.expandedRepoData = res;
+        this.isLoadingContents = false;
+        this.cdr.detectChanges();
+        // GSAP staggered file row entrance
+        setTimeout(() => {
+          const rows = document.querySelectorAll('.file-row');
+          if (rows.length) {
+            gsap.fromTo(rows,
+              { y: 10, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.35, stagger: 0.025, ease: 'power2.out' }
+            );
+          }
+        }, 60);
+      },
+      error: (err) => {
+        this.isLoadingContents = false;
+        this.contentsError = err?.error?.message || 'Failed to load file tree.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  isRepoExpanded(repoId: number): boolean {
+    return this.expandedRepoId === repoId;
+  }
+
+  /**
+   * Agent 3 — XSS guard: only text content is ever rendered (no innerHTML binding).
+   * File paths and names are bound via Angular interpolation {{ }}, which auto-escapes.
+   * This helper produces a safe CSS color for a language dot only (no HTML output).
+   */
+  langColorSafe(lang: string | null): string {
+    return this.langColor(lang);
+  }
+
+  /** Maps extension to a readable emoji icon — purely presentational */
+  fileIcon(ext: string): string {
+    const map: Record<string, string> = {
+      ts: '📘', tsx: '⚛️', js: '🟡', jsx: '⚛️',
+      html: '🌐', css: '🎨', scss: '🎨', sass: '🎨',
+      py: '🐍', java: '☕', go: '🟦', rs: '🪡',
+      rb: '💎', php: '🐘', swift: '🟠', kt: '🟣',
+      dart: '🟡', vue: '🟢', svelte: '🔶',
+      json: '📝', yaml: '📝', yml: '📝', xml: '📝',
+      md: '📄', sql: '🗃️', sh: '🖥️', bash: '🖥️',
+      dockerfile: '🐳', tf: '🏗️',
+    };
+    return map[ext] ?? '📁';
+  }
+
+  formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   }
 }

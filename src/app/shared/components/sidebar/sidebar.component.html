@@ -1,4 +1,4 @@
-<aside class="sidebar-master d-flex flex-column p-3" [class.show]="(sidebarService.isOpen$ | async)">
+<aside class="sidebar-master d-flex flex-column p-3">
 
   <!-- Close Button (mobile only) -->
   <button class="sidebar-close-btn d-lg-none" (click)="sidebarService.close()" aria-label="Close sidebar">
@@ -8,7 +8,7 @@
   <!-- Logo Section -->
   <div class="logo-area mb-4 text-center d-flex align-items-center justify-content-center justify-content-lg-center">
     <div class="logo-hexagon">D</div>
-    <span class="brand-text ms-3 d-none d-lg-none-sidebar">Dev<span class="highlight">Track</span></span>
+    <span class="brand-text ms-3">Dev<span class="highlight">Track</span></span>
   </div>
 
   <!-- Navigation Links -->
@@ -21,13 +21,23 @@
       <div class="active-indicator"></div>
     </a>
 
-    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'teams'"
-      (click)="navigate('teams')" title="Teams">
+    <!-- My Teams -->
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'my-teams'"
+      (click)="navigate('my-teams')" title="My Teams">
       <i class="bi bi-people-fill nav-icon"></i>
-      <span class="nav-label">Teams</span>
+      <span class="nav-label">My Teams</span>
       <div class="active-indicator"></div>
     </a>
 
+    <!-- Teams Leaderboard -->
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'teams'"
+      (click)="navigate('teams')" title="Leaderboard">
+      <i class="bi bi-trophy-fill nav-icon"></i>
+      <span class="nav-label">Leaderboard</span>
+      <div class="active-indicator"></div>
+    </a>
+
+    <!-- Invitations -->
     <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'invitations'"
       (click)="navigate('invitations')" title="Invitations">
       <i class="bi bi-person-plus-fill nav-icon"></i>
@@ -45,14 +55,14 @@
     <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'completed'"
       (click)="navigate('completed')" title="Completed Projects">
       <i class="bi bi-clock-history nav-icon"></i>
-      <span class="nav-label">Completed Projects</span>
+      <span class="nav-label">Completed</span>
       <div class="active-indicator"></div>
     </a>
 
     <a id="tour-step-github" class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'github'"
       (click)="navigate('github')" title="GitHub Integration">
       <i class="bi bi-github nav-icon"></i>
-      <span class="nav-label">GitHub Integration</span>
+      <span class="nav-label">GitHub</span>
       <div class="active-indicator"></div>
     </a>
 
@@ -90,34 +100,41 @@
     </a>
   </div>
 
-  <!-- Pro/Premium Member Status Widget -->
-  <div class="pro-widget w-100 mb-3" *ngIf="isPro || isPremium">
-    <div class="pro-widget__inner" [class.pro-widget__inner--premium]="isPremium">
+  <!-- ── Expired Subscription Warning Widget ── -->
+  <div class="expired-widget w-100 mb-2" *ngIf="subscriptionExpired">
+    <div class="expired-widget__inner">
+      <i class="bi bi-exclamation-circle-fill expired-widget__icon"></i>
+      <div class="expired-widget__info">
+        <span class="expired-widget__label">{{ planLabel }} Expired</span>
+        <a (click)="navigate('developersettings')" class="expired-widget__cta">Renew →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Active Pro/Premium Member Status Widget ── -->
+  <div class="pro-widget w-100 mb-3" *ngIf="(isPro || isPremium) && !subscriptionExpired">
+    <div class="pro-widget__inner" [class.pro-widget__inner--premium]="isPremium && subscriptionActive">
       <div class="pro-widget__glow"></div>
       <div class="pro-widget__crown">
-        <i class="bi" [ngClass]="isPremium ? 'bi-gem' : 'bi-crown-fill'"></i>
+        <i class="bi" [ngClass]="isPremium && subscriptionActive ? 'bi-gem' : 'bi-crown-fill'"></i>
       </div>
       <div class="pro-widget__info">
-        <span class="pro-widget__label">{{ isPremium ? 'Premium' : 'Pro Trial' }}</span>
-        <span class="pro-widget__days" *ngIf="daysRemaining !== null">
-          {{ daysRemaining }}d left
+        <span class="pro-widget__label">
+          {{ isPremium && subscriptionActive ? planLabel : 'Pro Trial' }}
         </span>
-        <span class="pro-widget__days pro-widget__days--unlimited" *ngIf="daysRemaining === null">
-          Unlimited ∞
-        </span>
+        <span class="pro-widget__days" *ngIf="daysRemaining !== null">{{ daysRemaining }}d left</span>
+        <span class="pro-widget__days pro-widget__days--unlimited" *ngIf="daysRemaining === null">Unlimited ∞</span>
       </div>
     </div>
   </div>
 
   <!-- Profile Area -->
-  <div
-    class="profile-mini text-center border-top border-white border-opacity-10 pt-3 w-100 d-flex align-items-center justify-content-center justify-content-lg-center gap-2">
-    <img src="https://ui-avatars.com/api/?name=Ali&background=0d6efd&color=fff" class="rounded-circle shadow-sm"
-      width="34">
-    <span class="profile-name d-lg-none text-white small fw-semibold">Ali Abueldahab</span>
+  <div class="profile-mini text-center border-top border-white border-opacity-10 pt-3 w-100 d-flex align-items-center justify-content-center justify-content-lg-center gap-2">
+    <img [src]="'https://ui-avatars.com/api/?name=' + (currentUser?.name || 'Developer') + '&background=0d6efd&color=fff'"
+      class="rounded-circle shadow-sm" width="34" alt="Avatar">
+    <span class="profile-name text-white small fw-semibold">{{ currentUser?.name || 'Developer' }}</span>
   </div>
 </aside>
 
 <!-- Click-away overlay for mobile navigation drawer -->
-<div class="sidebar-overlay" *ngIf="(sidebarService.isOpen$ | async)" (click)="sidebarService.close()">
-</div>
+<div class="sidebar-overlay" (click)="sidebarService.close()"></div>

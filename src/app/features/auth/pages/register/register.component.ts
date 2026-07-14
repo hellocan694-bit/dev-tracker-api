@@ -12,7 +12,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
 })
 export class RegisterComponent implements OnInit {
   formData: FormGroup;
-  token:string | undefined;
+  token: string | undefined;
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -35,7 +35,7 @@ export class RegisterComponent implements OnInit {
 
   isLoading = false;
   errorMessage: string | null = null;
-  
+
   ngOnInit(): void {
     AOS.init({ once: true, duration: 800 });
   }
@@ -45,9 +45,10 @@ export class RegisterComponent implements OnInit {
       const { name, email, password } = this.formData.value;
       this.authService.register(name, email, password).subscribe({
         next: (res: any) => {
+
           this.toast.success(res.otpMessage);
           this.router.navigate(['auth/verifyEmail'], {
-            state:{token:res.token}
+            state: { token: res.token }
           });
         },
         error: (err) => {
