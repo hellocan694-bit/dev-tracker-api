@@ -67,7 +67,8 @@ export class ProjectsListComponent implements OnInit, OnDestroy {
   getAllActiveProject() {
     this.isLoading = true;
 
-    this.projectService.getAllProjects(this.currentPage, this.pageSize).subscribe({
+    // ✔ Uses the cache-gate: zero HTTP calls on revisits (page 1)
+    this.projectService.loadProjects(this.currentPage, this.pageSize).subscribe({
       next: (res: ProjectResponse) => {
         const projectsList = Array.isArray(res.Projects)
           ? res.Projects
@@ -124,13 +125,9 @@ export class ProjectsListComponent implements OnInit, OnDestroy {
   markAsComplete(_id: string) {
     this.projectService.completeProject(_id).subscribe({
       next: (res: any) => {
-        // FIX (Audit Issue #19): Toast now fires INSIDE the success callback,
-        // not before the API responds — preventing false success messages on failure.
-        this.projects = this.projects.filter(
-          (p: { _id: string }) => p._id !== _id
-        );
-        this.countProjects--;
-        this.getAllActiveProject();
+        // ✔ Service already removed this project from the BehaviorSubject cache.
+        // No refetch needed — local array stays in sync with the stream.
+        this.countProjects = Math.max(0, this.countProjects - 1);
 
         const Toast = Swal.mixin({
           toast: true,
@@ -151,7 +148,5 @@ export class ProjectsListComponent implements OnInit, OnDestroy {
         this.toaster.error(err.error.message);
       },
     });
-  
-    this.router.navigate(['home/completedprojects'])
   }
 }

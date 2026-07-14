@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from 'src/environment/environment';
 import { MyTeamsResponse } from 'src/app/shared/interfaces/team';
 
@@ -13,7 +14,35 @@ export class TeamsService {
 
   constructor(private http: HttpClient) { }
 
-  // ── My Teams (new endpoint) ───────────────────────────────────────────────
+  // ── Cache Layer ────────────────────────────────────────────────────────────
+  private readonly _teams$ = new BehaviorSubject<MyTeamsResponse | null>(null);
+
+  /** Read-only stream. Components subscribe; the service pushes updates. */
+  readonly teams$ = this._teams$.asObservable();
+
+  get isCacheLoaded(): boolean {
+    return this._teams$.getValue() !== null;
+  }
+
+  /**
+   * Smart cache-gate: returns the cached team data if available,
+   * otherwise fires the HTTP GET and populates the cache.
+   */
+  loadMyTeams(): Observable<MyTeamsResponse> {
+    if (this.isCacheLoaded) {
+      return of(this._teams$.getValue()!);
+    }
+    return this.getMyTeams().pipe(
+      tap((res) => this._teams$.next(res))
+    );
+  }
+
+  /** Invalidate cache — forces a fresh fetch on the next loadMyTeams() call. */
+  invalidateCache(): void {
+    this._teams$.next(null);
+  }
+
+  // ── My Teams (HTTP) ────────────────────────────────────────────────────────
 
   /**
    * GET /api/teams/my-teams
@@ -27,9 +56,12 @@ export class TeamsService {
   /**
    * POST /api/teams
    * Create a new team — the calling user becomes the owner.
+   * Invalidates the cache so the next loadMyTeams() fetches fresh data.
    */
   createTeam(payload: { name: string; description?: string; category?: string }): Observable<any> {
-    return this.http.post(`${this.teamsUrl}`, payload);
+    return this.http.post(`${this.teamsUrl}`, payload).pipe(
+      tap(() => this.invalidateCache())
+    );
   }
 
   // ── Invitations (existing) ────────────────────────────────────────────────
