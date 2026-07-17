@@ -955,3 +955,202 @@ $text-muted: #4b5563;
     transform: translateY(-1px);
   }
 }
+
+// ─── [4] Blurred Premium Analytics Teaser Styles ──────────────────────────────
+.analytics-preview-section {
+  margin-top: 40px;
+  width: 100%;
+  box-sizing: border-box;
+
+  .analytics-preview__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .analytics-preview__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .analytics-preview__badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(167, 139, 250, 0.12);
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    color: #a78bfa;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .analytics-preview__card {
+    position: relative;
+    width: 100%;
+    background: #0f0f13;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 30px;
+    box-sizing: border-box;
+    overflow: hidden;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  // --- Dummy Content Underneath ---
+  .analytics-preview__dummy-content {
+    opacity: 0.25;
+    pointer-events: none;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .dummy-chart {
+    position: relative;
+    height: 120px;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+
+    &__bars {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      gap: 15px;
+    }
+
+    .dummy-bar {
+      flex: 1;
+      max-width: 32px;
+      border-radius: 6px 6px 0 0;
+      background: rgba(255, 255, 255, 0.1);
+
+      &--accent {
+        background: linear-gradient(180deg, rgba(0, 240, 255, 0.3) 0%, rgba(0, 240, 255, 0.05) 100%);
+      }
+    }
+
+    &__line {
+      position: absolute;
+      top: 30%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.4), transparent);
+    }
+  }
+
+  .dummy-metrics {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    padding-top: 15px;
+
+    .dummy-metric {
+      text-align: center;
+      span {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      p {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin: 4px 0 0;
+      }
+    }
+  }
+
+  // --- Blur Overlay & CTA ---
+  .analytics-preview__blur-overlay {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(8, 8, 12, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 10;
+  }
+
+  .analytics-preview__cta-card {
+    max-width: 440px;
+    text-align: center;
+    background: rgba(15, 15, 20, 0.75);
+    border: 1px solid rgba(167, 139, 250, 0.18);
+    border-radius: 20px;
+    padding: 30px 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .analytics-preview__cta-icon {
+    font-size: 2rem;
+    color: #a78bfa;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.4));
+  }
+
+  .analytics-preview__cta-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .analytics-preview__cta-body {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0 0 20px;
+
+    strong {
+      color: #a78bfa;
+    }
+  }
+
+  .analytics-preview__cta-btn {
+    background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.55);
+      filter: brightness(1.1);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}

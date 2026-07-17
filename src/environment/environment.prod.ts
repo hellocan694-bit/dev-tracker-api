@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://dev-tracker-production-3ef3.up.railway.app',
-  socketUrl: 'https://dev-tracker-production-3ef3.up.railway.app',
-  githubRedirectUri: 'https://dev-tracker-api-five.vercel.app/auth/github/callback'
+  apiUrl: 'https://devtracker-backend-production-11df.up.railway.app',
+  socketUrl: 'https://devtracker-backend-production-11df.up.railway.app',
+  githubRedirectUri: 'https://devtracker-backend-production-11df.up.railway.app/auth/github/callback'
 };

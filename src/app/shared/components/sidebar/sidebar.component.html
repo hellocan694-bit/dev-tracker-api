@@ -80,6 +80,33 @@
       <div class="active-indicator"></div>
     </a>
 
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- [1] PREMIUM-GATED NAV ITEMS — hidden for active PRO subscribers    -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="!isPremium || !subscriptionActive">
+
+      <a class="nav-item-wrapper nav-item-wrapper--locked d-flex align-items-center w-100"
+         (click)="openUpsellModal('Custom Webhook Rules')" title="Custom Webhook Rules — PRO">
+        <i class="bi bi-diagram-3-fill nav-icon nav-icon--muted"></i>
+        <span class="nav-label nav-label--muted">Webhook Rules</span>
+        <span class="premium-lock-badge ms-auto nav-label">
+          <i class="bi bi-lock-fill"></i>
+        </span>
+        <div class="active-indicator"></div>
+      </a>
+
+      <a class="nav-item-wrapper nav-item-wrapper--locked d-flex align-items-center w-100"
+         (click)="openUpsellModal('Team Invite Manager')" title="Team Invite Manager — PRO">
+        <i class="bi bi-person-badge-fill nav-icon nav-icon--muted"></i>
+        <span class="nav-label nav-label--muted">Invite Manager</span>
+        <span class="premium-lock-badge ms-auto nav-label">
+          <i class="bi bi-lock-fill"></i>
+        </span>
+        <div class="active-indicator"></div>
+      </a>
+
+    </ng-container>
+
     <!-- ARIA Live Trigger -->
     <a class="nav-item-wrapper aria-test-btn d-flex align-items-center w-100 mt-auto" [class.loading]="isAriaLoading"
       (click)="triggerAriaDemo()" title="Trigger ARIA Onboarding">
@@ -98,34 +125,98 @@
       <span class="nav-label">Settings</span>
       <div class="active-indicator"></div>
     </a>
-  </div>
 
-  <!-- ── Expired Subscription Warning Widget ── -->
-  <div class="expired-widget w-100 mb-2" *ngIf="subscriptionExpired">
-    <div class="expired-widget__inner">
-      <i class="bi bi-exclamation-circle-fill expired-widget__icon"></i>
-      <div class="expired-widget__info">
-        <span class="expired-widget__label">{{ planLabel }} Expired</span>
-        <a (click)="navigate('developersettings')" class="expired-widget__cta">Renew →</a>
-      </div>
-    </div>
-  </div>
+  </div><!-- /nav-links -->
 
-  <!-- ── Active Pro/Premium Member Status Widget ── -->
-  <div class="pro-widget w-100 mb-3" *ngIf="(isPro || isPremium) && !subscriptionExpired">
-    <div class="pro-widget__inner" [class.pro-widget__inner--premium]="isPremium && subscriptionActive">
-      <div class="pro-widget__glow"></div>
-      <div class="pro-widget__crown">
-        <i class="bi" [ngClass]="isPremium && subscriptionActive ? 'bi-gem' : 'bi-crown-fill'"></i>
-      </div>
-      <div class="pro-widget__info">
-        <span class="pro-widget__label">
-          {{ isPremium && subscriptionActive ? planLabel : 'Pro Trial' }}
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- [3] PROJECT USAGE PROGRESS BAR — hidden for active PRO subscribers     -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="!isPremium || !subscriptionActive">
+    <div class="usage-bar-widget w-100 mb-2 nav-label" #usageBarWidget>
+      <div class="usage-bar-widget__header">
+        <span class="usage-bar-widget__label">
+          <i class="bi bi-folder2 me-1"></i>Projects
         </span>
-        <span class="pro-widget__days" *ngIf="daysRemaining !== null">{{ daysRemaining }}d left</span>
-        <span class="pro-widget__days pro-widget__days--unlimited" *ngIf="daysRemaining === null">Unlimited ∞</span>
+        <span class="usage-bar-widget__count">{{ projectUsageCount }} / {{ projectLimit }}</span>
+      </div>
+      <div class="usage-bar-widget__track">
+        <div class="usage-bar-widget__fill"
+             [class.usage-bar-widget__fill--urgent]="projectUsagePercent >= 80"
+             [style.width.%]="projectUsagePercent"
+             #usageBarFill>
+        </div>
+      </div>
+      <div class="usage-bar-widget__footer" *ngIf="projectUsagePercent >= 80">
+        <span class="usage-bar-widget__warn">Limit approaching</span>
+        <a (click)="navigate('developersettings')" class="usage-bar-widget__upgrade-link">Upgrade ↑</a>
       </div>
     </div>
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- Subscription Status Badges                                             -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="status-badge status-badge--expired w-100 mb-2" *ngIf="subscriptionExpired">
+    <div class="status-badge__shell">
+      <span class="status-badge__dot status-badge__dot--warn"></span>
+      <div class="status-badge__body">
+        <span class="status-badge__title">{{ planLabel }} Expired</span>
+        <a (click)="navigate('developersettings')" class="status-badge__action">Renew now →</a>
+      </div>
+      <i class="bi bi-exclamation-circle-fill status-badge__icon--right"></i>
+    </div>
+  </div>
+
+  <div class="status-badge status-badge--pro w-100 mb-3"
+       *ngIf="isPremium && subscriptionActive && !subscriptionExpired"
+       (mouseenter)="onBadgeMouseEnter($event, 'pro')"
+       (mouseleave)="onBadgeMouseLeave($event, 'pro')">
+    <div class="status-badge__shell">
+      <div class="status-badge__glow-orb"></div>
+      <span class="status-badge__dot status-badge__dot--pro"></span>
+      <div class="status-badge__body">
+        <span class="status-badge__title">
+          <i class="bi bi-gem status-badge__gem"></i> PRO
+        </span>
+        <span class="status-badge__sub" *ngIf="daysRemaining !== null">{{ daysRemaining }}d left</span>
+        <span class="status-badge__sub status-badge__sub--unlimited" *ngIf="daysRemaining === null">∞ Unlimited</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-badge status-badge--trial w-100 mb-3"
+       *ngIf="isPro && !isPremium && !subscriptionExpired"
+       (mouseenter)="onBadgeMouseEnter($event, 'trial')"
+       (mouseleave)="onBadgeMouseLeave($event, 'trial')">
+    <div class="status-badge__shell">
+      <span class="status-badge__dot status-badge__dot--trial"></span>
+      <div class="status-badge__body">
+        <span class="status-badge__title">Trial</span>
+        <span class="status-badge__sub" *ngIf="daysRemaining !== null">{{ daysRemaining }} days left</span>
+        <span class="status-badge__sub" *ngIf="daysRemaining === null">Active</span>
+      </div>
+      <a (click)="navigate('developersettings')" class="status-badge__upgrade">↑ Upgrade</a>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- [2] SIDEBAR PROMO CARD — hidden for active PRO subscribers             -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="promo-card w-100 mb-3 nav-label" #promoCard
+       *ngIf="!isPremium || !subscriptionActive"
+       (mouseenter)="onPromoMouseEnter()" (mouseleave)="onPromoMouseLeave()">
+    <div class="promo-card__glow"></div>
+    <div class="promo-card__content">
+      <div class="promo-card__icon"><i class="bi bi-lightning-charge-fill"></i></div>
+      <p class="promo-card__copy">
+        Running out of tracking juice?<br>
+        <strong>Unlock unlimited real-time webhooks</strong> with PRO.
+      </p>
+      <button class="promo-card__cta" (click)="navigate('developersettings')">
+        <i class="bi bi-gem me-1"></i> Get PRO
+      </button>
+    </div>
+    <div class="promo-card__shine" #promoShine></div>
   </div>
 
   <!-- Profile Area -->
@@ -138,3 +229,10 @@
 
 <!-- Click-away overlay for mobile navigation drawer -->
 <div class="sidebar-overlay" (click)="sidebarService.close()"></div>
+
+<!-- [1] UPSELL MODAL — outside <aside> so it renders over the full viewport -->
+<app-upsell-modal
+  *ngIf="upsellModalOpen"
+  [featureName]="upsellFeatureName"
+  (closed)="closeUpsellModal()">
+</app-upsell-modal>

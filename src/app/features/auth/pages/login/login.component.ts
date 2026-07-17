@@ -121,7 +121,7 @@ export class LoginComponent implements OnInit {
     const clientId = 'Ov23li8O7Mzc2lmnXluy';
 
     // ثبتنا الرابط هنا مباشرة عشان نضمن إنه يطابق إعدادات جيت هاب بالظبط
-    const redirectUri = encodeURIComponent('https://dev-tracker-production-3ef3.up.railway.app/auth/github/callback');
+    const redirectUri = encodeURIComponent(`${environment.apiUrl}/auth/github/callback`);
     const scope = 'read:user user:email';
     const state = 'login'; // نحدد الحالة كـ login عشان الـ backend يعرف يفرق
 

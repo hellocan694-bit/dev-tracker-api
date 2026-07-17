@@ -20,12 +20,12 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   formData: FormGroup;
   editProjectForm: FormGroup;
   editTaskForm: FormGroup;
-  tasks: any[] = []; 
+  tasks: any[] = [];
   isLoading: boolean = false;
   financials: any;
-  currentFilter: 'all' | 'completed' | 'progress' = 'all'; 
+  currentFilter: 'all' | 'completed' | 'progress' = 'all';
   taskMonitors: { [key: string]: Subscription } = {};
-  
+
   // Project details & Team members
   project: Project | null = null;
   teamMembers: any[] = [];
@@ -106,15 +106,15 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
 
     if (projectId) {
       this.isLoading = true;
-      
+
       this.taskService.getAllTasks(projectId).subscribe({
         next: (res: any) => {
           this.tasks = res.tasks;
           this.isLoading = false;
 
           // 1. استخراج الـ Owner ID من الداتا اللي راجعة من الباك إند
-          const projectOwnerId = res.projectOwnerId; 
-          
+          const projectOwnerId = res.projectOwnerId;
+
           // 2. هل اليوزر الحالي هو صاحب المشروع؟
           this.isOwner = (currentUser._id === projectOwnerId || currentUser.id === projectOwnerId);
           this.isAdmin = currentUser.role === 'admin';
@@ -220,12 +220,12 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
 
     const projectId = this.router.snapshot.paramMap.get('id');
     const isRunning = task.statusActivity?.isWorking;
-    
+
     if (!isRunning) {
       const duration = task.statusActivity?.duration || "0h 0m";
       const hasStartedBefore = duration !== "0h 0m";
       const action = hasStartedBefore ? 'resumeTask' : 'startTask';
-      
+
       this.taskService[action](projectId!, task._id).subscribe({
         next: () => {
           task.statusActivity = { ...task.statusActivity, isWorking: true };
@@ -274,7 +274,7 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
         let h = parseInt(match[1]), m = parseInt(match[2]) + 1;
         if (m >= 60) { h++; m = 0; }
         task.statusActivity = { ...task.statusActivity, duration: `${h}h ${m}m` };
-        
+
         const progress = ((h * 60 + m) / (task.estimatedHours * 60)) * 100;
         if (progress >= 90 && progress < 100) {
           this.showAlertNotification('warning', 'Fuel Alert', `${task.title} is at 90%!`);
@@ -380,13 +380,13 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   // Task editing methods
   openEditTaskModal(task: any) {
     this.selectedTask = task;
-    
+
     // Set form values
     let formattedDeadline = '';
     if (task.deadline) {
       formattedDeadline = new Date(task.deadline).toISOString().split('T')[0];
     }
-    
+
     // Get assigned developer ID
     let assignedDevId = '';
     if (task.assignedTo) {

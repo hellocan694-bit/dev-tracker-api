@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, AfterViewInit, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, HostListener, ElementRef } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { SidebarService } from 'src/app/core/services/sidebar.service';
 import { GithubService } from 'src/app/core/services/github.service';
 import { SubscriptionService } from 'src/app/core/services/subscription.service';
+import { DeveloperService } from 'src/app/core/services/developer.service';
 import { Developer } from 'src/app/shared/interfaces/developer';
 import { TrialStatus } from 'src/app/shared/interfaces/github';
 import { Subscription } from 'rxjs';
@@ -22,6 +23,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   isLoggedIn: boolean = false;
   currentUser: Developer | null = null;
   isDropdownOpen: boolean = false;
+  private ambientTweens: gsap.core.Tween[] = [];
 
   // Pro/Premium status
   trialStatus: TrialStatus | null = null;
@@ -29,11 +31,18 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   get isPremium(): boolean { return this.trialStatus?.isPremium ?? false; }
   get daysRemaining(): number | null { return this.trialStatus?.daysRemaining ?? null; }
 
-  // Subscription expiry-aware getters (mirrors checkSubscription middleware)
+  // ── Subscription state: trialStatus (live API) is the authoritative override. ──
+  // The local subscription object in currentUser can be stale (loaded from
+  // localStorage) — we only fall back to it if the API hasn't responded yet.
   get subscriptionActive(): boolean {
+    if (this.trialStatus !== null) {
+      return this.trialStatus.isPremium === true && this.trialStatus.active === true;
+    }
     return this.subscriptionService.isSubscriptionActive(this.currentUser?.subscription);
   }
   get subscriptionExpired(): boolean {
+    // If the live API confirmed premium, never show as expired.
+    if (this.trialStatus !== null && this.trialStatus.isPremium) return false;
     return this.subscriptionService.isExpired(this.currentUser?.subscription);
   }
   get planLabel(): string {
@@ -46,13 +55,16 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   private authSub?: Subscription;
   private userSub?: Subscription;
   private trialSub?: Subscription;
+  private profileRefreshSub?: Subscription;
 
   constructor(
+    private el: ElementRef,
     private authService: AuthService,
     private router: Router,
     public sidebarService: SidebarService,
     private githubService: GithubService,
-    private subscriptionService: SubscriptionService
+    private subscriptionService: SubscriptionService,
+    private developerService: DeveloperService
   ) {}
 
   ngOnInit(): void {
@@ -62,14 +74,31 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       // Fetch trial status only when logged in
       if (status && !this.trialSub) {
         this.trialSub = this.githubService.getTrialStatus().subscribe({
-          next: s => { this.trialStatus = s; },
-          error: () => { this.trialStatus = null; }
+          next: s => {
+            this.trialStatus = s;
+            this.triggerIdleAnimations();
+          },
+          error: () => {
+            this.trialStatus = null;
+          }
+        });
+
+        // Trigger background refresh of the user profile to sync subscription expiration
+        this.profileRefreshSub = this.developerService.refreshProfile().subscribe({
+          next: () => {
+            this.triggerIdleAnimations();
+          },
+          error: (err) => {
+            console.error('Failed to refresh developer profile on load:', err);
+          }
         });
       }
+      this.triggerIdleAnimations();
     });
 
     this.userSub = this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      this.triggerIdleAnimations();
     });
   }
 
@@ -85,20 +114,120 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       { y: -15, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.6, stagger: 0.05, ease: 'power2.out', delay: 0.25 }
     );
+
+    this.triggerIdleAnimations();
   }
 
   ngOnDestroy(): void {
     this.authSub?.unsubscribe();
     this.userSub?.unsubscribe();
     this.trialSub?.unsubscribe();
+    this.profileRefreshSub?.unsubscribe();
 
     // Kill GSAP animations to prevent memory leaks
+    this.ambientTweens.forEach(t => t.kill());
     gsap.killTweensOf('.glass-nav');
     gsap.killTweensOf('.brand-section, .center-link, .nav-actions > *');
     const menuEl = document.querySelector('.profile-dropdown-menu');
     if (menuEl) {
       gsap.killTweensOf(menuEl);
     }
+  }
+
+  // ── GSAP Badge Animations ────────────────────────────────────────────────
+  onBadgeMouseEnter(event: MouseEvent, type: 'pro' | 'trial') {
+    const target = event.currentTarget as HTMLElement;
+    gsap.to(target, {
+      scale: 1.05,
+      duration: 0.3,
+      ease: 'power2.out',
+      overwrite: 'auto'
+    });
+
+    const shell = target.querySelector('.status-badge-nav__shell') || target;
+    if (type === 'pro') {
+      gsap.to(shell, {
+        boxShadow: '0 0 25px rgba(139, 92, 246, 0.45), inset 0 0 15px rgba(99, 102, 241, 0.2)',
+        borderColor: 'rgba(167, 139, 250, 0.6)',
+        duration: 0.3,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    } else {
+      gsap.to(shell, {
+        boxShadow: '0 0 20px rgba(245, 158, 11, 0.35), inset 0 0 12px rgba(217, 119, 6, 0.15)',
+        borderColor: 'rgba(245, 158, 11, 0.5)',
+        duration: 0.3,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    }
+  }
+
+  onBadgeMouseLeave(event: MouseEvent, type: 'pro' | 'trial') {
+    const target = event.currentTarget as HTMLElement;
+    gsap.to(target, {
+      scale: 1.0,
+      duration: 0.4,
+      ease: 'power2.out',
+      overwrite: 'auto'
+    });
+
+    const shell = target.querySelector('.status-badge-nav__shell') || target;
+    if (type === 'pro') {
+      gsap.to(shell, {
+        boxShadow: '0 0 12px rgba(139, 92, 246, 0.12), inset 0 0 12px rgba(99, 102, 241, 0.06)',
+        borderColor: 'rgba(139, 92, 246, 0.35)',
+        duration: 0.4,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    } else {
+      gsap.to(shell, {
+        boxShadow: '0 0 12px rgba(245, 158, 11, 0.08), inset 0 0 10px rgba(217, 119, 6, 0.05)',
+        borderColor: 'rgba(245, 158, 11, 0.22)',
+        duration: 0.4,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    }
+  }
+
+  private triggerIdleAnimations() {
+    setTimeout(() => {
+      this.ambientTweens.forEach(t => t.kill());
+      this.ambientTweens = [];
+
+      // 1. PRO Badge Ambient Pulse (shadow & border)
+      const proShell = this.el.nativeElement.querySelector('.status-badge-nav--pro .status-badge-nav__shell');
+      if (proShell) {
+        const t = gsap.fromTo(proShell,
+          {
+            boxShadow: '0 0 10px rgba(139, 92, 246, 0.1), inset 0 0 8px rgba(99, 102, 241, 0.04)',
+            borderColor: 'rgba(139, 92, 246, 0.25)'
+          },
+          {
+            boxShadow: '0 0 18px rgba(139, 92, 246, 0.22), inset 0 0 12px rgba(99, 102, 241, 0.08)',
+            borderColor: 'rgba(139, 92, 246, 0.45)',
+            duration: 2.5,
+            repeat: -1,
+            yoyo: true,
+            ease: 'power1.inOut'
+          }
+        );
+        this.ambientTweens.push(t);
+      }
+
+      // 2. Trial Dot Pulsing (breathing warning indicator dot)
+      const trialDot = this.el.nativeElement.querySelector('.status-badge-nav--trial .status-badge-nav__dot--trial');
+      if (trialDot) {
+        const t = gsap.fromTo(trialDot,
+          { scale: 0.85, opacity: 0.65 },
+          { scale: 1.35, opacity: 1, duration: 1.6, repeat: -1, yoyo: true, ease: 'sine.inOut' }
+        );
+        this.ambientTweens.push(t);
+      }
+    }, 150);
   }
 
   toggleMenu() {

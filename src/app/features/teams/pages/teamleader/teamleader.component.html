@@ -9,25 +9,71 @@
       <p class="text-muted">Scale your productivity by managing your elite developer team.</p>
     </div>
 
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- [4] LIMIT-EXCEEDED ALERT PANEL — GSAP animated entrance             -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div class="limit-panel" #limitPanel *ngIf="limitError" aria-live="polite">
+      <div class="limit-panel__icon">
+        <i class="bi bi-shield-exclamation"></i>
+      </div>
+      <div class="limit-panel__body">
+        <h4 class="limit-panel__title">Invite Blocked — Project Limit Reached</h4>
+        <p class="limit-panel__msg limit-panel__row">{{ limitError.message }}</p>
+        <div class="limit-panel__meta limit-panel__row">
+          <span class="limit-panel__pill">
+            <i class="bi bi-folder2 me-1"></i>
+            {{ limitError.currentCount }} / {{ limitError.limit }} projects used
+          </span>
+        </div>
+        <div class="limit-panel__actions limit-panel__row">
+          <button class="limit-panel__btn-tip" (click)="dismissLimitError()">
+            Share fewer projects
+          </button>
+          <span class="limit-panel__divider">or</span>
+          <span class="limit-panel__hint">
+            <i class="bi bi-gem me-1"></i>
+            Ask them to upgrade to <strong>PRO</strong> for unlimited access.
+          </span>
+        </div>
+      </div>
+      <button class="limit-panel__close" (click)="dismissLimitError()" aria-label="Dismiss">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
     <div class="row g-4">
-      
+
+      <!-- Invite Panel -->
       <div class="col-12 col-lg-4">
         <section class="invite-panel h-100">
           <span class="tag">Growth</span>
           <h3>Expand Workforce</h3>
-          
+
           <div class="input-group-custom">
-            <input 
-              type="email" 
-              [(ngModel)]="email" 
+            <input
+              type="email"
+              [(ngModel)]="email"
               placeholder="Enter developer email..."
               class="form-control-cyber"
             >
           </div>
 
-          <button 
-            class="btn-glow" 
-            [disabled]="!email || isSending" 
+          <!-- [3] Project Selector Trigger -->
+          <button
+            class="btn-project-select"
+            [class.has-selection]="selectedProjectIds.size > 0"
+            (click)="openProjectModal()"
+            [disabled]="!email"
+            type="button">
+            <i class="bi bi-folder2-open me-2"></i>
+            <span *ngIf="selectedProjectIds.size === 0">Select Projects to Share</span>
+            <span *ngIf="selectedProjectIds.size > 0">{{ selectedProjectIds.size }} Project(s) Selected</span>
+            <i class="bi bi-chevron-down ms-auto"></i>
+          </button>
+
+          <button
+            class="btn-glow"
+            [disabled]="!email || isSending"
             (click)="onSendInvite()">
             <span *ngIf="!isSending">Send Invitation</span>
             <span *ngIf="isSending">
@@ -37,6 +83,7 @@
         </section>
       </div>
 
+      <!-- Members Panel -->
       <div class="col-12 col-lg-8">
         <section class="members-panel h-100">
           <div class="panel-header d-flex justify-content-between align-items-center mb-4">
@@ -65,7 +112,7 @@
                 <div class="member-avatar">
                   {{ (member.name || member.email)[0].toUpperCase() }}
                 </div>
-                
+
                 <div class="member-info">
                   <span class="name">{{ member.name || 'Developer' }}</span>
                   <span class="mail text-truncate">{{ member.email }}</span>
@@ -75,31 +122,31 @@
   <button class="dots-btn">
     <i class="bi bi-three-dots-vertical"></i>
   </button>
-  
+
   <div class="action-menu">
     <div class="permissions-wrapper">
       <button class="menu-item edit">
         <i class="bi bi-shield-lock"></i> Permissions
       </button>
-      
+
       <div class="permissions-popover">
         <div class="popover-header">Access Control</div>
-        
+
         <div class="perm-list">
           <div class="perm-item" *ngFor="let p of [
             {key: 'canCreateProjects', label: 'Create Projects', icon: 'bi-plus-circle'},
-            {key: 'canEditProjects', label: 'Edit Projects', icon: 'bi-pencil'},
+            {key: 'canEditProjects',   label: 'Edit Projects',   icon: 'bi-pencil'},
             {key: 'canDeleteProjects', label: 'Delete Projects', icon: 'bi-trash'},
-            {key: 'canManageTasks', label: 'Manage Tasks', icon: 'bi-list-check'},
-            {key: 'canSeeFinancials', label: 'Financials', icon: 'bi-cash-stack'}
+            {key: 'canManageTasks',    label: 'Manage Tasks',    icon: 'bi-list-check'},
+            {key: 'canSeeFinancials',  label: 'Financials',      icon: 'bi-cash-stack'}
           ]">
             <div class="perm-info">
               <i [class]="'bi ' + p.icon"></i>
               <span>{{ p.label }}</span>
             </div>
-            
+
             <label class="cyber-switch">
-              <input type="checkbox" 
+              <input type="checkbox"
                      [checked]="member.permissions?.[p.key]"
                      (change)="onPermissionChange(member.id, p.key, $event)">
               <span class="slider"></span>
@@ -124,5 +171,85 @@
         </section>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- [3] PROJECT SELECTOR MODAL                                                -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div class="proj-modal-backdrop" *ngIf="showProjectModal" (click)="closeProjectModal()">
+  <div class="proj-modal" #projectModal (click)="$event.stopPropagation()">
+
+    <div class="proj-modal__header">
+      <div>
+        <h3 class="proj-modal__title">
+          <i class="bi bi-folder2-open me-2"></i>Select Projects to Share
+        </h3>
+        <p class="proj-modal__subtitle">
+          Choose which of your projects <strong>{{ email }}</strong> will have access to.
+        </p>
+      </div>
+      <button class="proj-modal__close" (click)="closeProjectModal()" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoadingProjects" class="proj-modal__loader">
+      <div class="proj-modal__skeleton" *ngFor="let i of [1,2,3]"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!isLoadingProjects && adminProjects.length === 0" class="proj-modal__empty">
+      <i class="bi bi-folder-x"></i>
+      <p>You don't have any active projects yet.</p>
+    </div>
+
+    <!-- Project checklist -->
+    <div class="proj-modal__list" *ngIf="!isLoadingProjects && adminProjects.length > 0">
+      <label
+        class="proj-item"
+        [class.proj-item--selected]="isSelected(proj._id)"
+        *ngFor="let proj of adminProjects"
+        [for]="'proj-' + proj._id">
+
+        <input
+          type="checkbox"
+          [id]="'proj-' + proj._id"
+          [checked]="isSelected(proj._id)"
+          (change)="toggleProjectSelection(proj._id)"
+          class="proj-item__check">
+
+        <div class="proj-item__icon">
+          <i class="bi bi-folder2-open"></i>
+        </div>
+
+        <div class="proj-item__meta">
+          <span class="proj-item__name">{{ proj.name }}</span>
+          <span class="proj-item__status" [class]="'status--' + proj.status">{{ proj.status }}</span>
+        </div>
+
+        <div class="proj-item__tick" *ngIf="isSelected(proj._id)">
+          <i class="bi bi-check-lg"></i>
+        </div>
+      </label>
+    </div>
+
+    <!-- Footer -->
+    <div class="proj-modal__footer" *ngIf="!isLoadingProjects">
+      <span class="proj-modal__sel-count">
+        {{ selectedProjectIds.size }} project(s) selected
+      </span>
+      <div class="d-flex gap-2">
+        <button class="proj-modal__btn-cancel" (click)="closeProjectModal()">Cancel</button>
+        <button
+          class="proj-modal__btn-confirm"
+          (click)="closeProjectModal(); onSendInvite()"
+          [disabled]="selectedProjectIds.size === 0">
+          <i class="bi bi-send me-2"></i>Send Invite
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>

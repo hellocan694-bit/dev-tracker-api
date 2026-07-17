@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarService } from 'src/app/core/services/sidebar.service';
@@ -7,6 +7,7 @@ import { OnboardingService } from 'src/app/core/services/onboarding.service';
 import { ProjectService } from 'src/app/core/services/project.service';
 import { GithubService } from 'src/app/core/services/github.service';
 import { SubscriptionService } from 'src/app/core/services/subscription.service';
+import { UpsellModalComponent } from 'src/app/shared/components/upsell-modal/upsell-modal.component';
 import { Developer } from 'src/app/shared/interfaces/developer';
 import { TrialStatus } from 'src/app/shared/interfaces/github';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
@@ -18,7 +19,7 @@ import gsap from 'gsap';
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, TrialBannerComponent],
+  imports: [CommonModule, TrialBannerComponent, UpsellModalComponent],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
@@ -31,17 +32,43 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   private routeSub?: Subscription;
   private sidebarOpenSub?: Subscription;
 
+  // ── [1] Upsell modal state ──────────────────────────────────────────────────
+  upsellModalOpen    = false;
+  upsellFeatureName  = '';
+
+  // ── [3] Usage bar state ─────────────────────────────────────────────────────
+  readonly projectLimit = 3;      // free-tier cap (mirrors backend logic)
+  projectUsageCount  = 0;
+  get projectUsagePercent(): number {
+    return Math.min(100, Math.round((this.projectUsageCount / this.projectLimit) * 100));
+  }
+
+  // ── [2/3] ViewChild refs for GSAP ──────────────────────────────────────────
+  @ViewChild('promoCard',    { static: false }) promoCardRef!:   ElementRef<HTMLElement>;
+  @ViewChild('promoShine',   { static: false }) promoShineRef!:  ElementRef<HTMLElement>;
+  @ViewChild('usageBarFill', { static: false }) usageBarFillRef!: ElementRef<HTMLElement>;
+
+  private promoTiltTl?: gsap.core.Timeline;
+  private urgencyTween?: gsap.core.Tween;
+
   // Pro widget state
   trialStatus: TrialStatus | null = null;
   get isPro(): boolean { return this.trialStatus?.isPro ?? false; }
   get isPremium(): boolean { return this.trialStatus?.isPremium ?? false; }
   get daysRemaining(): number | null { return this.trialStatus?.daysRemaining ?? null; }
 
-  // Expiry-aware subscription state
+  // \u2500\u2500 Subscription state: trialStatus (live API) is the authoritative override. \u2500\u2500
+  // The local subscription object in currentUser can be stale (loaded from
+  // localStorage) \u2014 we only fall back to it if the API hasn't responded yet.
   get subscriptionActive(): boolean {
+    if (this.trialStatus !== null) {
+      return this.trialStatus.isPremium === true && this.trialStatus.active === true;
+    }
     return this.subscriptionService.isSubscriptionActive(this.currentUser?.subscription);
   }
   get subscriptionExpired(): boolean {
+    // If the live API confirmed premium, never show as expired.
+    if (this.trialStatus !== null && this.trialStatus.isPremium) return false;
     return this.subscriptionService.isExpired(this.currentUser?.subscription);
   }
   get planLabel(): string {
@@ -76,16 +103,36 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isOpenSubject.next(false);
   }
 
+  private ambientTweens: gsap.core.Tween[] = [];
+
   ngOnInit(): void {
     this.authSub = this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       this.isAdmin = user?.role === 'admin';
+      this.triggerIdleAnimations();
     });
 
     // Subscribe to trial/Pro status for the sidebar Pro widget
     this.trialSub = this.githubService.getTrialStatus().subscribe({
-      next: status => { this.trialStatus = status; },
-      error: () => { this.trialStatus = null; }
+      next: status => {
+        this.trialStatus = status;
+        this.triggerIdleAnimations();
+      },
+      error: () => {
+        this.trialStatus = null;
+      }
+    });
+
+    // [3] Load project count for usage bar (free users only — PRO gate in template)
+    this.projectService.getAllProjects(0).subscribe({
+      next: (res: any) => {
+        const total = typeof res.total === 'number'
+          ? res.total
+          : (res.Projects?.totalActiveProjects ?? 0);
+        this.projectUsageCount = total;
+        this.animateUrgencyBarIfNeeded();
+      },
+      error: () => { /* non-critical — silently swallow */ }
     });
 
     // Synchronize activeRoute on load
@@ -108,6 +155,8 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isMobileDrawerOpen = isOpen;
       this.animateMobileDrawer(isOpen);
     });
+
+    this.triggerIdleAnimations();
   }
 
   ngOnDestroy(): void {
@@ -117,17 +166,170 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.sidebarOpenSub?.unsubscribe();
 
     // Clean up GSAP tweens to avoid memory leaks
+    this.ambientTweens.forEach(t => t.kill());
+    this.promoTiltTl?.kill();
+    this.urgencyTween?.kill();
+
     const sidebarEl = this.el.nativeElement.querySelector('.sidebar-master');
     const overlayEl = this.el.nativeElement.querySelector('.sidebar-overlay');
     const navLinks = this.el.nativeElement.querySelectorAll('.nav-item-wrapper');
     const animElements = this.el.nativeElement.querySelectorAll(
-      '.brand-text, .nav-label, .profile-name, .pro-widget__info, .expired-widget__info'
+      '.brand-text, .nav-label, .profile-name, .status-badge__body'
     );
 
     if (sidebarEl) gsap.killTweensOf(sidebarEl);
     if (overlayEl) gsap.killTweensOf(overlayEl);
     if (navLinks && navLinks.length) gsap.killTweensOf(navLinks);
     if (animElements && animElements.length) gsap.killTweensOf(animElements);
+  }
+
+  // ── [1] Upsell modal handlers ─────────────────────────────────────────────
+  openUpsellModal(featureName: string): void {
+    this.upsellFeatureName = featureName;
+    this.upsellModalOpen   = true;
+  }
+
+  closeUpsellModal(): void {
+    this.upsellModalOpen = false;
+  }
+
+  // ── [2] Promo card 3D tilt / shine GSAP ──────────────────────────────────
+  onPromoMouseEnter(): void {
+    const card  = this.promoCardRef?.nativeElement;
+    const shine = this.promoShineRef?.nativeElement;
+    if (!card) return;
+
+    this.promoTiltTl?.kill();
+    this.promoTiltTl = gsap.timeline();
+    this.promoTiltTl
+      .to(card, { rotateX: 4, rotateY: -6, scale: 1.03, duration: 0.35, ease: 'power2.out', transformPerspective: 600 })
+      .to(card, { boxShadow: '0 10px 36px rgba(99, 102, 241, 0.40)', duration: 0.35, ease: 'power2.out' }, '<');
+
+    if (shine) {
+      gsap.fromTo(shine,
+        { x: '-120%', opacity: 0.6 },
+        { x: '120%',  opacity: 0,   duration: 0.65, ease: 'power2.in' }
+      );
+    }
+  }
+
+  onPromoMouseLeave(): void {
+    const card = this.promoCardRef?.nativeElement;
+    if (!card) return;
+    this.promoTiltTl?.kill();
+    gsap.to(card, { rotateX: 0, rotateY: 0, scale: 1, boxShadow: '0 4px 20px rgba(99, 102, 241, 0.18)', duration: 0.4, ease: 'power2.out' });
+  }
+
+  // ── [3] Urgency bar GSAP pulse when ≥ 80% ────────────────────────────────
+  private animateUrgencyBarIfNeeded(): void {
+    setTimeout(() => {
+      const fill = this.usageBarFillRef?.nativeElement;
+      if (!fill || this.projectUsagePercent < 80) return;
+      this.urgencyTween?.kill();
+      this.urgencyTween = gsap.to(fill, {
+        boxShadow: '0 0 12px rgba(251, 146, 60, 0.75)',
+        duration: 1.0,
+        yoyo: true,
+        repeat: -1,
+        ease: 'power1.inOut'
+      });
+    }, 300);
+  }
+
+  // ── GSAP Badge Animations ────────────────────────────────────────────────
+  onBadgeMouseEnter(event: MouseEvent, type: 'pro' | 'trial') {
+    const target = event.currentTarget as HTMLElement;
+    gsap.to(target, {
+      scale: 1.05,
+      duration: 0.3,
+      ease: 'power2.out',
+      overwrite: 'auto'
+    });
+
+    const shell = target.querySelector('.status-badge__shell') || target;
+    if (type === 'pro') {
+      gsap.to(shell, {
+        boxShadow: '0 0 25px rgba(139, 92, 246, 0.45), inset 0 0 15px rgba(99, 102, 241, 0.2)',
+        borderColor: 'rgba(167, 139, 250, 0.6)',
+        duration: 0.3,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    } else {
+      gsap.to(shell, {
+        boxShadow: '0 0 20px rgba(245, 158, 11, 0.35), inset 0 0 12px rgba(217, 119, 6, 0.15)',
+        borderColor: 'rgba(245, 158, 11, 0.5)',
+        duration: 0.3,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    }
+  }
+
+  onBadgeMouseLeave(event: MouseEvent, type: 'pro' | 'trial') {
+    const target = event.currentTarget as HTMLElement;
+    gsap.to(target, {
+      scale: 1.0,
+      duration: 0.4,
+      ease: 'power2.out',
+      overwrite: 'auto'
+    });
+
+    const shell = target.querySelector('.status-badge__shell') || target;
+    if (type === 'pro') {
+      gsap.to(shell, {
+        boxShadow: '0 0 18px rgba(139, 92, 246, 0.12), inset 0 0 12px rgba(99, 102, 241, 0.06)',
+        borderColor: 'rgba(139, 92, 246, 0.35)',
+        duration: 0.4,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    } else {
+      gsap.to(shell, {
+        boxShadow: '0 0 14px rgba(245, 158, 11, 0.08), inset 0 0 10px rgba(217, 119, 6, 0.05)',
+        borderColor: 'rgba(245, 158, 11, 0.22)',
+        duration: 0.4,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    }
+  }
+
+  private triggerIdleAnimations() {
+    setTimeout(() => {
+      this.ambientTweens.forEach(t => t.kill());
+      this.ambientTweens = [];
+
+      // 1. PRO Badge Ambient Pulse
+      const proShell = this.el.nativeElement.querySelector('.status-badge--pro .status-badge__shell');
+      if (proShell) {
+        const t = gsap.fromTo(proShell, 
+          {
+            boxShadow: '0 0 12px rgba(139, 92, 246, 0.1), inset 0 0 8px rgba(99, 102, 241, 0.04)',
+            borderColor: 'rgba(139, 92, 246, 0.25)'
+          },
+          {
+            boxShadow: '0 0 20px rgba(139, 92, 246, 0.25), inset 0 0 14px rgba(99, 102, 241, 0.1)',
+            borderColor: 'rgba(139, 92, 246, 0.45)',
+            duration: 2.5,
+            repeat: -1,
+            yoyo: true,
+            ease: 'power1.inOut'
+          }
+        );
+        this.ambientTweens.push(t);
+      }
+
+      // 2. Trial Dot Pulsing (breathing warning indicator dot)
+      const trialDot = this.el.nativeElement.querySelector('.status-badge--trial .status-badge__dot--trial');
+      if (trialDot) {
+        const t = gsap.fromTo(trialDot,
+          { scale: 0.9, opacity: 0.65 },
+          { scale: 1.4, opacity: 1, duration: 1.5, repeat: -1, yoyo: true, ease: 'sine.inOut' }
+        );
+        this.ambientTweens.push(t);
+      }
+    }, 150);
   }
 
   @HostListener('mouseenter')
@@ -150,7 +352,7 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
     const sidebarEl = this.el.nativeElement.querySelector('.sidebar-master');
     const overlayEl = this.el.nativeElement.querySelector('.sidebar-overlay');
     const animElements = this.el.nativeElement.querySelectorAll(
-      '.brand-text, .nav-label, .profile-name, .pro-widget__info, .expired-widget__info'
+      '.brand-text, .nav-label, .profile-name, .status-badge__body'
     );
 
     if (isDesktop) {
@@ -241,7 +443,7 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   private expandSidebar(): void {
     const sidebarEl = this.el.nativeElement.querySelector('.sidebar-master');
     const animElements = this.el.nativeElement.querySelectorAll(
-      '.brand-text, .nav-label, .profile-name, .pro-widget__info, .expired-widget__info'
+      '.brand-text, .nav-label, .profile-name, .status-badge__body'
     );
 
     if (sidebarEl) {
@@ -254,11 +456,11 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (animElements.length) {
-      gsap.set(animElements, { display: (i, el) => {
+      gsap.set(animElements, { display: (i: number, el: Element) => {
         if (el.classList.contains('brand-text') || el.classList.contains('profile-name')) {
           return 'inline';
         }
-        if (el.classList.contains('pro-widget__info') || el.classList.contains('expired-widget__info')) {
+        if (el.classList.contains('status-badge__body')) {
           return 'flex';
         }
         return 'inline-block';
@@ -278,7 +480,7 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   private collapseSidebar(): void {
     const sidebarEl = this.el.nativeElement.querySelector('.sidebar-master');
     const animElements = this.el.nativeElement.querySelectorAll(
-      '.brand-text, .nav-label, .profile-name, .pro-widget__info, .expired-widget__info'
+      '.brand-text, .nav-label, .profile-name, .status-badge__body'
     );
 
     if (sidebarEl) {

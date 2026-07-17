@@ -49,20 +49,34 @@
         </a>
 
         <!-- ❷ Active paid Premium plan -->
-        <a *ngIf="isPremium && subscriptionActive" class="nav-link premium-link premium-link--premium"
+        <div *ngIf="isPremium && subscriptionActive && !subscriptionExpired"
+          class="status-badge-nav status-badge-nav--pro"
+          (mouseenter)="onBadgeMouseEnter($event, 'pro')"
+          (mouseleave)="onBadgeMouseLeave($event, 'pro')"
           [title]="planLabel + ' plan · ' + (daysRemaining !== null ? daysRemaining + ' days left' : 'Lifetime')">
-          <i class="fa-solid fa-gem"></i>
-          <span class="action-text">{{ planLabel }}</span>
-          <span class="pro-badge-dot pro-badge-dot--premium"></span>
-        </a>
+          <div class="status-badge-nav__shell">
+            <span class="status-badge-nav__dot status-badge-nav__dot--pro"></span>
+            <i class="fa-solid fa-gem status-badge-nav__icon"></i>
+            <span class="status-badge-nav__title">{{ planLabel }}</span>
+            <span class="status-badge-nav__sub" *ngIf="daysRemaining !== null">{{ daysRemaining }}d</span>
+            <span class="status-badge-nav__sub" *ngIf="daysRemaining === null">∞</span>
+          </div>
+        </div>
 
         <!-- ❸ Active trial Pro (not yet paid) -->
-        <a *ngIf="isPro && !isPremium && !subscriptionExpired" (click)="gotopremium()" class="nav-link premium-link premium-link--active"
+        <div *ngIf="isPro && !isPremium && !subscriptionExpired"
+          class="status-badge-nav status-badge-nav--trial"
+          (click)="gotopremium()"
+          (mouseenter)="onBadgeMouseEnter($event, 'trial')"
+          (mouseleave)="onBadgeMouseLeave($event, 'trial')"
           [title]="daysRemaining !== null ? daysRemaining + ' days remaining' : 'Unlimited'">
-          <i class="fa-solid fa-crown"></i>
-          <span class="action-text">Pro</span>
-          <span class="pro-badge-dot"></span>
-        </a>
+          <div class="status-badge-nav__shell">
+            <span class="status-badge-nav__dot status-badge-nav__dot--trial"></span>
+            <i class="fa-solid fa-crown status-badge-nav__icon"></i>
+            <span class="status-badge-nav__title">Trial</span>
+            <span class="status-badge-nav__sub" *ngIf="daysRemaining !== null">{{ daysRemaining }}d left</span>
+          </div>
+        </div>
 
         <!-- ❹ Free / no Pro — Upgrade CTA -->
         <a *ngIf="!isPro && !isPremium && !subscriptionExpired" (click)="gotopremium()" class="nav-link premium-link">

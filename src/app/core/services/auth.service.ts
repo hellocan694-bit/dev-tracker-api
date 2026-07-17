@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 import { environment } from 'src/environment/environment';
 
 import { Developer } from 'src/app/shared/interfaces/developer';
@@ -19,6 +19,15 @@ export class AuthService {
   private _currentUser = new BehaviorSubject<Developer | null>(null);
   currentUser$ = this._currentUser.asObservable();
 
+  /**
+   * Cached user-profile stream. Components that need profile data should
+   * subscribe to this instead of calling DeveloperService.getProfile() every
+   * time — the cache is automatically seeded on login and cleared on logout.
+   */
+  private userProfileSource = new BehaviorSubject<Developer | null>(null);
+  /** Read-only stream of the cached developer profile. */
+  userProfile$ = this.userProfileSource.asObservable();
+
   // Derived login flag — truthy when we have a profile in memory
   readonly loggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$ = this.loggedIn.asObservable();
@@ -30,6 +39,7 @@ export class AuthService {
       try {
         const dev = JSON.parse(storedDev);
         this._currentUser.next(dev);
+        this.userProfileSource.next(dev);
         this.loggedIn.next(true);
       } catch (e) { }
     }
@@ -46,6 +56,7 @@ export class AuthService {
       }
       localStorage.setItem('developerProfile', JSON.stringify(res.developer));
       this._currentUser.next(res.developer);
+      this.userProfileSource.next(res.developer);  // seed the profile cache
     }
     localStorage.setItem('isUserAuthenticated', 'true');
     this.loggedIn.next(true);
@@ -64,7 +75,29 @@ export class AuthService {
     localStorage.setItem('developerProfile', JSON.stringify(developer));
     localStorage.setItem('isUserAuthenticated', 'true');
     this._currentUser.next(developer);
+    this.userProfileSource.next(developer);  // seed the profile cache
     this.loggedIn.next(true);
+  }
+
+  /**
+   * Cache-gate: returns the cached profile instantly (as an Observable) if
+   * already populated. Callers should delegate the actual HTTP fetch to
+   * DeveloperService.getProfile() and then call updateProfileCache() with
+   * the fresh data so all subscribers receive it.
+   */
+  getCachedProfile(): Observable<Developer | null> {
+    return of(this.userProfileSource.value);
+  }
+
+  /**
+   * Push a fresh Developer object into the shared profile cache.
+   * Call this after a successful profile update so every component that
+   * subscribes to userProfile$ receives the new data without a re-fetch.
+   */
+  updateProfileCache(developer: Developer): void {
+    localStorage.setItem('developerProfile', JSON.stringify(developer));
+    this._currentUser.next(developer);
+    this.userProfileSource.next(developer);
   }
 
   googleLogin(idToken: string): Observable<any> {
@@ -124,6 +157,7 @@ export class AuthService {
     localStorage.removeItem('userId');
     localStorage.removeItem('user');
     this._currentUser.next(null);
+    this.userProfileSource.next(null);  // clear the profile cache
     this.loggedIn.next(false);
   }
 }

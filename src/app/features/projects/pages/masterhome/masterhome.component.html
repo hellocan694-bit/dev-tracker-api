@@ -134,3 +134,57 @@
 
 <!-- Feature Tour Component -->
 <app-feature-tour></app-feature-tour>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- [4] BLURRED PREMIUM ANALYTICS PREVIEW — hidden for active PRO subscribers  -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="analytics-preview-section" *ngIf="!isPremiumActive">
+  <div class="analytics-preview__header">
+    <h2 class="analytics-preview__title">
+      <i class="bi bi-graph-up-arrow me-2"></i>Advanced Analytics
+    </h2>
+    <span class="analytics-preview__badge">
+      <i class="bi bi-gem me-1"></i>PRO
+    </span>
+  </div>
+
+  <div class="analytics-preview__card">
+    <!-- Dummy chart rendered underneath the blur -->
+    <div class="analytics-preview__dummy-content" aria-hidden="true">
+      <div class="dummy-chart">
+        <div class="dummy-chart__bars">
+          <div class="dummy-bar" style="height:45%"></div>
+          <div class="dummy-bar dummy-bar--accent" style="height:70%"></div>
+          <div class="dummy-bar" style="height:35%"></div>
+          <div class="dummy-bar dummy-bar--accent" style="height:85%"></div>
+          <div class="dummy-bar" style="height:50%"></div>
+          <div class="dummy-bar dummy-bar--accent" style="height:60%"></div>
+          <div class="dummy-bar" style="height:30%"></div>
+        </div>
+        <div class="dummy-chart__line"></div>
+      </div>
+      <div class="dummy-metrics">
+        <div class="dummy-metric"><span>92%</span><p>Velocity</p></div>
+        <div class="dummy-metric"><span>4.7h</span><p>Avg Focus</p></div>
+        <div class="dummy-metric"><span>17</span><p>Deployments</p></div>
+      </div>
+    </div>
+
+    <!-- Blur overlay -->
+    <div class="analytics-preview__blur-overlay">
+      <div class="analytics-preview__cta-card">
+        <div class="analytics-preview__cta-icon">
+          <i class="bi bi-bar-chart-line-fill"></i>
+        </div>
+        <h3 class="analytics-preview__cta-title">Get clear on your pipeline performance.</h3>
+        <p class="analytics-preview__cta-body">
+          Upgrade to <strong>PRO</strong> to unlock advanced productivity analytics,
+          velocity tracking, and deployment insights.
+        </p>
+        <button class="analytics-preview__cta-btn" routerLink="/home/developersettings">
+          <i class="bi bi-gem me-2"></i>Upgrade to PRO
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -208,3 +208,47 @@ $glass-border: rgba(255, 255, 255, 0.08);
     filter: blur(50px);
   }
 }
+
+// ── Shared Projects Section (Agent 3 addition) ────────────────────────────────
+.shared-projects-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.shared-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.shared-projects-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .status-dot {
+    font-size: 6px;
+    flex-shrink: 0;
+    color: #334155;
+
+    &.dot-active { color: #22d3ee; }
+    &.dot-paused { color: #f59e0b; }
+  }
+}

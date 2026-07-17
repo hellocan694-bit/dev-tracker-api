@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of, switchMap, tap } from 'rxjs';
 import { environment } from 'src/environment/environment';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { Developer } from 'src/app/shared/interfaces/developer';
 
 @Injectable({
   providedIn: 'root'
@@ -9,18 +11,38 @@ import { environment } from 'src/environment/environment';
 export class DeveloperService {
   private baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
   // ── Existing ────────────────────────────────────────────────────────────────
   changeUserName(name: string): Observable<any> {
     return this.http.patch(`${this.baseUrl}/developerSettings/changeusername`, { name });
   }
 
-  // ── Get Profile ─────────────────────────────────────────────────────────────
-  // GET /developerSettings/profile
-  getProfile(): Observable<{ status: string; data: any }> {
-    return this.http.get<{ status: string; data: any }>(
+  // ── Get Profile (cache-gated) ────────────────────────────────────────────────
+  // Returns the cached Developer instantly if already populated;
+  // otherwise fetches from the API, seeds the cache, and emits the result.
+  getProfile(): Observable<{ status: string; data: Developer }> {
+    return this.authService.getCachedProfile().pipe(
+      switchMap(cached => {
+        if (cached) {
+          return of({ status: 'cached', data: cached });
+        }
+        return this.refreshProfile();
+      })
+    );
+  }
+
+  // ── Refresh Profile (network check) ──────────────────────────────────────────
+  // Forces a network request to keep the in-memory cache and localStorage updated.
+  refreshProfile(): Observable<{ status: string; data: Developer }> {
+    return this.http.get<{ status: string; data: Developer }>(
       `${this.baseUrl}/developerSettings/profile`
+    ).pipe(
+      tap(res => {
+        if (res?.data) {
+          this.authService.updateProfileCache(res.data);
+        }
+      })
     );
   }
 

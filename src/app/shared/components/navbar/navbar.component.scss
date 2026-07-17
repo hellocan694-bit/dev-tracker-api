@@ -569,6 +569,118 @@
           display: none;
         }
       }
+
+      // Compact navbar badges on mobile
+      .status-badge-nav {
+        &__sub {
+          display: none !important;
+        }
+        &__title {
+          font-size: 0.72rem;
+        }
+        &__shell {
+          padding: 5px 9px;
+          gap: 4px;
+        }
+      }
     }
+  }
+}
+
+// ── Navbar Premium Status Badges ──────────────────────────────────────────
+.status-badge-nav {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.3s ease;
+
+  &__shell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.3s ease;
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+
+    &--pro {
+      background: #a78bfa;
+      box-shadow: 0 0 6px #a78bfa;
+    }
+
+    &--trial {
+      background: #fbbf24;
+      box-shadow: 0 0 6px #fbbf24;
+    }
+  }
+
+  &__icon {
+    font-size: 0.85rem;
+  }
+
+  &__title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__sub {
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0.6;
+  }
+
+  // PRO Variant: violet/blue glassmorphic theme
+  &--pro &__shell {
+    color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.08);
+    border-color: rgba(139, 92, 246, 0.35);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.12);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      padding: 1px;
+      background: linear-gradient(135deg, #7c3aed, #2563eb, #7c3aed);
+      background-size: 200% 200%;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      z-index: 0;
+      animation: proBorderShimmer 3.5s linear infinite;
+    }
+  }
+
+  &--pro &__icon {
+    color: #a78bfa;
+    filter: drop-shadow(0 0 4px rgba(167, 139, 250, 0.6));
+  }
+
+  // Trial Variant: amber theme
+  &--trial &__shell {
+    color: #fcd34d;
+    background: rgba(245, 158, 11, 0.06);
+    border-color: rgba(245, 158, 11, 0.22);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.08);
+  }
+
+  &--trial &__icon {
+    color: #fbbf24;
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
   }
 }

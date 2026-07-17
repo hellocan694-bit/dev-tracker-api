@@ -64,10 +64,27 @@ export class TeamsService {
     );
   }
 
-  // ── Invitations (existing) ────────────────────────────────────────────────
+  // ── Invitations (existing + new project-aware) ────────────────────────────
 
+  /** Legacy: team-only invite (no project sharing) */
   sendInvite(email: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/sendinvitaions`, { email });
+  }
+
+  /**
+   * Agent 3 — sends an invite with an explicit list of shared project IDs.
+   * The backend validates ownership server-side (IDOR guard).
+   */
+  sendInviteWithProjects(email: string, sharedProjects: string[]): Observable<any> {
+    return this.http.post(`${this.baseUrl}/sendinvitaions`, { email, sharedProjects });
+  }
+
+  /**
+   * Agent 3 — fetches only this admin's own projects (for the selector modal).
+   * Returns { data: { projects: [{ _id, name, status }] } }
+   */
+  getAdminProjects(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/my-projects`);
   }
 
   getMyInvitations(): Observable<any> {
