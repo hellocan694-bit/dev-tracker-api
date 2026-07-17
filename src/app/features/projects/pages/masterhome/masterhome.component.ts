@@ -12,6 +12,9 @@ import { TrialStatus } from 'src/app/shared/interfaces/github';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { FeatureTourComponent } from 'src/app/shared/components/feature-tour/feature-tour.component';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 // FIX #4 — Memory Leak: import Subject and takeUntil for subscription cleanup
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -91,20 +94,38 @@ export class MasterhomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.ctx = gsap.context(() => {
-      this.typewriter('.typewriter-text', `> System Status: Online. Welcome back, ${this.developerName}.`);
+      // 1️⃣ Initial Load Sequencing (Independent gsap.from animations)
+      // Header Greeting
+      if (document.querySelector('.welcome-msg')) {
+        gsap.from('.welcome-msg', {
+          opacity: 0,
+          y: 20,
+          duration: 0.6,
+          ease: 'power2.out'
+        });
+      }
 
-      gsap.to('.floating-icon', {
-        y: -15,
-        rotation: 5,
-        duration: 3,
-        yoyo: true,
-        repeat: -1,
-        ease: 'sine.inOut',
-        stagger: {
-          each: 0.3,
-          from: 'random'
-        }
-      });
+      // Top Metric Cards
+      if (document.querySelectorAll('.metric-card').length > 0) {
+        gsap.from('.metric-card', {
+          opacity: 0,
+          y: 30,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: 'power2.out'
+        });
+      }
+
+      // Main Grid (Active Operations & Productivity Chart)
+      if (document.querySelector('.recent-projects') || document.querySelector('.chart-wrapper')) {
+        gsap.from('.recent-projects, .chart-wrapper', {
+          opacity: 0,
+          y: 30,
+          duration: 0.6,
+          stagger: 0.15,
+          ease: 'power2.out'
+        });
+      }
     });
   }
 
@@ -114,6 +135,7 @@ export class MasterhomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.destroy$.complete();
     this.trialSub?.unsubscribe();
     if (this.ctx) this.ctx.revert();
+    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
   }
 
   loadWeeklyStats() {
@@ -144,6 +166,9 @@ export class MasterhomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isLoading = false;
         this.cdr.markForCheck();
         this.animateCounters('.counter-projects', this.countProjects);
+        
+        // 3️⃣ ScrollTrigger Setup for Deep Sections & Lazy-loaded rows
+        this.initScrollTriggers();
       },
       error: (err) => {
         this.isLoading = false;
@@ -158,9 +183,70 @@ export class MasterhomeComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (data) => {
         this.chartData = data;
         this.cdr.markForCheck();
+        
+        // 2️⃣ Premium Micro-Interactions (Chart Bars GSAP animation)
+        this.animateChartBars();
       },
       error: (err) => console.error('Error fetching productivity stats:', err)
     });
+  }
+
+  private animateChartBars() {
+    if (!this.ctx) return;
+    setTimeout(() => {
+      this.ctx.add(() => {
+        const bars = document.querySelectorAll('.chart-container .bar');
+        if (bars.length > 0) {
+          gsap.fromTo(bars,
+            { scaleY: 0, transformOrigin: 'bottom center' },
+            { scaleY: 1, duration: 0.8, stagger: 0.08, ease: 'power2.out' }
+          );
+        }
+      });
+    }, 200);
+  }
+
+  private initScrollTriggers() {
+    if (!this.ctx) return;
+    setTimeout(() => {
+      this.ctx.add(() => {
+        const rows = document.querySelectorAll('.project-row');
+        rows.forEach((row) => {
+          gsap.fromTo(row,
+            { opacity: 0, y: 15 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              ease: 'power1.out',
+              scrollTrigger: {
+                trigger: row,
+                start: 'top 85%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
+        });
+
+        const previewSection = document.querySelector('.analytics-preview-section');
+        if (previewSection) {
+          gsap.fromTo(previewSection,
+            { opacity: 0, y: 40 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.8,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: previewSection,
+                start: 'top 85%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
+        }
+      });
+    }, 300);
   }
 
   private animateCounters(selector: string, endValue: number) {

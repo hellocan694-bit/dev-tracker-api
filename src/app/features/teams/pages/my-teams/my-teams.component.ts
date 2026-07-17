@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
+import { gsap } from 'gsap';
 
 import { TeamsService } from 'src/app/core/services/teams.service';
 import { Team, TeamMember } from 'src/app/shared/interfaces/team';
@@ -55,12 +56,32 @@ export class MyTeamsComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.ownedTeams = res.data.ownedTeams;
           this.memberTeams = res.data.memberTeams;
+          this.animateCards();
         },
         error: (err) => {
           this.errorMessage =
             err?.error?.message || 'Failed to load your teams. Please try again.';
         },
       });
+  }
+
+  private animateCards(): void {
+    setTimeout(() => {
+      const sections = document.querySelectorAll('.teams-section');
+      const cards = document.querySelectorAll('.team-card');
+      if (sections.length > 0) {
+        gsap.fromTo(sections,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out' }
+        );
+      }
+      if (cards.length > 0) {
+        gsap.fromTo(cards,
+          { opacity: 0, y: 40, scale: 0.96 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.08, ease: 'power2.out' }
+        );
+      }
+    }, 150);
   }
 
   // ── UI Helpers ─────────────────────────────────────────────────────────────

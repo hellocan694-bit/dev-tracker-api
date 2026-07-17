@@ -49,96 +49,358 @@
 
     </div>
 
-    <!-- ── Dashboard Mockup (preserved + floating 3-D + Spotlight reveal) ── -->
-    <div class="hero-dashboard-mockup floating-element mockup-spotlight-container">
-      <div class="mockup-frame glass-panel">
-
-        <div class="mac-dots">
-          <span></span><span></span><span></span>
-        </div>
-
-        <div class="mockup-body-wrapper">
-          <!-- Background image layer: Dimmed base -->
-          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
-            class="mockup-img-base" alt="DevTrack Dashboard Base">
-
-          <!-- Foreground image layer: Bright/Crisp, masked by spotlight -->
-          <div class="mockup-spotlight-mask">
-            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
-              class="mockup-img-highlight" alt="DevTrack Dashboard Highlight">
+    <!-- ── Webhook Simulator Terminal ── -->
+    <div class="hero-terminal-wrapper" id="webhook-terminal">
+      <div class="terminal-frame">
+        <div class="terminal-titlebar">
+          <div class="mac-dots">
+            <span></span><span></span><span></span>
           </div>
-
-          <!-- Highlight neon border glow overlay -->
-          <div class="spotlight-border-glow"></div>
+          <span class="terminal-title">devtrack — webhook listener</span>
+          <span class="terminal-badge live-badge"><span class="live-dot"></span>LIVE</span>
         </div>
-
+        <div class="terminal-body" id="terminal-body">
+          <div class="terminal-line static">
+            <span class="t-dim">$</span> devtrack webhooks listen --port 9000
+          </div>
+          <div class="terminal-line static dim">
+            <span class="t-green">✓</span> Listening for GitHub events on :9000
+          </div>
+          <div class="terminal-separator"></div>
+          <!-- Lines are injected via GSAP -->
+          <div id="webhook-lines-container"></div>
+          <div class="terminal-cursor" id="terminal-cursor">█</div>
+        </div>
       </div>
     </div>
 
   </section>
 
-  <!-- BRAND LOGOS -->
+  <!-- DEVELOPER TECH WALL -->
   <section class="trusted-by gsap-reveal">
-    <p>TRUSTED BY INNOVATIVE TEAMS WORLDWIDE</p>
+    <p class="tech-wall-label">BUILT ON THE STACK DEVELOPERS TRUST</p>
     <div class="logo-strip">
-      <i class="fa-brands fa-aws"></i>
-      <i class="fa-brands fa-docker"></i>
-      <i class="fa-brands fa-github"></i>
-      <i class="fa-brands fa-microsoft"></i>
-      <i class="fa-brands fa-figma"></i>
+      <div class="tech-logo-item">
+        <i class="fa-brands fa-github"></i>
+        <span>GitHub</span>
+      </div>
+      <div class="tech-logo-item">
+        <i class="fa-brands fa-gitlab"></i>
+        <span>GitLab</span>
+      </div>
+      <div class="tech-logo-item">
+        <i class="fa-brands fa-docker"></i>
+        <span>Docker</span>
+      </div>
+      <div class="tech-logo-item">
+        <i class="fa-brands fa-node-js"></i>
+        <span>Node.js</span>
+      </div>
+      <div class="tech-logo-item">
+        <i class="fa-solid fa-database"></i>
+        <span>Redis</span>
+      </div>
     </div>
   </section>
 
-  <!-- FEATURES GRID -->
-  <section class="features-section" id="demo-section">
+  <!-- ══════════ BENTO GRID FEATURES ══════════ -->
+  <section class="bento-section" id="demo-section">
+    <!-- Cursor spotlight accent -->
+    <div class="bento-spotlight" id="bento-spotlight"></div>
+
     <div class="section-header gsap-reveal">
       <h2 class="section-title">The anatomy of <span class="gradient-text">high performance</span>.</h2>
-      <p class="section-subtitle">Everything you need to orchestrate a world-class engineering team without the overhead
-        of micro-management.</p>
+      <p class="section-subtitle">Everything you need to orchestrate a world-class engineering team — in one unified surface.</p>
     </div>
 
-    <div class="features-grid">
-      <!-- Feature Card 1 -->
-      <div class="feature-card glass-panel neon-border">
-        <div class="card-icon blue-glow">
-          <i class="fa-solid fa-chart-line"></i>
+    <div class="bento-grid">
+
+      <!-- Card A: Large — AI Analytics -->
+      <div class="bento-card bento-a" id="bento-card-0">
+        <div class="bento-icon-wrap blue">
+          <i class="fa-solid fa-chart-mixed"></i>
         </div>
-        <h3>Real-time Analytics</h3>
-        <p>Your entire Git history parsed and visualized. Identify bottlenecks, code churn, and deep work sessions
-          instantly.</p>
+        <h3 class="bento-title">AI Productivity Analytics</h3>
+        <p class="bento-desc">Transform raw Git history into actionable intelligence. Detect burnout patterns, forecast velocity, and visualize deep work sessions with precision.</p>
+        <div class="bento-metric-row">
+          <div class="bento-metric">
+            <span class="bento-metric-val blue">94%</span>
+            <span class="bento-metric-lbl">Velocity Score</span>
+          </div>
+          <div class="bento-metric">
+            <span class="bento-metric-val purple">6.2h</span>
+            <span class="bento-metric-lbl">Deep Work / Day</span>
+          </div>
+          <div class="bento-metric">
+            <span class="bento-metric-val green">2,847</span>
+            <span class="bento-metric-lbl">Commits Tracked</span>
+          </div>
+        </div>
+        <div class="bento-glow-bar"></div>
       </div>
 
-      <!-- Feature Card 2 -->
-      <div class="feature-card glass-panel neon-border">
-        <div class="card-icon purple-glow">
-          <i class="fa-solid fa-users-viewfinder"></i>
+      <!-- Card B: Tall — Webhooks -->
+      <div class="bento-card bento-b" id="bento-card-1">
+        <div class="bento-icon-wrap purple">
+          <i class="fa-solid fa-bolt"></i>
         </div>
-        <h3>Seamless Collaboration</h3>
-        <p>Automated daily standups generated from actual commits and pull requests. Keep everyone aligned
-          automatically.</p>
+        <h3 class="bento-title">Real-time Webhooks</h3>
+        <p class="bento-desc">GitHub events captured and synced within milliseconds. Zero data loss, guaranteed.</p>
+        <div class="bento-webhook-stream">
+          <div class="wh-event">
+            <span class="wh-dot green"></span>
+            <span class="wh-type">push</span>
+            <span class="wh-branch">main</span>
+            <span class="wh-time">2ms</span>
+          </div>
+          <div class="wh-event">
+            <span class="wh-dot blue"></span>
+            <span class="wh-type">pull_request</span>
+            <span class="wh-branch">#142</span>
+            <span class="wh-time">5ms</span>
+          </div>
+          <div class="wh-event">
+            <span class="wh-dot purple"></span>
+            <span class="wh-type">workflow_run</span>
+            <span class="wh-branch">CI/CD</span>
+            <span class="wh-time">8ms</span>
+          </div>
+          <div class="wh-event">
+            <span class="wh-dot orange"></span>
+            <span class="wh-type">issues</span>
+            <span class="wh-branch">#88</span>
+            <span class="wh-time">3ms</span>
+          </div>
+        </div>
+        <div class="bento-glow-bar purple"></div>
       </div>
 
-      <!-- Feature Card 3 -->
-      <div class="feature-card glass-panel neon-border">
-        <div class="card-icon blue-glow">
-          <i class="fa-solid fa-brain"></i>
-        </div>
-        <h3>AI Tech Lead</h3>
-        <p>Receive proactive suggestions on code quality and patterns of burnout. Your personal AI assistant for
-          healthier workflows.</p>
-      </div>
-
-      <!-- Feature Card 4 -->
-      <div class="feature-card glass-panel neon-border">
-        <div class="card-icon purple-glow">
+      <!-- Card C: Small — Security -->
+      <div class="bento-card bento-c" id="bento-card-2">
+        <div class="bento-icon-wrap green">
           <i class="fa-solid fa-shield-halved"></i>
         </div>
-        <h3>Enterprise Security</h3>
-        <p>Bank-grade encryption, SOC2 compliance, and precise role-based access controls to protect your intellectual
-          property.</p>
+        <h3 class="bento-title">Enterprise-grade Security</h3>
+        <p class="bento-desc">Bank-grade encryption, SOC2 compliance, and RBAC access controls.</p>
+        <div class="bento-shield-badges">
+          <span class="bento-badge">SOC2</span>
+          <span class="bento-badge">AES-256</span>
+          <span class="bento-badge">RBAC</span>
+        </div>
+        <div class="bento-glow-bar green"></div>
+      </div>
+
+      <!-- Card D: Wide — Multi-dev Admin -->
+      <div class="bento-card bento-d" id="bento-card-3">
+        <div class="bento-icon-wrap orange">
+          <i class="fa-solid fa-users-gear"></i>
+        </div>
+        <h3 class="bento-title">Multi-developer Admin Management</h3>
+        <p class="bento-desc">Manage entire engineering orgs with role-based access. Add developers, assign projects, and audit activity logs in real time.</p>
+        <div class="bento-team-row">
+          <div class="bento-avatar a1" title="James Davis">JD</div>
+          <div class="bento-avatar a2" title="Sarah Allen">SA</div>
+          <div class="bento-avatar a3" title="Alex Lee">AL</div>
+          <div class="bento-avatar a4" title="Maya Khan">MK</div>
+          <span class="bento-avatar-more">+14</span>
+        </div>
+        <div class="bento-glow-bar orange"></div>
+      </div>
+
+      <!-- Card E: Small — AI Lead -->
+      <div class="bento-card bento-e" id="bento-card-4">
+        <div class="bento-icon-wrap purple">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <h3 class="bento-title">Aria — AI Tech Lead</h3>
+        <p class="bento-desc">Proactive burnout alerts, PR unblocking, and sprint planning powered by AI.</p>
+        <div class="bento-aria-chip">
+          <span class="aria-dot"></span>
+          <span>Aria is analyzing your sprint...</span>
+        </div>
+        <div class="bento-glow-bar purple"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ FLOWCHART SECTION ══════════ -->
+  <section class="workflow-flowchart-section gsap-reveal">
+    <div class="section-header">
+      <span class="section-eyebrow">INFRASTRUCTURE</span>
+      <h2 class="section-title">From Git Commit to <span class="gradient-text">Live Dashboard</span></h2>
+      <p class="section-subtitle">A zero-latency processing pipeline that connects code activities to metrics instantly.</p>
+    </div>
+
+    <div class="flowchart-container">
+      <!-- Node 1: GitHub Push -->
+      <div class="fc-node" id="fc-node-github">
+        <div class="fc-node-icon github"><i class="fa-brands fa-github"></i></div>
+        <div class="fc-node-text">
+          <strong>GitHub Push</strong>
+          <span>Webhook Event Emitted</span>
+        </div>
+      </div>
+
+      <!-- Connector Line 1 -->
+      <div class="fc-line" id="fc-line-0">
+        <div class="fc-line-track"></div>
+        <div class="fc-line-glow"></div>
+      </div>
+
+      <!-- Node 2: Webhook Receiver -->
+      <div class="fc-node" id="fc-node-webhook">
+        <div class="fc-node-icon receiver"><i class="fa-solid fa-satellite-dish"></i></div>
+        <div class="fc-node-text">
+          <strong>Webhook Ingestion</strong>
+          <span>Validates Payload / Origin</span>
+        </div>
+      </div>
+
+      <!-- Connector Line 2 -->
+      <div class="fc-line" id="fc-line-1">
+        <div class="fc-line-track"></div>
+        <div class="fc-line-glow"></div>
+      </div>
+
+      <!-- Node 3: Redis / BullMQ -->
+      <div class="fc-node" id="fc-node-queue">
+        <div class="fc-node-icon queue"><i class="fa-solid fa-server"></i></div>
+        <div class="fc-node-text">
+          <strong>Redis / BullMQ</strong>
+          <span>Ingestion Queueing</span>
+        </div>
+      </div>
+
+      <!-- Connector Line 3 -->
+      <div class="fc-line" id="fc-line-2">
+        <div class="fc-line-track"></div>
+        <div class="fc-line-glow"></div>
+      </div>
+
+      <!-- Node 4: Aria AI Agent -->
+      <div class="fc-node" id="fc-node-aria">
+        <div class="fc-node-icon aria"><i class="fa-solid fa-brain"></i></div>
+        <div class="fc-node-text">
+          <strong>Aria AI Lead</strong>
+          <span>Analyzes Dev Activity</span>
+        </div>
+      </div>
+
+      <!-- Connector Line 4 -->
+      <div class="fc-line" id="fc-line-3">
+        <div class="fc-line-track"></div>
+        <div class="fc-line-glow"></div>
+      </div>
+
+      <!-- Node 5: Dashboard View -->
+      <div class="fc-node" id="fc-node-dashboard">
+        <div class="fc-node-icon dashboard"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="fc-node-text">
+          <strong>DevTrack UI</strong>
+          <span>Metrics Updated Live</span>
+        </div>
+        
+        <!-- Mini productivity chart attached underneath -->
+        <div class="fc-mini-chart">
+          <div class="fc-chart-bar-wrap"><div class="fc-chart-bar"></div></div>
+          <div class="fc-chart-bar-wrap"><div class="fc-chart-bar"></div></div>
+          <div class="fc-chart-bar-wrap"><div class="fc-chart-bar"></div></div>
+          <div class="fc-chart-bar-wrap"><div class="fc-chart-bar"></div></div>
+          <div class="fc-chart-bar-wrap"><div class="fc-chart-bar"></div></div>
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- ══════════ ADMIN SIMULATOR SECTION ══════════ -->
+  <section class="admin-simulator-section gsap-reveal">
+    <div class="section-header">
+      <span class="section-eyebrow">WORKSPACE & TEAM</span>
+      <h2 class="section-title">Invite & Manage <span class="gradient-text">Collaborators</span></h2>
+      <p class="section-subtitle">Coordinate seamlessly. Grant precise permissions to projects and developers in real-time.</p>
+    </div>
+
+    <div class="sim-wrapper glass-panel neon-border">
+      <div class="sim-container">
+        
+        <!-- Left Column: Invite Interface -->
+        <div class="sim-panel invite-panel">
+          <h3 class="sim-panel-title"><i class="fa-solid fa-user-plus me-2"></i>Workspace Invite</h3>
+          <p class="sim-panel-desc">Add developers to your workspace with specific role permissions.</p>
+          
+          <div class="sim-form">
+            <div class="sim-form-group">
+              <label>Email Address</label>
+              <input type="email" id="sim-email-input" placeholder="Enter developer email..." readonly />
+            </div>
+            
+            <div class="sim-form-group">
+              <label>Role</label>
+              <div class="sim-role-select">
+                <span class="sim-role-option active">Developer</span>
+                <span class="sim-role-option">Workspace Admin</span>
+              </div>
+            </div>
+            
+            <button class="btn btn-primary sim-btn" id="sim-invite-btn" disabled>
+              Send Invitation <i class="fa-solid fa-paper-plane ms-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Divider Line -->
+        <div class="sim-divider"></div>
+
+        <!-- Right Column: Active Members Directory -->
+        <div class="sim-panel directory-panel">
+          <div class="directory-header">
+            <h3 class="sim-panel-title"><i class="fa-solid fa-users me-2"></i>Workspace Members</h3>
+            <span class="member-count">2 Active</span>
+          </div>
+          
+          <div class="sim-member-list" id="sim-workspace-list">
+            <!-- Owner -->
+            <div class="sim-member-item owner">
+              <div class="member-av you">JD</div>
+              <div class="member-info">
+                <strong>James Davis (You)</strong>
+                <span>james@company.io</span>
+              </div>
+              <div class="member-status-col">
+                <span class="status-badge owner">Owner</span>
+              </div>
+            </div>
+
+            <!-- Existing Member -->
+            <div class="sim-member-item active">
+              <div class="member-av a2">SA</div>
+              <div class="member-info">
+                <strong>Sarah Allen</strong>
+                <span>sarah@company.io</span>
+              </div>
+              <div class="member-status-col">
+                <span class="status-badge active">Active Member</span>
+                <span class="permission-badge">Can Manage Projects</span>
+              </div>
+            </div>
+            
+            <!-- Dynamically added items will appear here -->
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Success Toast Notification -->
+      <div class="sim-toast" id="sim-toast">
+        <div class="toast-content">
+          <i class="fa-solid fa-circle-check me-2"></i>
+          <span>Invitation to <strong>alex.rivera@devtrack.io</strong> sent successfully!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
 
   <!-- ═══════════════ STICKY FEATURE SHOWCASE ═══════════════ -->
   <section class="feature-showcase-section">
@@ -418,6 +680,173 @@
       </div><!-- /showcase-visual-col -->
 
     </div><!-- /showcase-inner -->
+  </section>
+
+  <!-- ══════════ PRICING SECTION ══════════ -->
+  <section class="pricing-section gsap-reveal" id="pricing-section">
+    <div class="section-header">
+      <span class="section-eyebrow">PRICING</span>
+      <h2 class="section-title">Simple, <span class="gradient-text">transparent</span> pricing.</h2>
+      <p class="section-subtitle">No lock-ins. No hidden fees. Start free, scale as your team grows.</p>
+    </div>
+
+    <!-- Billing Toggle -->
+    <div class="pricing-toggle-wrapper" id="pricing-toggle-wrapper">
+      <span class="toggle-label" [class.active]="!isYearly">Monthly</span>
+      <button class="pricing-toggle-track" (click)="toggleBilling()" id="pricing-billing-toggle" [attr.aria-pressed]="isYearly">
+        <span class="pricing-toggle-thumb" [class.yearly]="isYearly"></span>
+      </button>
+      <span class="toggle-label" [class.active]="isYearly">
+        Yearly
+        <span class="toggle-save-badge">Save 20%</span>
+      </span>
+    </div>
+
+    <!-- Cards -->
+    <div class="pricing-cards-row">
+
+      <!-- Free -->
+      <div class="pricing-card" id="pricing-card-free">
+        <div class="pricing-card-header">
+          <span class="plan-icon free-icon"><i class="fa-solid fa-seedling"></i></span>
+          <div>
+            <h3 class="plan-name">Starter</h3>
+            <p class="plan-tagline">Perfect for solo devs</p>
+          </div>
+        </div>
+        <div class="pricing-price-row">
+          <span class="price-currency">$</span>
+          <span class="price-amount" id="price-free">0</span>
+          <span class="price-period">/ mo</span>
+        </div>
+        <ul class="pricing-features">
+          <li><i class="fa-solid fa-check"></i> 1 Developer seat</li>
+          <li><i class="fa-solid fa-check"></i> 3 Active projects</li>
+          <li><i class="fa-solid fa-check"></i> Basic Git sync</li>
+          <li><i class="fa-solid fa-check"></i> 7-day history</li>
+          <li class="disabled"><i class="fa-solid fa-xmark"></i> AI Aria access</li>
+          <li class="disabled"><i class="fa-solid fa-xmark"></i> Team management</li>
+        </ul>
+        <button class="btn btn-pricing outline" (click)="gotoRegister()" id="pricing-free-btn">Get Started Free</button>
+      </div>
+
+      <!-- Pro (highlighted) -->
+      <div class="pricing-card featured" id="pricing-card-pro">
+        <div class="pricing-popular-badge">Most Popular</div>
+        <div class="pricing-card-header">
+          <span class="plan-icon pro-icon"><i class="fa-solid fa-rocket"></i></span>
+          <div>
+            <h3 class="plan-name">Pro</h3>
+            <p class="plan-tagline">For growing teams</p>
+          </div>
+        </div>
+        <div class="pricing-price-row">
+          <span class="price-currency">$</span>
+          <span class="price-amount" id="price-pro">19</span>
+          <span class="price-period">/ mo</span>
+        </div>
+        <ul class="pricing-features">
+          <li><i class="fa-solid fa-check"></i> Up to 10 developers</li>
+          <li><i class="fa-solid fa-check"></i> Unlimited projects</li>
+          <li><i class="fa-solid fa-check"></i> Real-time webhooks</li>
+          <li><i class="fa-solid fa-check"></i> 90-day history</li>
+          <li><i class="fa-solid fa-check"></i> Aria AI access</li>
+          <li class="disabled"><i class="fa-solid fa-xmark"></i> Custom SSO</li>
+        </ul>
+        <button class="btn btn-pricing primary" (click)="gotoRegister()" id="pricing-pro-btn">Start Pro Trial</button>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="pricing-card" id="pricing-card-enterprise">
+        <div class="pricing-card-header">
+          <span class="plan-icon ent-icon"><i class="fa-solid fa-building-columns"></i></span>
+          <div>
+            <h3 class="plan-name">Enterprise</h3>
+            <p class="plan-tagline">For engineering orgs</p>
+          </div>
+        </div>
+        <div class="pricing-price-row">
+          <span class="price-currency">$</span>
+          <span class="price-amount" id="price-enterprise">79</span>
+          <span class="price-period">/ mo</span>
+        </div>
+        <ul class="pricing-features">
+          <li><i class="fa-solid fa-check"></i> Unlimited developers</li>
+          <li><i class="fa-solid fa-check"></i> Unlimited projects</li>
+          <li><i class="fa-solid fa-check"></i> Priority webhooks</li>
+          <li><i class="fa-solid fa-check"></i> Unlimited history</li>
+          <li><i class="fa-solid fa-check"></i> Advanced AI insights</li>
+          <li><i class="fa-solid fa-check"></i> Custom SSO + audit logs</li>
+        </ul>
+        <button class="btn btn-pricing outline" (click)="gotoRegister()" id="pricing-enterprise-btn">Contact Sales</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ FAQ SECTION ══════════ -->
+  <section class="faq-section gsap-reveal" id="faq-section">
+    <div class="section-header">
+      <span class="section-eyebrow">SUPPORT</span>
+      <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
+      <p class="section-subtitle">Everything you need to know about DevTrack's technology and permissions model.</p>
+    </div>
+
+    <div class="faq-container">
+      
+      <!-- FAQ Item 1 -->
+      <div class="faq-item">
+        <button class="faq-trigger" (click)="toggleFaq(0, $event)">
+          <span class="faq-question">How does the real-time webhook ingestion handle GitHub rate limits?</span>
+          <span class="faq-icon"><i class="fa-solid fa-plus"></i></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>DevTrack webhooks use a separate event-driven ingestion service. We bypass regular API rate limits by registering standard webhook endpoints directly, meaning we receive pushed payloads instead of polling. For heavy workflows, a Redis/BullMQ queue buffers updates to guarantee message delivery.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Item 2 -->
+      <div class="faq-item">
+        <button class="faq-trigger" (click)="toggleFaq(1, $event)">
+          <span class="faq-question">Can I assign custom roles and project permissions to individual developers?</span>
+          <span class="faq-icon"><i class="fa-solid fa-plus"></i></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>Yes. Workspace Owners can specify precise permissions (e.g. read, write, admin access) at both the workspace level and the individual project level. Our Role-Based Access Control (RBAC) ensures developers only view metrics for projects they are explicitly assigned to.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Item 3 -->
+      <div class="faq-item">
+        <button class="faq-trigger" (click)="toggleFaq(2, $event)">
+          <span class="faq-question">How secure is the repository connection to DevTrack?</span>
+          <span class="faq-icon"><i class="fa-solid fa-plus"></i></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>We take security extremely seriously. All repository metadata links use OAuth2 with restricted read-only permissions for commit information. We do not store or access your actual source code. All stored token data is encrypted using AES-256 at rest.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Item 4 -->
+      <div class="faq-item">
+        <button class="faq-trigger" (click)="toggleFaq(3, $event)">
+          <span class="faq-question">Is there a limit to the number of teams or projects I can manage on the Free plan?</span>
+          <span class="faq-icon"><i class="fa-solid fa-plus"></i></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>The Free Starter plan includes 1 developer seat and allows tracking of up to 3 active projects. To add more collaborators, expand access to detailed team performance charts, or run advanced Aria AI analyses, you can upgrade to our Pro plan.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </section>
 
   <!-- TESTIMONIALS -->
