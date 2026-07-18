@@ -65,14 +65,30 @@ historyCount$ = this.historyCountSource.asObservable();
 updateHistoryCount(count: number) {
   this.historyCountSource.next(count);
 }
-getAllProjects(page: number = 1, limit: number = 10): Observable<ProjectResponse> {
-  
-  let params = new HttpParams()
-    .set('page', page.toString())
-    .set('limit', limit.toString());
+  getAllProjects(page: number = 1, limit: number = 10, forceRefresh = false): Observable<ProjectResponse> {
+    if (!forceRefresh && this.isCacheLoaded && (page === 1 || page === 0)) {
+      const cachedList = this._projects$.getValue()!;
+      return of({
+        page: page,
+        limit,
+        total: cachedList.length,
+        Projects: cachedList
+      });
+    }
+    
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
 
-  return this.http.get<ProjectResponse>(`${this.baseUrl}/developer/dev/projectdev/projects`, { params });
-}
+    return this.http.get<ProjectResponse>(`${this.baseUrl}/developer/dev/projectdev/projects`, { params }).pipe(
+      tap((res) => {
+        if (page === 1 || page === 0) {
+          const list = this._extractProjects(res);
+          this._projects$.next(list);
+        }
+      })
+    );
+  }
   /**
    * Archive a project. On success, removes it from the local cache instantly
    * so the UI updates without a refetch.

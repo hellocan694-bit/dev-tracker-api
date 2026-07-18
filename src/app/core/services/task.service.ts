@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, Observable, of } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, shareReplay } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/environment/environment';
 import { Task, TaskResponse } from 'src/app/shared/interfaces/task';
@@ -228,7 +228,8 @@ export class TaskService {
             }),
             value: item.hours,
           }))
-        )
+        ),
+        shareReplay(1)
       );
   }
 }

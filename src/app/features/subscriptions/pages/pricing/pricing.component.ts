@@ -1,29 +1,42 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { SubscriptionService } from '../../../../core/services/subscription.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-pricing',
   templateUrl: './pricing.component.html',
   styleUrls: ['./pricing.component.scss']
 })
-export class PricingComponent {
+export class PricingComponent implements OnInit, OnDestroy {
   currency: 'USD' | 'EGP' = 'USD';
   isLoading = false;
-  plans:any[]=[];
+  plans: any[] = [];
   error: string | null = null;
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private subscriptionService: SubscriptionService,
     private router: Router
   ) {}
   ngOnInit(): void {
-    this.subscriptionService.getplans().subscribe({
-      next:(res:any)=>{
-        console.log(res);
-        this.plans=res.data.plans;
+    this.subscriptionService.getplans().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (res: any) => {
+        this.plans = res.data.plans;
+      },
+      error: (err) => {
+        console.error('Failed to load plans:', err);
       }
-    })
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleCurrency(cur: 'USD' | 'EGP') {

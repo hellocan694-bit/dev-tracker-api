@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, Subject, BehaviorSubject, of, throwError } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { map, tap, catchError, shareReplay } from 'rxjs/operators';
 import { environment } from 'src/environment/environment';
 import {
   TrialStatus,
@@ -64,14 +64,21 @@ export class GithubService {
   // ───────────────────────────────────────────────────────────────────────────
   // 2.  Trial Status
   // ───────────────────────────────────────────────────────────────────────────
-  getTrialStatus(): Observable<TrialStatus> {
+  getTrialStatus(forceRefresh = false): Observable<TrialStatus> {
+    if (!forceRefresh) {
+      const cached = this._trialStatus.getValue();
+      if (cached) {
+        return of(cached);
+      }
+    }
     return this.http.get<{ message: string; data: TrialStatus }>(`${this.baseUrl}/github/trial-status`).pipe(
       map(res => res.data),
       tap(status => this._trialStatus.next(status)),
       catchError(err => {
         this._trialStatus.next(null);
         return throwError(() => err);
-      })
+      }),
+      shareReplay(1)
     );
   }
 

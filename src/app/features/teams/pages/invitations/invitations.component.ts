@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { TeamsService } from 'src/app/core/services/teams.service';
-import { SocketService } from 'src/app/core/services/socket.service'; // استيراد السيرفس
+import { SocketService } from 'src/app/core/services/socket.service';
 import Swal from 'sweetalert2';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-invitations',
@@ -12,7 +13,8 @@ import { Subscription } from 'rxjs';
 export class InvitationsComponent implements OnInit, OnDestroy {
   myInvitations: any[] = [];
   isLoading: boolean = false;
-  private inviteSub: Subscription | undefined;
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private _teamsService: TeamsService,
@@ -23,20 +25,20 @@ export class InvitationsComponent implements OnInit, OnDestroy {
     // 1. تحميل الدعوات الموجودة فعلاً عند فتح الصفحة
     this.loadMyInvitations();
 
-    // 2. الاستماع للسوكيت: لو جت دعوة جديدة وأنا واقف في الصفحة، حدث القائمة فوراً
-    this.inviteSub = this._socketService.onEvent('new_invitation').subscribe({
+    // 2. Socket: real-time invite notifications refresh the list automatically
+    this._socketService.onEvent('new_invitation').pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (data) => {
         console.log('Real-time invite received:', data);
-        this.loadMyInvitations(); // ريفريش تلقائي للقائمة
+        this.loadMyInvitations();
       }
     });
   }
 
-  // تنظيف الـ Subscription عشان ميبقاش فيه Memory Leak
   ngOnDestroy(): void {
-    if (this.inviteSub) {
-      this.inviteSub.unsubscribe();
-    }
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // جلب كل الدعوات من الـ API

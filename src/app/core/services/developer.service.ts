@@ -21,15 +21,14 @@ export class DeveloperService {
   // ── Get Profile (cache-gated) ────────────────────────────────────────────────
   // Returns the cached Developer instantly if already populated;
   // otherwise fetches from the API, seeds the cache, and emits the result.
-  getProfile(): Observable<{ status: string; data: Developer }> {
-    return this.authService.getCachedProfile().pipe(
-      switchMap(cached => {
-        if (cached) {
-          return of({ status: 'cached', data: cached });
-        }
-        return this.refreshProfile();
-      })
-    );
+  getProfile(forceRefresh = false): Observable<{ status: string; data: Developer }> {
+    if (!forceRefresh) {
+      const cached = this.authService.userProfileValue;
+      if (cached) {
+        return of({ status: 'cached', data: cached });
+      }
+    }
+    return this.refreshProfile();
   }
 
   // ── Refresh Profile (network check) ──────────────────────────────────────────
@@ -56,6 +55,12 @@ export class DeveloperService {
     return this.http.put<{ status: string; message: string; data: any }>(
       `${this.baseUrl}/developerSettings/settings`,
       data
+    ).pipe(
+      tap(res => {
+        if (res?.data) {
+          this.authService.updateProfileCache(res.data);
+        }
+      })
     );
   }
 

@@ -8,8 +8,8 @@ import { TeamsService } from 'src/app/core/services/teams.service';
 import { Project } from 'src/app/shared/interfaces/project';
 import { Task } from 'src/app/shared/interfaces/task';
 import Swal from 'sweetalert2';
-import { timer, Subscription, Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { timer, Subject, Observable, EMPTY, Subscription } from 'rxjs';
+import { map, shareReplay, switchMap, catchError, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-view-main-project',
@@ -44,6 +44,9 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   isOwner: boolean = false;
 
   now$: Observable<number>;
+
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -89,13 +92,14 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   }
 
   loadTeamMembers(): void {
-    this.teamsService.getTeamMembers().subscribe({
-      next: (res: any) => {
-        this.teamMembers = res.data?.members || [];
-      },
-      error: (err) => {
+    this.teamsService.getTeamMembers().pipe(
+      takeUntil(this.destroy$),
+      catchError(err => {
         console.error('Failed to load team members:', err);
-      }
+        return EMPTY;
+      })
+    ).subscribe((res: any) => {
+      this.teamMembers = res.data?.members || [];
     });
   }
 
@@ -107,7 +111,9 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
     if (projectId) {
       this.isLoading = true;
 
-      this.taskService.getAllTasks(projectId).subscribe({
+      this.taskService.getAllTasks(projectId).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
         next: (res: any) => {
           this.tasks = res.tasks;
           this.isLoading = false;
@@ -152,24 +158,27 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   }
 
   loadProjectDetails(projectId: string, currentUser: any) {
-    this.projectService.getAllProjects(1, 100).subscribe({
-      next: (res: any) => {
+    // Flatten the previously nested subscribe with switchMap to avoid memory leaks
+    this.projectService.getAllProjects(1, 100).pipe(
+      takeUntil(this.destroy$),
+      switchMap((res: any) => {
         const list = res.Projects || [];
         const found = list.find((p: any) => p._id === projectId);
         if (found) {
           this.project = found;
-        } else {
-          // Check completed/archived projects as fallback
-          this.projectService.getCompletedProjects(1).subscribe({
-            next: (resComp: any) => {
-              const listComp = resComp.Projects || [];
-              const foundComp = listComp.find((p: any) => p._id === projectId);
-              if (foundComp) {
-                this.project = foundComp;
-              }
-            }
-          });
+          return EMPTY; // already found — no need for fallback
         }
+        // Fallback: check completed/archived projects
+        return this.projectService.getCompletedProjects(1).pipe(
+          catchError(() => EMPTY)
+        );
+      }),
+      catchError(() => EMPTY)
+    ).subscribe((resComp: any) => {
+      const listComp = resComp?.Projects || [];
+      const foundComp = listComp.find((p: any) => p._id === projectId);
+      if (foundComp) {
+        this.project = foundComp;
       }
     });
   }
@@ -470,6 +479,10 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    // Signal all takeUntil subscriptions to complete
+    this.destroy$.next();
+    this.destroy$.complete();
+    // Clean up running task timer monitors
     Object.values(this.taskMonitors).forEach(sub => sub.unsubscribe());
   }
 }

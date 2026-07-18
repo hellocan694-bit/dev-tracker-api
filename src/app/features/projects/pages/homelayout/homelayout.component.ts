@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { filter, Subscription } from 'rxjs';
+import { filter, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { FooterComponent } from 'src/app/shared/components/footer/footer.component';
 import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.component';
 import { SidebarComponent } from "src/app/shared/components/sidebar/sidebar.component";
@@ -15,15 +16,17 @@ import { SidebarComponent } from "src/app/shared/components/sidebar/sidebar.comp
 })
 export class HomelayoutComponent implements OnInit, OnDestroy {
   showSidebar = true;
-  private routerSub!: Subscription;
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
 
   constructor(private router: Router) {
     this.checkRoute(this.router.url);
   }
 
   ngOnInit() {
-    this.routerSub = this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
     ).subscribe((event: any) => {
       this.checkRoute(event.urlAfterRedirects);
     });
@@ -35,8 +38,7 @@ export class HomelayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.routerSub) {
-      this.routerSub.unsubscribe();
-    }
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

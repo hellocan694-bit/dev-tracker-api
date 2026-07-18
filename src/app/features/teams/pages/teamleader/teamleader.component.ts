@@ -2,7 +2,8 @@ import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } fr
 import { TeamsService } from 'src/app/core/services/teams.service';
 import { SocketService } from 'src/app/core/services/socket.service';
 import Swal from 'sweetalert2';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import gsap from 'gsap';
 
 interface AdminProject {
@@ -40,7 +41,7 @@ export class TeamleaderComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('limitPanel') limitPanelRef?: ElementRef<HTMLElement>;
   @ViewChild('projectModal') projectModalRef?: ElementRef<HTMLElement>;
 
-  private subscriptions = new Subscription();
+  private readonly destroy$ = new Subject<void>();
   private limitTl?: gsap.core.Timeline;
 
   constructor(
@@ -51,26 +52,27 @@ export class TeamleaderComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.loadTeamMembers();
 
-    this.subscriptions.add(
-      this._socketService.onEvent('invitation_accepted').subscribe({
-        next: (data: any) => {
-          this.loadTeamMembers();
-          this.showToast('success', `${data.developerName} joined!`);
-        },
-      })
-    );
+    this._socketService.onEvent('invitation_accepted').pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (data: any) => {
+        this.loadTeamMembers();
+        this.showToast('success', `${data.developerName} joined!`);
+      },
+    });
 
-    this.subscriptions.add(
-      this._socketService.onEvent('removed_from_team').subscribe({
-        next: () => this.loadTeamMembers(),
-      })
-    );
+    this._socketService.onEvent('removed_from_team').pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => this.loadTeamMembers(),
+    });
   }
 
   ngAfterViewInit(): void {}
 
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
     this.limitTl?.kill();
   }
 

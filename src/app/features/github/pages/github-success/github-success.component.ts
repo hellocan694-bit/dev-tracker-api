@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { take } from 'rxjs/operators';
 import gsap from 'gsap';
 
 @Component({
@@ -25,7 +26,8 @@ export class GitHubSuccessComponent implements OnInit, AfterViewInit, OnDestroy 
   constructor(private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
+    // take(1): this is a one-time redirect landing page — params only need reading once.
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
       this.githubLogin    = params['githubLogin']    ?? '';
       this.trialStarted   = params['trialStarted']   === 'true';
       this.proTrialEndDate = params['proTrialEndDate'] ?? '';

@@ -8,7 +8,8 @@ import {
   AfterViewInit
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { FeatureTourService, TourState } from 'src/app/core/services/feature-tour.service';
 
 @Component({
@@ -28,7 +29,8 @@ export class FeatureTourComponent implements OnInit, OnDestroy, AfterViewInit {
   highlightStyle: { [key: string]: string } = {};
   arrowDirection: 'top' | 'bottom' | 'left' | 'right' | 'none' = 'bottom';
 
-  private sub?: Subscription;
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
   private resizeObserver?: ResizeObserver;
 
   constructor(
@@ -38,7 +40,9 @@ export class FeatureTourComponent implements OnInit, OnDestroy, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.sub = this.tourService.state$.subscribe(state => {
+    this.tourService.state$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(state => {
       this.state = state;
       if (state.active && state.currentStep) {
         // Give Angular a tick to render before positioning
@@ -63,7 +67,8 @@ export class FeatureTourComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
     this.resizeObserver?.disconnect();
   }
 

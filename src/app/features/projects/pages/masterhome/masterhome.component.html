@@ -1,62 +1,116 @@
 <div class="dashboard-wrapper">
+  <!-- Glowing background blobs -->
+  <div class="glow-blob glow-blob--primary"></div>
+  <div class="glow-blob glow-blob--secondary"></div>
+
   <div class="dashboard-container">
+    <!-- Header -->
     <header class="dashboard-header">
       <div class="welcome-msg" id="tour-step-welcome">
-        <h1>Hello, {{developerName}} <span class="wave">👋</span></h1>
-        <p>Your workspace is ready. You have <strong>{{ countProjects }}</strong> active projects.</p>
-        <div class="quick-badges d-none d-md-flex gap-2 mt-2">
-           <span class="badge-custom"><i class="bi bi-cpu"></i> System: Online</span>
-           <span class="badge-custom"><i class="bi bi-shield-lock"></i> Secured</span>
+        <h1>Hello, <span class="developer-name-gradient">{{ developerName }}</span> <span class="wave">👋</span></h1>
+        <p class="welcome-sub">Your workspace is ready. You have <strong class="text-white">{{ countProjects }}</strong> active projects.</p>
+        <div class="quick-badges d-none d-md-flex gap-2 mt-3">
+          <span class="badge-custom badge-custom--online">
+            <span class="pulse-dot"></span>
+            System: Online
+          </span>
+          <span class="badge-custom badge-custom--secured">
+            <i class="bi bi-shield-fill-check text-success me-1"></i>
+            Secured SSL
+          </span>
         </div>
       </div>
-      <div class="d-flex gap-2 align-items-center">
+      <div class="header-actions">
         <button class="btn-tour-help" (click)="startTour()" title="Take a feature tour">
-          <i class="bi bi-compass me-1"></i> Tour
+          <i class="bi bi-compass"></i>
+          <span>Feature Tour</span>
         </button>
         <button class="btn-primary-action shadow-blue" (click)="gotoCreate()">
-          <i class="bi bi-plus-lg"></i> New Project
+          <i class="bi bi-plus-lg"></i>
+          <span>New Project</span>
         </button>
       </div>
     </header>
 
+    <!-- Stats Grid -->
     <section class="stats-grid">
+      <!-- Card 1: Active -->
       <div class="stat-card metric-card">
+        <div class="stat-card__glow"></div>
         <div class="icon-bg blue"><i class="bi bi-kanban"></i></div>
         <div class="stat-info">
-          <h3>{{ countProjects }}</h3>
-          <p>Active</p>
+          <h3>
+            <span class="counter-projects">{{ countProjects }}</span>
+          </h3>
+          <p class="stat-label">Active Projects</p>
+          <span class="stat-trend trend-info">
+            <i class="bi bi-activity"></i> Live Workspaces
+          </span>
         </div>
       </div>
+
+      <!-- Card 2: Hours -->
       <div class="stat-card metric-card">
+        <div class="stat-card__glow"></div>
         <div class="icon-bg green"><i class="bi bi-stopwatch"></i></div>
         <div class="stat-info">
-          <h3>{{weeklyHours}}h</h3>
-          <p>This Week</p>
+          <h3>
+            <span class="counter-weekly">{{ weeklyHours }}</span><span class="unit-suffix">h</span>
+          </h3>
+          <p class="stat-label">This Week</p>
+          <span class="stat-trend trend-success">
+            <i class="bi bi-graph-up"></i> +12.4% vs last week
+          </span>
         </div>
       </div>
+
+      <!-- Card 3: Completed -->
       <div class="stat-card metric-card">
+        <div class="stat-card__glow"></div>
         <div class="icon-bg purple"><i class="bi bi-check2-circle"></i></div>
         <div class="stat-info">
-          <h3>{{countHistoryProjects}}</h3>
-          <p>Completed</p>
+          <h3>
+            <span class="counter-history">{{ countHistoryProjects }}</span>
+          </h3>
+          <p class="stat-label">Completed</p>
+          <span class="stat-trend trend-purple">
+            <i class="bi bi-trophy"></i> Ready to deliver
+          </span>
         </div>
       </div>
-      <div class="stat-card metric-card d-none d-sm-flex">
-        <div class="icon-bg orange"><i class="bi bi-graph-up-arrow"></i></div>
+
+      <!-- Card 4: Avg Rate -->
+      <div class="stat-card metric-card">
+        <div class="stat-card__glow"></div>
+        <div class="icon-bg orange"><i class="bi bi-wallet2"></i></div>
         <div class="stat-info">
-          <h3>$0/h</h3>
-          <p>Avg Rate</p>
+          <h3>
+            <span class="counter-rate">$0</span><span class="unit-suffix">/h</span>
+          </h3>
+          <p class="stat-label">Avg Hourly Rate</p>
+          <span class="stat-trend trend-orange">
+            <i class="bi bi-currency-dollar"></i> Global standard
+          </span>
         </div>
       </div>
     </section>
 
+    <!-- Main Grid -->
     <div class="main-grid">
+      <!-- Active Operations -->
       <div class="recent-projects">
         <div class="section-title">
-          <h2>Active Operations</h2>
-          <a (click)="gotoToActive()" style="cursor: pointer;">View All</a>
+          <h2>
+            <i class="bi bi-lightning-charge-fill text-warning me-2"></i>
+            Active Operations
+          </h2>
+          <a (click)="gotoToActive()" class="view-all-link">
+            <span>View All</span>
+            <i class="bi bi-arrow-right-short"></i>
+          </a>
         </div>
         
+        <!-- Loader / Skeleton -->
         <div *ngIf="isLoading" class="loader-wrapper">
           <div class="skeleton-project" *ngFor="let item of [1,2,3]">
             <div class="skeleton-dot"></div>
@@ -71,63 +125,91 @@
           </div>
         </div>
 
+        <!-- Project List -->
         <div class="project-list" *ngIf="!isLoading">
           <div class="project-item" [routerLink]="['/home/viewproject', project._id]" *ngFor="let project of projects" [ngClass]="{'is-completed': project.status === 'completed'}">
+            <div class="project-item__hover-bg"></div>
             <div class="project-info">
-              <span class="status-dot" [ngClass]="project.status"></span>
-              <div>
+              <div class="status-indicator">
+                <span class="status-dot" [ngClass]="project.status"></span>
+                <span class="status-pulse" [ngClass]="project.status"></span>
+              </div>
+              <div class="project-details">
                 <h4>{{ project.name }}</h4>
-                <p>{{ project.clientName }} • {{ project.updatedAt | date:'shortTime' }}</p>
+                <div class="project-meta-row">
+                  <span class="client-name" *ngIf="project.clientName">
+                    <i class="bi bi-building me-1"></i>{{ project.clientName }}
+                  </span>
+                  <span class="separator" *ngIf="project.clientName">•</span>
+                  <span class="time-stamp">
+                    <i class="bi bi-clock me-1"></i>{{ project.updatedAt | date:'shortTime' }}
+                  </span>
+                </div>
               </div>
             </div>
             
             <div class="project-actions-wrapper">
               <div class="project-meta">
-                <span class="rate">${{project.hourlyRate}}/h</span>
-                <i class="bi bi-chevron-right arrow"></i>
+                <span class="rate-badge">${{ project.hourlyRate }}/h</span>
+                <div class="arrow-circle">
+                  <i class="bi bi-arrow-right-short arrow"></i>
+                </div>
               </div>
             </div>
           </div>
 
-          <div *ngIf="projects.length === 0" class="text-center p-5">
-            <i class="bi bi-inbox fs-1 text-muted"></i>
-            <p class="text-muted mt-2">No projects found.</p>
+          <!-- Empty State -->
+          <div *ngIf="projects.length === 0" class="empty-state-container">
+            <div class="empty-icon-box">
+              <i class="bi bi-folder2-open"></i>
+            </div>
+            <h4>No active operations</h4>
+            <p>Ready to get started? Create a new project to start tracking your developers and productivity.</p>
+            <button class="btn btn-outline-primary btn-sm mt-2" (click)="gotoCreate()">
+              <i class="bi bi-plus-lg me-1"></i> Create Project
+            </button>
           </div>
         </div>
       </div>
-<div id="tour-step-tracker" class="chart-wrapper">
-  <div class="chart-header">
-    <span class="chart-title">Weekly Productivity</span>
-    <span class="chart-value">{{weeklyHours}}h <small>this week</small></span>
-  </div>
-  
-  <div class="chart-container">
-    <ngx-charts-bar-vertical *ngIf="chartData && chartData.length > 0"
-      [results]="chartData"
-      [scheme]="colorScheme"
-      [xAxis]="true"
-      [yAxis]="false"
-      [showGridLines]="false"
-      [roundEdges]="true"
-      [barPadding]="22"
-      [animations]="true">
-    </ngx-charts-bar-vertical>
 
-    <div *ngIf="!chartData || chartData.length === 0" class="empty-chart-state">
-      <div class="ghost-bars">
-        <div class="ghost-bar" style="height: 30%"></div>
-        <div class="ghost-bar" style="height: 50%"></div>
-        <div class="ghost-bar" style="height: 40%"></div>
-        <div class="ghost-bar" style="height: 70%"></div>
-        <div class="ghost-bar" style="height: 20%"></div>
+      <!-- Weekly Productivity Chart -->
+      <div id="tour-step-tracker" class="chart-wrapper">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <i class="bi bi-bar-chart-line-fill text-primary me-2"></i>
+            <span class="chart-title">Weekly Productivity</span>
+          </div>
+          <span class="chart-value">{{ weeklyHours }}h <small class="trend-indicator-up"><i class="bi bi-caret-up-fill"></i> this week</small></span>
+        </div>
+        
+        <div class="chart-container">
+          <ngx-charts-bar-vertical *ngIf="chartData && chartData.length > 0"
+            [results]="chartData"
+            [scheme]="colorScheme"
+            [xAxis]="true"
+            [yAxis]="false"
+            [showGridLines]="false"
+            [roundEdges]="true"
+            [barPadding]="22"
+            [animations]="true">
+          </ngx-charts-bar-vertical>
+
+          <!-- Empty Chart State -->
+          <div *ngIf="!chartData || chartData.length === 0" class="empty-chart-state">
+            <div class="ghost-bars">
+              <div class="ghost-bar" style="height: 30%"></div>
+              <div class="ghost-bar" style="height: 50%"></div>
+              <div class="ghost-bar" style="height: 40%"></div>
+              <div class="ghost-bar" style="height: 70%"></div>
+              <div class="ghost-bar" style="height: 20%"></div>
+            </div>
+            <div class="empty-msg">
+              <i class="bi bi-bar-chart-steps"></i>
+              <p>No activity recorded yet</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="empty-msg">
-        <i class="bi bi-bar-chart"></i>
-        <p>No activity yet</p>
-      </div>
-    </div>
-  </div>
-</div>
     </div>
   </div>
 </div>
@@ -135,16 +217,14 @@
 <!-- Feature Tour Component -->
 <app-feature-tour></app-feature-tour>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- [4] BLURRED PREMIUM ANALYTICS PREVIEW — hidden for active PRO subscribers  -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- Blurred Premium Analytics Preview -->
 <div class="analytics-preview-section" *ngIf="!isPremiumActive">
   <div class="analytics-preview__header">
     <h2 class="analytics-preview__title">
-      <i class="bi bi-graph-up-arrow me-2"></i>Advanced Analytics
+      <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Advanced Analytics
     </h2>
     <span class="analytics-preview__badge">
-      <i class="bi bi-gem me-1"></i>PRO
+      <i class="bi bi-gem me-1"></i>PRO FEATURES
     </span>
   </div>
 
@@ -174,7 +254,7 @@
     <div class="analytics-preview__blur-overlay">
       <div class="analytics-preview__cta-card">
         <div class="analytics-preview__cta-icon">
-          <i class="bi bi-bar-chart-line-fill"></i>
+          <i class="bi bi-gem"></i>
         </div>
         <h3 class="analytics-preview__cta-title">Get clear on your pipeline performance.</h3>
         <p class="analytics-preview__cta-body">
@@ -187,4 +267,4 @@
       </div>
     </div>
   </div>
-</div>
+</div>

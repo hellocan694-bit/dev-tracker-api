@@ -12,6 +12,7 @@ export interface TeamMember {
   name: string;
   email: string;
   avatar?: string;
+  sharedProjects?: any[];
 }
 
 /** A single team document as returned by the my-teams endpoint. */

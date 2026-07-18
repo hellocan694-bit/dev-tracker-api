@@ -410,8 +410,8 @@
         <div class="file-table" *ngIf="expandedRepoData && !isLoadingContents">
           <div class="file-table__head d-flex align-items-center px-3 py-1 mb-1">
             <span class="file-table__col-name">File</span>
-            <span class="file-table__col-dir ms-auto me-3">Directory</span>
-            <span class="file-table__col-lang">Language</span>
+            <span class="file-table__col-dir d-none d-md-block">Directory</span>
+            <span class="file-table__col-lang d-none d-sm-block">Language</span>
             <span class="file-table__col-size">Size</span>
           </div>
 
@@ -422,10 +422,10 @@
             <div class="file-row__info flex-grow-1 min-w-0">
               <span class="file-row__name text-truncate d-block fw-medium">{{ file.name }}</span>
             </div>
-            <span class="file-row__dir text-muted small text-truncate me-3" [title]="file.directory">
+            <span class="file-row__dir text-muted small text-truncate d-none d-md-block" [title]="file.directory">
               {{ file.directory || '/' }}
             </span>
-            <span class="lang-chip flex-shrink-0 me-2" *ngIf="file.language">
+            <span class="lang-chip flex-shrink-0 d-none d-sm-inline-flex" *ngIf="file.language">
               <span class="lang-dot" [style.background]="langColorSafe(file.language)"></span>
               {{ file.language }}
             </span>

@@ -79,6 +79,10 @@ export class AuthService {
     this.loggedIn.next(true);
   }
 
+  get userProfileValue(): Developer | null {
+    return this.userProfileSource.value;
+  }
+
   /**
    * Cache-gate: returns the cached profile instantly (as an Observable) if
    * already populated. Callers should delegate the actual HTTP fetch to

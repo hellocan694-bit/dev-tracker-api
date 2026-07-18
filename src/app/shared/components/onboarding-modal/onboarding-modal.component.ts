@@ -13,7 +13,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import gsap from 'gsap';
 
 import { OnboardingMessage, BottleneckAlert, PriorityFile } from 'src/app/shared/interfaces/onboarding.model';
@@ -68,7 +69,8 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
 
   // GSAP text-scramble state
   private scrambleTween?: gsap.core.Tween;
-  private subscription?: Subscription;
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
   private floatTween?: gsap.core.Tween;
 
   // Scramble character pool (cyberpunk feel)
@@ -83,7 +85,9 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
 
   ngOnInit(): void {
     // Subscribe to the shared stream; auto-open whenever ARIA sends a message
-    this.subscription = this.onboardingService.onboardingMessage$.subscribe(msg => {
+    this.onboardingService.onboardingMessage$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(msg => {
       this.openWith(msg);
     });
   }
@@ -96,7 +100,8 @@ export class OnboardingModalComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngOnDestroy(): void {
-    this.subscription?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
     this.scrambleTween?.kill();
     this.floatTween?.kill();
   }

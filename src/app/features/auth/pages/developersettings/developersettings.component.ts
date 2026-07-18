@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DeveloperService } from 'src/app/core/services/developer.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { SubscriptionService } from 'src/app/core/services/subscription.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -11,7 +13,7 @@ import Swal from 'sweetalert2';
   templateUrl: './developersettings.component.html',
   styleUrls: ['./developersettings.component.scss']
 })
-export class DevelopersettingsComponent implements OnInit {
+export class DevelopersettingsComponent implements OnInit, OnDestroy {
 
   // ── State ──────────────────────────────────────────────────────────────────
   activeTab: 'profile' | 'preferences' | 'security' = 'profile';
@@ -19,6 +21,8 @@ export class DevelopersettingsComponent implements OnInit {
   isLoading      = false;
   isDeleting     = false;
   showDeleteModal = false;
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
 
   // ── Forms ──────────────────────────────────────────────────────────────────
   profileForm: FormGroup;
@@ -54,6 +58,11 @@ export class DevelopersettingsComponent implements OnInit {
     this.loadProfile();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   // ── Tab Navigation ─────────────────────────────────────────────────────────
   setTab(tab: 'profile' | 'preferences' | 'security'): void {
     this.activeTab = tab;
@@ -62,7 +71,9 @@ export class DevelopersettingsComponent implements OnInit {
   // ── Load Profile ───────────────────────────────────────────────────────────
   loadProfile(): void {
     this.isLoading = true;
-    this.developerService.getProfile().subscribe({
+    this.developerService.getProfile().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (res) => {
         this.profile = res.data;
         this.isLoading = false;

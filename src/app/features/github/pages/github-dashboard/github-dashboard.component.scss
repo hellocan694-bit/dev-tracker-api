@@ -977,7 +977,8 @@ $radius:      14px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 60%;
+    flex: 1;
+    min-width: 0;
   }
 
   &__badge {
@@ -1150,14 +1151,23 @@ $radius:      14px;
   }
 
   &__dir {
-    max-width: 160px;
+    width: 160px;
+    text-align: right;
+    flex-shrink: 0;
     font-size: 0.72rem;
+  }
+
+  .lang-chip {
+    width: 90px;
+    flex-shrink: 0;
+    justify-content: flex-start;
   }
 
   &__size {
     width: 60px;
     text-align: right;
     font-size: 0.7rem;
+    flex-shrink: 0;
   }
 }
 

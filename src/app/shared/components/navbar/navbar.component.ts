@@ -8,7 +8,9 @@ import { SubscriptionService } from 'src/app/core/services/subscription.service'
 import { DeveloperService } from 'src/app/core/services/developer.service';
 import { Developer } from 'src/app/shared/interfaces/developer';
 import { TrialStatus } from 'src/app/shared/interfaces/github';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil, filter, switchMap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { environment } from 'src/environment/environment';
 import gsap from 'gsap';
 
@@ -52,10 +54,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     return t.charAt(0).toUpperCase() + t.slice(1);
   }
 
-  private authSub?: Subscription;
-  private userSub?: Subscription;
-  private trialSub?: Subscription;
-  private profileRefreshSub?: Subscription;
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private el: ElementRef,
@@ -68,36 +68,46 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    this.authSub = this.authService.isLoggedIn$.subscribe(status => {
-      this.isLoggedIn = status;
+    // ── Auth state stream ──────────────────────────────────────────────────────
+    this.authService.isLoggedIn$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.isLoggedIn = status;
+        this.triggerIdleAnimations();
+      });
 
-      // Fetch trial status only when logged in
-      if (status && !this.trialSub) {
-        this.trialSub = this.githubService.getTrialStatus().subscribe({
-          next: s => {
-            this.trialStatus = s;
-            this.triggerIdleAnimations();
-          },
-          error: () => {
-            this.trialStatus = null;
-          }
-        });
+    // ── User profile stream ────────────────────────────────────────────────────
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+        this.triggerIdleAnimations();
+      });
 
-        // Trigger background refresh of the user profile to sync subscription expiration
-        this.profileRefreshSub = this.developerService.refreshProfile().subscribe({
-          next: () => {
-            this.triggerIdleAnimations();
-          },
-          error: (err) => {
-            console.error('Failed to refresh developer profile on load:', err);
-          }
-        });
-      }
+    // ── Trial status: only fetch once logged in ────────────────────────────────
+    // switchMap cancels any in-flight request when the login status changes.
+    this.authService.isLoggedIn$.pipe(
+      filter(loggedIn => loggedIn),
+      switchMap(() => this.githubService.getTrialStatus().pipe(
+        catchError(() => of(null))
+      )),
+      takeUntil(this.destroy$)
+    ).subscribe(status => {
+      this.trialStatus = status;
       this.triggerIdleAnimations();
     });
 
-    this.userSub = this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
+    // ── Background profile refresh (best-effort) ───────────────────────────────
+    this.authService.isLoggedIn$.pipe(
+      filter(loggedIn => loggedIn),
+      switchMap(() => this.developerService.refreshProfile().pipe(
+        catchError(err => {
+          console.error('Failed to refresh developer profile on load:', err);
+          return of(null);
+        })
+      )),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
       this.triggerIdleAnimations();
     });
   }
@@ -119,10 +129,9 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this.authSub?.unsubscribe();
-    this.userSub?.unsubscribe();
-    this.trialSub?.unsubscribe();
-    this.profileRefreshSub?.unsubscribe();
+    // Signal all takeUntil subscriptions to complete
+    this.destroy$.next();
+    this.destroy$.complete();
 
     // Kill GSAP animations to prevent memory leaks
     this.ambientTweens.forEach(t => t.kill());
@@ -285,7 +294,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * FIX #1 — Auth Bypass resolved.
    * Calls the backend /auth/logout endpoint first to invalidate the
    * HttpOnly JWT cookie server-side, then clears all local state.
    * Falls back to local-only cleanup if the network call fails so the

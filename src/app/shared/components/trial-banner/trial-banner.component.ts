@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { GithubService } from 'src/app/core/services/github.service';
 import { TrialStatus } from 'src/app/shared/interfaces/github';
 import gsap from 'gsap';
@@ -20,12 +21,15 @@ export class TrialBannerComponent implements OnInit, OnDestroy {
   isVisible = false;
   progressPercent = 0;
 
-  private sub?: Subscription;
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
 
   constructor(private githubService: GithubService, private router: Router) {}
 
   ngOnInit(): void {
-    this.sub = this.githubService.getTrialStatus().subscribe({
+    this.githubService.getTrialStatus().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (status) => {
         this.trialStatus = status;
         // Show banner only during an active trial (not for paid Pro subscribers)
@@ -47,7 +51,8 @@ export class TrialBannerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private animateIn(): void {

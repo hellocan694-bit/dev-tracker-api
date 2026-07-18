@@ -6,6 +6,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
 import { SocketService } from 'src/app/core/services/socket.service';
 import { GithubCallbackComponent } from 'src/app/shared/github-callback/github-callback.component';
 import * as AOS from 'aos';
+import { take } from 'rxjs/operators';
 import { environment } from 'src/environment/environment';
 
 // تعريف مكتبة جوجل العالمية
@@ -52,7 +53,8 @@ export class LoginComponent implements OnInit {
 
     // GitHub OAuth callback: token is in the HttpOnly cookie set by the backend.
     // Only the developer profile is passed in query params (no token in URL).
-    this.route.queryParams.subscribe(params => {
+    // take(1): query params only need to be read once on arrival — prevents a lingering subscription.
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
       const userStr = params['user'];
       if (userStr) {
         try {

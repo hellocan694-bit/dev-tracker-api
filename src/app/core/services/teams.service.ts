@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/environment/environment';
-import { MyTeamsResponse, Team } from 'src/app/shared/interfaces/team';
+import { MyTeamsResponse, Team, TeamMember } from 'src/app/shared/interfaces/team';
 
 @Injectable({
   providedIn: 'root'
@@ -28,13 +28,8 @@ export class TeamsService {
    * Smart cache-gate: returns the cached team data if available,
    * otherwise fires the HTTP GET and populates the cache.
    */
-  loadMyTeams(): Observable<MyTeamsResponse> {
-    if (this.isCacheLoaded) {
-      return of(this._teams$.getValue()!);
-    }
-    return this.getMyTeams().pipe(
-      tap((res) => this._teams$.next(res))
-    );
+  loadMyTeams(forceRefresh = false): Observable<MyTeamsResponse> {
+    return this.getMyTeams(forceRefresh);
   }
 
   /** Invalidate cache — forces a fresh fetch on the next loadMyTeams() call. */
@@ -49,8 +44,13 @@ export class TeamsService {
    * Returns all teams where the authenticated user is owner OR member,
    * pre-split into ownedTeams / memberTeams by the server.
    */
-  getMyTeams(): Observable<MyTeamsResponse> {
-    return this.http.get<MyTeamsResponse>(`${this.teamsUrl}/my-teams`);
+  getMyTeams(forceRefresh = false): Observable<MyTeamsResponse> {
+    if (!forceRefresh && this.isCacheLoaded) {
+      return of(this._teams$.getValue()!);
+    }
+    return this.http.get<MyTeamsResponse>(`${this.teamsUrl}/my-teams`).pipe(
+      tap((res) => this._teams$.next(res))
+    );
   }
 
   /**
@@ -133,5 +133,37 @@ export class TeamsService {
     return this.http
       .patch(`${this.baseUrl}/members/${memberId}/permissions`, { key, value })
       .pipe(tap(() => this.invalidateCache()));
+  }
+
+  /**
+   * PATCH /invitations/members/:id/assign-projects
+   * Assigns (or replaces) the set of shared projects for a specific member.
+   * On success, updates the in-memory cache immediately so the UI reflects
+   * the new assignment without a page reload or network refetch.
+   */
+  assignProjectsToMember(memberId: string, projectIds: string[]): Observable<any> {
+    return this.http
+      .patch(`${this.baseUrl}/members/${memberId}/assign-projects`, { projectIds })
+      .pipe(
+        tap((res: any) => {
+          const current = this._teams$.getValue();
+          if (!current) return;
+          // The server echoes back the updated member; fall back to local projectIds
+          const updatedProjects: string[] = res?.data?.sharedProjects ?? projectIds;
+          const patchMember = (members: TeamMember[]) =>
+            members.map((m) =>
+              m._id === memberId
+                ? { ...m, sharedProjects: updatedProjects }
+                : m
+            );
+          this._teams$.next({
+            ...current,
+            data: {
+              ownedTeams:  current.data.ownedTeams.map((t) => ({ ...t, members: patchMember(t.members) })),
+              memberTeams: current.data.memberTeams.map((t) => ({ ...t, members: patchMember(t.members) })),
+            },
+          });
+        })
+      );
   }
 }

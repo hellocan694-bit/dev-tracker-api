@@ -2,7 +2,8 @@
      My Teams Page
      Bootstrap 5 + Custom SCSS — NO Tailwind
      Shows owned teams and member teams with clear role differentiation.
-     trackBy on both *ngFor loops for optimal DOM re-rendering.
+     Includes "Assign Project" modal for each team member.
+     trackBy on all *ngFor loops for optimal DOM re-rendering.
      ══════════════════════════════════════════════════════════════════════ -->
 
 <div class="my-teams-wrapper">
@@ -12,7 +13,7 @@
 
   <div class="container py-5">
 
-    <!-- ── Page Header ──────────────────────────────────────────────────── -->
+    <!-- ── Page Header ────────────────────────────────────────────────── -->
     <header class="teams-header mb-5 fade-in">
       <div class="header-left">
         <h1 class="teams-title">
@@ -30,7 +31,7 @@
       </div>
     </header>
 
-    <!-- ── Loading State ────────────────────────────────────────────────── -->
+    <!-- ── Loading State ──────────────────────────────────────────────── -->
     <div *ngIf="isLoading" class="loading-grid fade-in">
       <div class="skeleton-card" *ngFor="let s of [1,2,3,4]">
         <div class="skeleton-header">
@@ -51,7 +52,7 @@
       </div>
     </div>
 
-    <!-- ── Error State ───────────────────────────────────────────────────── -->
+    <!-- ── Error State ─────────────────────────────────────────────────── -->
     <div *ngIf="!isLoading && errorMessage" class="error-panel fade-in" role="alert">
       <div class="error-icon-box">
         <i class="bi bi-wifi-off fs-2 mb-3 text-danger"></i>
@@ -63,9 +64,8 @@
       </button>
     </div>
 
-    <!-- ── Empty State ───────────────────────────────────────────────────── -->
-    <div *ngIf="!isLoading && !errorMessage && totalTeams === 0"
-         class="empty-panel fade-in" id="empty-teams-panel">
+    <!-- ── Empty State ─────────────────────────────────────────────────── -->
+    <div *ngIf="!isLoading && !errorMessage && totalTeams === 0" class="empty-panel fade-in" id="empty-teams-panel">
       <div class="empty-icon-box">
         <i class="bi bi-people fs-1 mb-3"></i>
       </div>
@@ -87,11 +87,9 @@
         </div>
 
         <div class="teams-grid">
-          <!-- trackBy prevents full re-render on refresh -->
-          <article class="team-card owner-card"
-                   *ngFor="let team of ownedTeams; trackBy: trackByTeamId"
-                   [id]="'owned-team-' + team._id">
-            
+          <article class="team-card owner-card" *ngFor="let team of ownedTeams; trackBy: trackByTeamId"
+            [id]="'owned-team-' + team._id">
+
             <div class="card-glow-line"></div>
 
             <!-- Card Header -->
@@ -109,9 +107,7 @@
             </div>
 
             <!-- Description -->
-            <p class="team-description" *ngIf="team.description">
-              {{ team.description }}
-            </p>
+            <p class="team-description" *ngIf="team.description">{{ team.description }}</p>
             <p class="team-description empty-desc" *ngIf="!team.description">
               No description provided for this team.
             </p>
@@ -131,21 +127,15 @@
             <!-- Member Avatars -->
             <div class="members-section">
               <div class="member-avatars" *ngIf="team.members.length > 0; else noMembers">
-                <!-- trackBy on members list -->
-                <div class="member-avatar-chip"
-                     *ngFor="let member of (expandedTeamId === team._id ? team.members : team.members.slice(0, 5));
+                <div class="member-avatar-chip" *ngFor="let member of (expandedTeamId === team._id ? team.members : team.members.slice(0, 5));
                              trackBy: trackByMemberId"
-                     [title]="member.name + ' · ' + member.email"
-                     [style.--avatar-hue]="getAvatarHue(member._id)">
+                  [title]="member.name + ' · ' + member.email + ' (Click to Assign Project)'"
+                  [style.--avatar-hue]="getAvatarHue(member._id)" (click)="openAssignModal(member)">
                   {{ getInitial(member.name) }}
                 </div>
-                <button class="more-btn"
-                        *ngIf="team.members.length > 5"
-                        (click)="toggleExpand(team._id)"
-                        [id]="'toggle-members-' + team._id">
-                  {{ expandedTeamId === team._id
-                     ? 'Show less'
-                     : '+' + (team.members.length - 5) + ' more' }}
+                <button class="more-btn" *ngIf="team.members.length > 0" (click)="toggleExpand(team._id)"
+                  [id]="'toggle-members-' + team._id">
+                  {{ expandedTeamId === team._id ? 'Hide Members' : 'Manage Members' }}
                 </button>
               </div>
               <ng-template #noMembers>
@@ -153,12 +143,10 @@
               </ng-template>
             </div>
 
-            <!-- Expanded Member List -->
-            <div class="expanded-members fade-in"
-                 *ngIf="expandedTeamId === team._id && team.members.length > 0">
-              <div class="expanded-member-row"
-                   *ngFor="let member of team.members; trackBy: trackByMemberId"
-                   [id]="'member-row-' + member._id">
+            <!-- Expanded Member List with Assign buttons -->
+            <div class="expanded-members fade-in" *ngIf="expandedTeamId === team._id && team.members.length > 0">
+              <div class="expanded-member-row" *ngFor="let member of team.members; trackBy: trackByMemberId"
+                [id]="'member-row-' + member._id">
                 <div class="member-avatar-sm" [style.--avatar-hue]="getAvatarHue(member._id)">
                   {{ getInitial(member.name) }}
                 </div>
@@ -166,6 +154,11 @@
                   <span class="member-name">{{ member.name }}</span>
                   <span class="member-email">{{ member.email }}</span>
                 </div>
+                <!-- Assign Project Button -->
+                <button class="btn-assign-project" (click)="openAssignModal(member)" [id]="'assign-btn-' + member._id"
+                  title="Assign a project to {{ member.name }}">
+                  <i class="bi bi-folder-plus me-1"></i>Assign Project
+                </button>
               </div>
             </div>
 
@@ -183,9 +176,8 @@
         </div>
 
         <div class="teams-grid">
-          <article class="team-card member-card"
-                   *ngFor="let team of memberTeams; trackBy: trackByTeamId"
-                   [id]="'member-team-' + team._id">
+          <article class="team-card member-card" *ngFor="let team of memberTeams; trackBy: trackByTeamId"
+            [id]="'member-team-' + team._id">
 
             <div class="card-glow-line"></div>
 
@@ -204,18 +196,15 @@
             </div>
 
             <!-- Description -->
-            <p class="team-description" *ngIf="team.description">
-              {{ team.description }}
-            </p>
+            <p class="team-description" *ngIf="team.description">{{ team.description }}</p>
             <p class="team-description empty-desc" *ngIf="!team.description">
               No description provided for this team.
             </p>
 
             <!-- Owner Row -->
             <div class="owner-row" *ngIf="team.owner">
-              <div class="owner-avatar"
-                   [style.--avatar-hue]="getAvatarHue(team.owner._id)"
-                   [title]="'Owner: ' + team.owner.name">
+              <div class="owner-avatar" [style.--avatar-hue]="getAvatarHue(team.owner._id)"
+                [title]="'Owner: ' + team.owner.name">
                 {{ getInitial(team.owner.name) }}
               </div>
               <div>
@@ -240,9 +229,8 @@
             <div class="members-section" *ngIf="team.members.length > 0">
               <div class="member-avatars">
                 <div class="member-avatar-chip"
-                     *ngFor="let member of team.members.slice(0, 5); trackBy: trackByMemberId"
-                     [title]="member.name + ' · ' + member.email"
-                     [style.--avatar-hue]="getAvatarHue(member._id)">
+                  *ngFor="let member of team.members.slice(0, 5); trackBy: trackByMemberId"
+                  [title]="member.name + ' · ' + member.email" [style.--avatar-hue]="getAvatarHue(member._id)">
                   {{ getInitial(member.name) }}
                 </div>
                 <span class="more-count" *ngIf="team.members.length > 5">
@@ -256,5 +244,121 @@
       </section>
 
     </ng-container>
-  </div>
-</div>
+  </div><!-- /.container -->
+</div><!-- /.my-teams-wrapper -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     ASSIGN PROJECT MODAL
+     Full-screen dark overlay with glassmorphic card. GSAP-animated in/out.
+     Loops through all projects and lets the owner select which to assign.
+     ══════════════════════════════════════════════════════════════════════ -->
+<div class="assign-modal-backdrop" *ngIf="showAssignModal" (click)="closeAssignModal()" id="assign-modal-backdrop"
+  role="dialog" aria-modal="true" [attr.aria-label]="'Assign project to ' + assignTargetMember?.name">
+
+  <!-- Stop click from bubbling to backdrop -->
+  <div class="assign-modal-box" #assignModalBox (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="assign-modal__header">
+      <div class="assign-modal__header-left">
+        <div class="assign-modal__avatar" [style.--avatar-hue]="getAvatarHue(assignTargetMember?._id ?? '')">
+          {{ getInitial(assignTargetMember?.name ?? '?') }}
+        </div>
+        <div>
+          <h3 class="assign-modal__title">Assign Project</h3>
+          <p class="assign-modal__sub">
+            Select projects to share with
+            <strong class="assign-modal__dev-name">{{ assignTargetMember?.name }}</strong>
+          </p>
+        </div>
+      </div>
+      <button class="assign-modal__close-btn" (click)="closeAssignModal()" id="close-assign-modal-btn"
+        aria-label="Close assign project modal">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="assign-modal__body">
+
+      <!-- Loading skeleton -->
+      <div *ngIf="isLoadingProjects" class="assign-modal__loading">
+        <div class="assign-skeleton-row" *ngFor="let s of [1,2,3,4,5]">
+          <div class="assign-skel assign-skel-check"></div>
+          <div class="assign-skel assign-skel-label"></div>
+          <div class="assign-skel assign-skel-badge"></div>
+        </div>
+      </div>
+
+      <!-- Empty projects state -->
+      <div *ngIf="!isLoadingProjects && allProjects.length === 0 && !assignError" class="assign-modal__empty">
+        <i class="bi bi-folder2-open fs-2 mb-2 text-muted"></i>
+        <p class="text-muted small mb-0">No active projects found in your workspace.</p>
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="assignError" class="assign-modal__error-msg" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ assignError }}
+      </div>
+
+      <!-- Project checkbox list -->
+      <ul class="assign-project-list" *ngIf="!isLoadingProjects && allProjects.length > 0">
+        <li class="assign-project-item" *ngFor="let project of allProjects; trackBy: trackByProjectId"
+          [class.assign-project-item--selected]="isProjectSelected(project._id)"
+          (click)="toggleProjectForAssignment(project._id)" [id]="'assign-project-' + project._id" role="checkbox"
+          [attr.aria-checked]="isProjectSelected(project._id)">
+
+          <!-- Custom checkbox -->
+          <span class="assign-checkbox" [class.assign-checkbox--checked]="isProjectSelected(project._id)">
+            <i class="bi bi-check-lg" *ngIf="isProjectSelected(project._id)"></i>
+          </span>
+
+          <!-- Project details -->
+          <div class="assign-project-info">
+            <span class="assign-project-name">{{ project.name }}</span>
+            <span class="assign-project-client text-muted small" *ngIf="project.clientName">{{ project.clientName
+              }}</span>
+          </div>
+
+          <!-- Status badge -->
+          <span class="assign-status-badge" [class.assign-status-badge--active]="project.status === 'active'"
+            [class.assign-status-badge--paused]="project.status === 'paused'"
+            [class.assign-status-badge--completed]="project.status === 'completed'">
+            {{ project.status }}
+          </span>
+        </li>
+      </ul>
+
+    </div><!-- /.assign-modal__body -->
+
+    <!-- Modal Footer -->
+    <div class="assign-modal__footer">
+      <span class="assign-selected-count">
+        <ng-container *ngIf="selectedProjectIds.size > 0">
+          <i class="bi bi-check-circle-fill me-1 text-success"></i>
+          {{ selectedProjectIds.size }} project{{ selectedProjectIds.size !== 1 ? 's' : '' }} selected
+        </ng-container>
+        <ng-container *ngIf="selectedProjectIds.size === 0">
+          Select projects above to assign
+        </ng-container>
+      </span>
+      <div class="assign-modal__footer-actions">
+        <button class="btn-assign-cancel" (click)="closeAssignModal()" id="assign-modal-cancel-btn"
+          [disabled]="isAssigning">
+          Cancel
+        </button>
+        <button class="btn-assign-confirm" (click)="submitAssignment()" id="assign-modal-confirm-btn"
+          [disabled]="isAssigning || selectedProjectIds.size === 0">
+          <span *ngIf="!isAssigning">
+            <i class="bi bi-send me-1"></i>Assign Projects
+          </span>
+          <span *ngIf="isAssigning">
+            <span class="assign-spinner me-2"></span>Assigning…
+          </span>
+        </button>
+      </div>
+    </div><!-- /.assign-modal__footer -->
+
+  </div><!-- /.assign-modal-box -->
+</div><!-- /.assign-modal-backdrop -->

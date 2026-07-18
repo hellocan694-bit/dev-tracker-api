@@ -10,8 +10,8 @@ import { SubscriptionService } from 'src/app/core/services/subscription.service'
 import { UpsellModalComponent } from 'src/app/shared/components/upsell-modal/upsell-modal.component';
 import { Developer } from 'src/app/shared/interfaces/developer';
 import { TrialStatus } from 'src/app/shared/interfaces/github';
-import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { BehaviorSubject, Subject, switchMap, catchError, of } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import { TrialBannerComponent } from 'src/app/shared/components/trial-banner/trial-banner.component';
 import Swal from 'sweetalert2';
 import gsap from 'gsap';
@@ -27,10 +27,8 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   activeRoute = 'dashboard';
   currentUser: Developer | null = null;
   isAdmin = false;
-  private authSub?: Subscription;
-  private trialSub?: Subscription;
-  private routeSub?: Subscription;
-  private sidebarOpenSub?: Subscription;
+  /** Single destroy signal — all takeUntil subscriptions complete automatically. */
+  private readonly destroy$ = new Subject<void>();
 
   // ── [1] Upsell modal state ──────────────────────────────────────────────────
   upsellModalOpen    = false;
@@ -106,41 +104,44 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   private ambientTweens: gsap.core.Tween[] = [];
 
   ngOnInit(): void {
-    this.authSub = this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-      this.isAdmin = user?.role === 'admin';
+    // ── Auth / user profile stream ─────────────────────────────────────────────
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+        this.isAdmin = user?.role === 'admin';
+        this.triggerIdleAnimations();
+      });
+
+    // ── Trial/Pro status for the sidebar Pro widget ─────────────────────────────
+    this.githubService.getTrialStatus().pipe(
+      catchError(() => of(null)),
+      takeUntil(this.destroy$)
+    ).subscribe(status => {
+      this.trialStatus = status;
       this.triggerIdleAnimations();
     });
 
-    // Subscribe to trial/Pro status for the sidebar Pro widget
-    this.trialSub = this.githubService.getTrialStatus().subscribe({
-      next: status => {
-        this.trialStatus = status;
-        this.triggerIdleAnimations();
-      },
-      error: () => {
-        this.trialStatus = null;
-      }
+    // ── [3] Project count for usage bar (free users only) ──────────────────────
+    this.projectService.getAllProjects(0).pipe(
+      takeUntil(this.destroy$),
+      catchError(() => of(null))
+    ).subscribe((res: any) => {
+      if (!res) return;
+      const total = typeof res.total === 'number'
+        ? res.total
+        : (res.Projects?.totalActiveProjects ?? 0);
+      this.projectUsageCount = total;
+      this.animateUrgencyBarIfNeeded();
     });
 
-    // [3] Load project count for usage bar (free users only — PRO gate in template)
-    this.projectService.getAllProjects(0).subscribe({
-      next: (res: any) => {
-        const total = typeof res.total === 'number'
-          ? res.total
-          : (res.Projects?.totalActiveProjects ?? 0);
-        this.projectUsageCount = total;
-        this.animateUrgencyBarIfNeeded();
-      },
-      error: () => { /* non-critical — silently swallow */ }
-    });
-
-    // Synchronize activeRoute on load
+    // ── Synchronize activeRoute on load ────────────────────────────────────────
     this.updateActiveRoute(this.router.url);
 
-    // Subscribe to router events for automatic route synchronization
-    this.routeSub = this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+    // ── Router events for automatic route synchronization ──────────────────────
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
     ).subscribe((event: any) => {
       this.updateActiveRoute(event.urlAfterRedirects || event.url);
     });
@@ -150,8 +151,10 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
     // Call resize to setup initial styles cleanly
     this.onResize();
 
-    // Subscribe to mobile open/close events
-    this.sidebarOpenSub = this.sidebarService.isOpen$.subscribe(isOpen => {
+    // ── Mobile open/close events ────────────────────────────────────────────────
+    this.sidebarService.isOpen$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(isOpen => {
       this.isMobileDrawerOpen = isOpen;
       this.animateMobileDrawer(isOpen);
     });
@@ -160,10 +163,9 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this.authSub?.unsubscribe();
-    this.trialSub?.unsubscribe();
-    this.routeSub?.unsubscribe();
-    this.sidebarOpenSub?.unsubscribe();
+    // Signal all takeUntil subscriptions to complete
+    this.destroy$.next();
+    this.destroy$.complete();
 
     // Clean up GSAP tweens to avoid memory leaks
     this.ambientTweens.forEach(t => t.kill());
