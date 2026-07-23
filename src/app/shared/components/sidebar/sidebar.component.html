@@ -59,6 +59,19 @@
       <div class="active-indicator"></div>
     </a>
 
+    <a class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'notifications'"
+      (click)="navigate('notifications')" title="Notifications" id="sidebar-nav-notifications">
+      <span class="nav-icon-badge-wrap">
+        <i class="bi bi-bell-fill nav-icon"></i>
+        <span class="nav-notif-badge"
+              *ngIf="(notificationService.unreadCount$ | async) as cnt">
+          {{ cnt > 99 ? '99+' : cnt }}
+        </span>
+      </span>
+      <span class="nav-label">Notifications</span>
+      <div class="active-indicator"></div>
+    </a>
+
     <a id="tour-step-github" class="nav-item-wrapper d-flex align-items-center w-100" [class.active]="activeRoute === 'github'"
       (click)="navigate('github')" title="GitHub Integration">
       <i class="bi bi-github nav-icon"></i>

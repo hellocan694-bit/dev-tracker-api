@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { environment } from 'src/environment/environment';
 import { MyTeamsResponse, Team, TeamMember } from 'src/app/shared/interfaces/team';
 
@@ -122,6 +122,43 @@ export class TeamsService {
         });
       })
     );
+  }
+
+  /**
+   * POST /invitations/terminate/:memberId
+   *
+   * Full revocation endpoint — removes the member AND triggers `access:revoked`
+   * socket emission from the server with their `revokedProjectIds`.
+   *
+   * Client-side: removes the member from the local team cache optimistically
+   * so the UI updates without waiting for the server's socket event.
+   */
+  terminateMember(memberId: string): Observable<{ revokedProjectIds: string[] }> {
+    return this.http
+      .post<{ status: string; message: string; data: { revokedProjectIds: string[] } }>(
+        `${this.baseUrl}/terminate/${memberId}`,
+        {}
+      )
+      .pipe(
+        tap(() => {
+          // Optimistic cache removal — same pattern as removeMember
+          const current = this._teams$.getValue();
+          if (!current) return;
+          const filterMember = (teams: Team[]) =>
+            teams.map((t) => ({
+              ...t,
+              members: t.members.filter((m) => m._id !== memberId),
+            }));
+          this._teams$.next({
+            ...current,
+            data: {
+              ownedTeams:  filterMember(current.data.ownedTeams),
+              memberTeams: filterMember(current.data.memberTeams),
+            },
+          });
+        }),
+        map((res) => ({ revokedProjectIds: res.data?.revokedProjectIds ?? [] }))
+      );
   }
 
   /**

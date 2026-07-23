@@ -1,0 +1,93 @@
+<div class="notif-page">
+
+  <!-- ── Page Header ──────────────────────────────────────────────────────── -->
+  <header class="notif-page__header">
+    <div class="notif-page__header-left">
+      <div class="notif-page__icon-wrap">
+        <i class="bi bi-bell-fill"></i>
+        <span class="notif-page__badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </div>
+      <div>
+        <h1 class="notif-page__title">Notifications</h1>
+        <p class="notif-page__sub">Real-time task assignments &amp; team updates</p>
+      </div>
+    </div>
+    <div class="notif-page__header-actions">
+      <button class="btn-ghost" (click)="markAllRead()" [disabled]="unreadCount === 0" id="notif-mark-all-btn">
+        <i class="bi bi-check2-all me-1"></i> Mark all read
+      </button>
+      <button class="btn-ghost btn-ghost--danger" (click)="clearAll()" [disabled]="notifications.length === 0"
+        id="notif-clear-all-btn">
+        <i class="bi bi-trash3 me-1"></i> Clear all
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Filter Tabs ──────────────────────────────────────────────────────── -->
+  <nav class="notif-page__tabs" aria-label="Notification filters">
+    <button *ngFor="let tab of tabs" class="notif-tab" [class.notif-tab--active]="activeTab === tab.value"
+      (click)="setTab(tab.value)" [id]="'notif-tab-' + tab.value">
+      <i class="bi me-1" [ngClass]="tab.icon"></i>
+      {{ tab.label }}
+      <span class="notif-tab__count" *ngIf="tabUnreadCounts[tab.value] > 0">
+        {{ tabUnreadCounts[tab.value] }}
+      </span>
+    </button>
+  </nav>
+
+  <!-- ── Notification List ─────────────────────────────────────────────────── -->
+  <section class="notif-page__list" aria-live="polite">
+
+    <!-- Empty state -->
+    <div class="notif-empty" *ngIf="notifications.length === 0">
+      <div class="notif-empty__icon"><i class="bi bi-bell-slash"></i></div>
+      <p class="notif-empty__title">All quiet here</p>
+      <p class="notif-empty__sub">No notifications match this filter.</p>
+    </div>
+
+    <!-- Notification cards -->
+    <article *ngFor="let n of notifications; trackBy: trackById" class="notif-card" [class.notif-card--unread]="!n.read"
+      [attr.id]="'notif-card-' + n.id">
+
+      <!-- Left accent + icon -->
+      <div class="notif-card__icon-col" [ngClass]="accentFor(n)">
+        <i class="bi" [ngClass]="iconFor(n)"></i>
+      </div>
+
+      <!-- Body -->
+      <div class="notif-card__body">
+        <div class="notif-card__meta">
+          <span class="notif-card__type-badge">{{ typeLabelFor(n) }}</span>
+          <span class="notif-card__time">{{ relativeTime(n.timestamp) }}</span>
+        </div>
+
+        <p class="notif-card__title">{{ n.title }}</p>
+        <p class="notif-card__message">{{ n.message }}</p>
+
+        <!-- Task-assigned breakdown -->
+        <div class="notif-card__breakdown" *ngIf="n.type === 'TASK_ASSIGNMENT'">
+          <div class="breakdown-row">
+            <span class="breakdown-label">Task</span>
+            <span class="breakdown-value">"{{ n.taskTitle }}"</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Assigned by</span>
+            <span class="breakdown-value">@{{ n.assignedByName }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Read action -->
+      <div class="notif-card__actions">
+        <button *ngIf="!n.read" class="btn-read" (click)="markRead(n.id, $event)" [attr.id]="'notif-read-btn-' + n.id"
+          title="Mark as read">
+          <i class="bi bi-check-lg"></i>
+        </button>
+        <span class="notif-card__read-stamp" *ngIf="n.read">
+          <i class="bi bi-check2-all"></i>
+        </span>
+      </div>
+    </article>
+
+  </section>
+</div>

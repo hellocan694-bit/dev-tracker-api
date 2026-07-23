@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { ProjectsRoutingModule } from './projects-routing.module';
 import { ProjectsListComponent } from './pages/projects-list/projects-list.component';
@@ -14,6 +16,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { LiquidButtonComponent } from './components/liquid-button/liquid-button.component';
 import { WebglShaderComponent } from './components/webgl-shader/webgl-shader.component';
 import { TestimonialsComponent } from './components/testimonials/testimonials.component';
+import { NotificationsComponent } from './pages/notifications/notifications.component';
 
 @NgModule({
   declarations: [
@@ -25,13 +28,16 @@ import { TestimonialsComponent } from './components/testimonials/testimonials.co
     ViewMainProjectComponent,
     LiquidButtonComponent,
     WebglShaderComponent,
-    TestimonialsComponent
+    TestimonialsComponent,
+    NotificationsComponent
   ],
   imports: [
     CommonModule,
     ProjectsRoutingModule,
     HomelayoutComponent,
     ReactiveFormsModule,
+    RouterModule,
+    FormsModule,
     NgxChartsModule
   ]
 })

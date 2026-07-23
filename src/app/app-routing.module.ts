@@ -3,13 +3,13 @@ import { RouterModule, Routes } from '@angular/router';
 import { ErrorpageComponent } from './shared/components/errorpage/errorpage.component';
 
 const routes: Routes = [
-    {
-    path:'',
+  {
+    path: '',
     redirectTo: 'home/guesthomepage',
     pathMatch: 'full'
   },
   {
-    path:'auth',
+    path: 'auth',
     loadChildren: () => import('./features/auth/auth.module').then(m => m.AuthModule)
   },
   {
@@ -24,7 +24,7 @@ const routes: Routes = [
     path: 'subscriptions',
     loadChildren: () => import('./features/subscriptions/subscriptions.module').then(m => m.SubscriptionsModule),
   },
-  
+
   {
     path: 'feedback',
     loadChildren: () => import('./features/feedback/feedback.module').then(m => m.FeedbackModule),
@@ -34,8 +34,8 @@ const routes: Routes = [
     loadChildren: () => import('./features/github/github.module').then(m => m.GithubModule)
   },
   {
-    path:'**',
-  component:ErrorpageComponent
+    path: '**',
+    component: ErrorpageComponent
 
   }
 ];

@@ -7,6 +7,7 @@ import { OnboardingService } from 'src/app/core/services/onboarding.service';
 import { ProjectService } from 'src/app/core/services/project.service';
 import { GithubService } from 'src/app/core/services/github.service';
 import { SubscriptionService } from 'src/app/core/services/subscription.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 import { UpsellModalComponent } from 'src/app/shared/components/upsell-modal/upsell-modal.component';
 import { Developer } from 'src/app/shared/interfaces/developer';
 import { TrialStatus } from 'src/app/shared/interfaces/github';
@@ -90,7 +91,8 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
     private onboardingService: OnboardingService,
     private projectService: ProjectService,
     private githubService: GithubService,
-    private subscriptionService: SubscriptionService
+    private subscriptionService: SubscriptionService,
+    public notificationService: NotificationService
   ) { }
 
   toggle() {
@@ -515,6 +517,8 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
       this.activeRoute = 'activeproject';
     } else if (url.includes('home/completedprojects')) {
       this.activeRoute = 'completed';
+    } else if (url.includes('home/notifications')) {
+      this.activeRoute = 'notifications';
     } else if (url.includes('auth/developersettings')) {
       this.activeRoute = 'developersettings';
     } else if (url.includes('teams/my-teams')) {
@@ -543,6 +547,7 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
     if (route === 'dashboard') this.router.navigate(['home/masterhome']);
     if (route === 'activeproject') this.router.navigate(['home/activeprojects']);
     if (route === 'completed') this.router.navigate(['home/completedprojects']);
+    if (route === 'notifications') this.router.navigate(['home/notifications']);
     if (route === 'developersettings') this.router.navigate(['auth/developersettings']);
 
     // مسارات الـ Teams الجديدة

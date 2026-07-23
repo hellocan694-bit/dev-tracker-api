@@ -141,6 +141,34 @@ $border-white: rgba(255, 255, 255, 0.05);
       z-index: 5;
     }
 
+    .nav-icon-badge-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-notif-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: #f87171;
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 0 3.5px;
+      min-width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid #08080a;
+      line-height: 1;
+      z-index: 6;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    }
+
     // Labels hidden on desktop by default
     .nav-label {
       font-size: 0.95rem;

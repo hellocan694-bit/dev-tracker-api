@@ -82,6 +82,9 @@
             <button class="btn btn-outline-primary btn-sm rounded-pill px-3" *ngIf="canEditProject" (click)="openEditProjectModal()">
               <i class="bi bi-pencil-square me-1"></i> Edit Project
             </button>
+            <button class="btn btn-outline-success btn-sm rounded-pill px-3" *ngIf="canEditProject && project?.status !== 'completed'" (click)="completeProject()">
+              <i class="bi bi-check-circle me-1"></i> Complete Project
+            </button>
           </div>
         </div>
 

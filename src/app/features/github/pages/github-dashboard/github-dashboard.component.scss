@@ -26,6 +26,10 @@ $radius:      14px;
   @media (max-width: 768px) {
     padding: 100px 1.25rem 1.25rem 1.25rem;
   }
+
+  @media (max-width: 576px) {
+    padding: 90px 1rem 1rem 1rem;
+  }
 }
 
 // ── Blobs ────────────────────────────────────────────────────────────────────
@@ -61,6 +65,17 @@ $radius:      14px;
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.gh-dash__header-right {
+  @media (max-width: 768px) {
+    width: 100%;
+    
+    .btn-save {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 }
 
 .gh-dash__gh-icon {
@@ -120,6 +135,8 @@ $radius:      14px;
   font-size: 0.78rem;
   color: $muted;
   transition: all 0.2s ease;
+  max-width: 100%;
+  overflow: hidden;
 
   &--connected {
     border-color: rgba($green, 0.2);
@@ -138,6 +155,11 @@ $radius:      14px;
 
   &__label {
     letter-spacing: 0.01em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 0;
+    display: inline-block;
   }
 
   &__handle {
@@ -396,6 +418,13 @@ $radius:      14px;
   }
 }
 
+.repo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
 // ── Section headers ───────────────────────────────────────────────────────────
 .section-head {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -555,6 +584,14 @@ $radius:      14px;
 .repo-card__footer {
   // Clears any layout overlap
   padding-top: 0.75rem;
+}
+
+.repo-card__footer-meta,
+.repo-card__footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .repo-card__lang {
@@ -949,6 +986,22 @@ $radius:      14px;
   &__name { font-size: 0.88rem; color: $text; }
   &__full  { font-size: 0.76rem; }
   &__lang-dot { flex-shrink: 0; }
+
+  &__actions {
+    @media (max-width: 576px) {
+      width: 100%;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      padding-top: 0.5rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.25rem !important;
+  }
 }
 
 // ── File Analytics Panel ──────────────────────────────────────────────────────
@@ -963,6 +1016,11 @@ $radius:      14px;
   position: relative;
   z-index: 10;
   animation: bannerSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  @media (max-width: 576px) {
+    padding: 0.85rem;
+    margin-top: 1rem;
+  }
 
   &__header {
     border-bottom: 1px solid $border;

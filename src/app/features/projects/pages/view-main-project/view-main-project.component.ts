@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { TaskService } from 'src/app/core/services/task.service';
 import { ProjectService } from 'src/app/core/services/project.service';
 import { TeamsService } from 'src/app/core/services/teams.service';
+import { SocketService } from 'src/app/core/services/socket.service';
 import { Project } from 'src/app/shared/interfaces/project';
 import { Task } from 'src/app/shared/interfaces/task';
 import Swal from 'sweetalert2';
@@ -35,6 +36,9 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   showEditTaskModal: boolean = false;
   selectedTask: any = null;
 
+  /** Tracks the assignee before opening the edit modal to detect reassignment */
+  private _previousAssignedTo: string = '';
+
   // ⚡ صلاحيات الوصول
   currentUser: any = null;
   canManage: boolean = false;
@@ -51,9 +55,11 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: ActivatedRoute,
+    private routerService: Router,
     private taskService: TaskService,
     private projectService: ProjectService,
     private teamsService: TeamsService,
+    private socketService: SocketService,
     private toaster: ToastrService
   ) {
     this.formData = this.fb.group({
@@ -353,6 +359,40 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   }
 
   // Project editing methods
+  completeProject() {
+    if (!this.project || !this.canEditProject) return;
+
+    Swal.fire({
+      title: 'Mission Accomplished?',
+      text: `Are you sure you want to mark "${this.project.name}" as completed?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#1a1a1a',
+      confirmButtonText: 'Yes, I\'m done!',
+      cancelButtonText: 'Not yet',
+      background: '#121212',
+      color: '#ffffff',
+      iconColor: '#10b981',
+      backdrop: `rgba(0,0,0,0.8)`
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.projectService.completeProject(this.project!._id).subscribe({
+          next: () => {
+            this.isLoading = false;
+            this.showToast('success', 'Project completed successfully!');
+            this.routerService.navigate(['/home/completedprojects']);
+          },
+          error: (err) => {
+            this.isLoading = false;
+            this.toaster.error(err.error?.message || 'Failed to complete project');
+          }
+        });
+      }
+    });
+  }
+
   openEditProjectModal() {
     if (!this.canEditProject || !this.project) return;
     this.editProjectForm.setValue({
@@ -389,6 +429,10 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
   // Task editing methods
   openEditTaskModal(task: any) {
     this.selectedTask = task;
+    // Capture the current assignee so we can detect reassignment on save
+    this._previousAssignedTo = typeof task.assignedTo === 'object'
+      ? task.assignedTo?._id
+      : task.assignedTo;
 
     // Set form values
     let formattedDeadline = '';
@@ -447,6 +491,7 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     const payload = this.editTaskForm.value;
+    const newAssignedTo: string = payload.assignedTo || '';
 
     this.taskService.updateTask(projectId, this.selectedTask._id, payload).subscribe({
       next: (res: any) => {
@@ -454,6 +499,21 @@ export class ViewMainProjectComponent implements OnInit, OnDestroy {
         this.showEditTaskModal = false;
         this.showToast('success', 'Task successfully updated');
         this.checkPermissionsAndLoadData();
+
+        // ── Emit task:assigned socket event when developer changes ──────────
+        if (newAssignedTo && newAssignedTo !== this._previousAssignedTo) {
+          const currentUser = JSON.parse(
+            localStorage.getItem('user') || localStorage.getItem('developerProfile') || '{}'
+          );
+          this.socketService.emit('task:assigned', {
+            taskId: this.selectedTask._id,
+            taskTitle: this.selectedTask.title,
+            assignedToUserId: newAssignedTo,
+            assignedByUserId: currentUser._id || currentUser.id,
+            assignedByName: currentUser.name || 'Admin',
+            timestamp: new Date().toISOString()
+          });
+        }
       },
       error: (err: any) => {
         this.isLoading = false;

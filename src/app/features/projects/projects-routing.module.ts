@@ -11,6 +11,7 @@ import { HistoryComponent } from './pages/history/history.component';
 import { ViewMainProjectComponent } from './pages/view-main-project/view-main-project.component';
 import { TaskManagementMasterComponent } from './components/task-management-master/task-management-master.component';
 import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
+import { NotificationsComponent } from './pages/notifications/notifications.component';
 
 const routes: Routes = [
   {path:'',
@@ -26,7 +27,8 @@ const routes: Routes = [
       {path:'activeprojects' , component:ProjectsListComponent , canActivate:[loginGuard]},
       {path:'completedprojects' , component:HistoryComponent , canActivate:[loginGuard]},
       {path:'viewproject/:id' , component:ViewMainProjectComponent , canActivate:[loginGuard]},
-      {path:'taskmanagement' , component:TaskManagementMasterComponent , canActivate:[loginGuard]}
+      {path:'taskmanagement' , component:TaskManagementMasterComponent , canActivate:[loginGuard]},
+      {path:'notifications'  , component:NotificationsComponent , canActivate:[loginGuard]}
     ]
   }
 ];

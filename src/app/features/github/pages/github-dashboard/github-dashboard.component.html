@@ -192,8 +192,8 @@
       </div>
 
       <!-- Skeleton loaders -->
-      <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4" *ngIf="isLoadingRepos">
-        <div class="col" *ngFor="let sk of skeletonItems">
+      <div class="repo-grid" *ngIf="isLoadingRepos">
+        <div *ngFor="let sk of skeletonItems">
           <div class="repo-card repo-card--skeleton h-100 d-flex flex-column">
             <div class="sk-line sk-title mb-2"></div>
             <div class="sk-line sk-lang mb-2"></div>
@@ -208,9 +208,9 @@
       </div>
 
       <!-- Repo cards -->
-      <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4" #repoGrid
+      <div class="repo-grid" #repoGrid
         *ngIf="!isLoadingRepos && filteredRepos.length && viewMode === 'grid'">
-        <div class="col" *ngFor="let repo of filteredRepos; trackBy: trackByRepoId">
+        <div *ngFor="let repo of filteredRepos; trackBy: trackByRepoId">
           <div class="repo-card h-100 d-flex flex-column" [class.repo-card--selected]="isSelected(repo.repoId)"
             [class.repo-card--expanded]="isRepoExpanded(repo.repoId)"
             [id]="'repo-card-' + repo.repoId" role="button"
@@ -271,25 +271,28 @@
               </span>
             </div>
 
-            <div
-              class="repo-card__footer mt-auto pt-2 border-top border-opacity-10 border-white d-flex align-items-center justify-content-between">
-              <div class="d-flex align-items-center gap-2">
-                <div class="repo-card__lang" *ngIf="repo.language">
-                  <span class="lang-dot" [style.background]="langColor(repo.language)"></span>
-                  <span class="small">{{ repo.language }}</span>
+            <div class="repo-card__footer mt-auto pt-2 border-top border-opacity-10 border-white d-flex flex-column gap-2">
+              <!-- Info Row (Metadata) -->
+              <div class="repo-card__footer-meta d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="repo-card__lang" *ngIf="repo.language">
+                    <span class="lang-dot" [style.background]="langColor(repo.language)"></span>
+                    <span class="small">{{ repo.language }}</span>
+                  </div>
+                  <div class="repo-card__stars small" *ngIf="repo.stars > 0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"
+                      class="me-0.5">
+                      <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    {{ repo.stars }}
+                  </div>
                 </div>
-                <div class="repo-card__stars small" *ngIf="repo.stars > 0">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"
-                    class="me-0.5">
-                    <polygon
-                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                  {{ repo.stars }}
-                </div>
+                <div class="repo-card__updated text-muted small">{{ relativeTime(repo.updatedAt) }}</div>
               </div>
 
-              <!-- File inspect + toggle -->
-              <div class="d-flex align-items-center gap-2">
+              <!-- Action Row -->
+              <div class="repo-card__footer-actions d-flex align-items-center justify-content-between">
                 <button class="btn-inspect" [class.active]="isRepoExpanded(repo.repoId)"
                   (click)="$event.stopPropagation(); toggleRepoContents(repo)"
                   [id]="'inspect-btn-' + repo.repoId" title="Browse files">
@@ -300,7 +303,6 @@
                   </svg>
                   Files
                 </button>
-                <div class="repo-card__updated text-muted small">{{ relativeTime(repo.updatedAt) }}</div>
                 <div class="repo-toggle" (click)="$event.stopPropagation(); toggleRepo(repo)">
                   <div class="repo-toggle__track" [class.on]="isSelected(repo.repoId)">
                     <div class="repo-toggle__thumb"></div>
@@ -325,7 +327,7 @@
             <span class="repo-list-item__name fw-semibold">{{ repo.name }}</span>
             <span class="repo-list-item__full ms-1 text-muted small">{{ repo.fullName }}</span>
           </div>
-          <div class="d-flex align-items-center gap-2 flex-shrink-0">
+          <div class="repo-list-item__actions d-flex align-items-center gap-2 flex-shrink-0">
             <span class="repo-meta-chip" *ngIf="repo.sizeKb">
               {{ repo.sizeKb >= 1024 ? (repo.sizeKb / 1024 | number:'1.1-1') + ' MB' : repo.sizeKb + ' KB' }}
             </span>
@@ -403,13 +405,13 @@
           <span class="text-muted small">Fetching file tree…</span>
         </div>
 
-        <!-- Error state -->
-        <div class="gh-dash__msg-error mb-2" *ngIf="contentsError">{{ contentsError }}</div>
-
         <!-- File rows -->
         <div class="file-table" *ngIf="expandedRepoData && !isLoadingContents">
           <div class="file-table__head d-flex align-items-center px-3 py-1 mb-1">
-            <span class="file-table__col-name">File</span>
+            <span class="file-table__col-name d-flex align-items-center">
+              <span class="file-icon-spacer me-2" style="width: 1.4rem; display: inline-block; flex-shrink: 0;"></span>
+              File
+            </span>
             <span class="file-table__col-dir d-none d-md-block">Directory</span>
             <span class="file-table__col-lang d-none d-sm-block">Language</span>
             <span class="file-table__col-size">Size</span>
@@ -425,9 +427,9 @@
             <span class="file-row__dir text-muted small text-truncate d-none d-md-block" [title]="file.directory">
               {{ file.directory || '/' }}
             </span>
-            <span class="lang-chip flex-shrink-0 d-none d-sm-inline-flex" *ngIf="file.language">
+            <span class="lang-chip flex-shrink-0 d-none d-sm-inline-flex" *ngIf="file.language" [title]="file.language">
               <span class="lang-dot" [style.background]="langColorSafe(file.language)"></span>
-              {{ file.language }}
+              <span class="text-truncate">{{ file.language }}</span>
             </span>
             <span class="file-row__size text-muted small flex-shrink-0">{{ formatBytes(file.sizeBytes) }}</span>
           </div>
